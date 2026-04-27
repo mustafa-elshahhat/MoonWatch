@@ -3,14 +3,9 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// ── Release signing ──────────────────────────────────────────────────────────
-// Read signing credentials from android/key.properties (not committed to git).
-// If key.properties is absent (e.g. CI without signing), release falls back to
-// debug keys so the build still succeeds without crashing.
 val keyPropertiesFile = rootProject.file("key.properties")
 val keyProperties = Properties()
 if (keyPropertiesFile.exists()) {

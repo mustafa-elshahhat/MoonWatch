@@ -34,11 +34,9 @@ void main() {
     });
 
     test('initializes config on first request if credentials exist', () async {
-      when(() => mockCredentialStore.readIptvCredentials()).thenAnswer((_) async => 
+      when(() => mockCredentialStore.readIptvCredentials()).thenAnswer((_) async =>
           IptvCredentials(username: 'user', password: 'pass'));
-      
-      // We can't easily mock the internal Dio without refactoring more, 
-      // but we can verify it at least tries to load credentials.
+
       try {
         await apiService.getLiveCategories();
       } catch (_) {}

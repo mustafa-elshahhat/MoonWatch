@@ -9,14 +9,11 @@ void main() {
   group('AppConfig', () {
     void mockConfig(Map<String, dynamic> config) {
       const key = 'assets/config/appsettings.local.json';
-      
-      // Clear cache to ensure the mock is used
+
       rootBundle.evict(key);
-      
+
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMessageHandler('flutter/assets', (message) async {
-        // The message is the asset path (encoded)
-        // But for loadString, it sends the key
         final Uint8List encoded = utf8.encoder.convert(jsonEncode(config));
         return encoded.buffer.asByteData();
       });
