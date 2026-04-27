@@ -12,11 +12,9 @@ sealed class IptvState extends Equatable {
   List<Object?> get props => [];
 }
 
-
 class IptvInitial extends IptvState {
   const IptvInitial();
 }
-
 
 class IptvLoading extends IptvState {
   final String? message;
@@ -25,7 +23,6 @@ class IptvLoading extends IptvState {
   @override
   List<Object?> get props => [message];
 }
-
 
 class IptvCategoriesLoaded extends IptvState {
   final IptvContentType contentType;
@@ -40,7 +37,6 @@ class IptvCategoriesLoaded extends IptvState {
   List<Object?> get props => [contentType, categories];
 }
 
-
 class IptvLiveStreamsLoaded extends IptvState {
   final String categoryName;
   final List<LiveStream> streams;
@@ -53,7 +49,6 @@ class IptvLiveStreamsLoaded extends IptvState {
   @override
   List<Object?> get props => [categoryName, streams];
 }
-
 
 class IptvVodStreamsLoaded extends IptvState {
   final String categoryName;
@@ -68,7 +63,6 @@ class IptvVodStreamsLoaded extends IptvState {
   List<Object?> get props => [categoryName, streams];
 }
 
-
 class IptvSeriesListLoaded extends IptvState {
   final String categoryName;
   final List<SeriesItem> seriesList;
@@ -82,7 +76,6 @@ class IptvSeriesListLoaded extends IptvState {
   List<Object?> get props => [categoryName, seriesList];
 }
 
-
 class IptvSeriesInfoLoaded extends IptvState {
   final String seriesName;
   final SeriesInfo info;
@@ -93,7 +86,6 @@ class IptvSeriesInfoLoaded extends IptvState {
   List<Object?> get props => [seriesName, info];
 }
 
-
 class IptvContentSelected extends IptvState {
   final IptvContentDescriptor descriptor;
   final String title;
@@ -103,7 +95,6 @@ class IptvContentSelected extends IptvState {
   @override
   List<Object?> get props => [descriptor, title];
 }
-
 
 class IptvError extends IptvState {
   final String message;

@@ -5,40 +5,24 @@ import '../../../core/player/player_controller.dart' as pc;
 import 'player_event.dart';
 import 'player_state.dart';
 
-
-
-
-
-
 class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   final pc.PlayerController _playerController;
   final AppLogger _logger = AppLogger('PlayerBloc');
   StreamSubscription? _playerSubscription;
   Timer? _bufferingTimer;
 
-  
-  
-  
   bool _isRoomMode = false;
 
-  
   bool _isInitializing = false;
   String? _activeUrl;
   String? _pendingUrl;
 
-  
-  
-  
   final Set<String> _processedContentKeys = {};
 
-  
-  
   String? _readyUrl;
 
-  
   void setRoomMode(bool value) => _isRoomMode = value;
 
-  
   void clearDedupState() {
     _processedContentKeys.clear();
     _readyUrl = null;
@@ -107,7 +91,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
         );
         return;
       }
-      
+
       _pendingUrl = url;
       _logger.i(
         '[PLAYER_INIT_QUEUED_PENDING_URL] url=${AppLogger.sanitizeUrl(url)}',
@@ -119,12 +103,10 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     _activeUrl = url;
     _pendingUrl = null;
 
-    
     _processedContentKeys.add(url);
 
     await _doInitialize(url, emit);
 
-    
     while (_pendingUrl != null) {
       final nextUrl = _pendingUrl!;
       _pendingUrl = null;
@@ -146,15 +128,12 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     _activeUrl = null;
   }
 
-  
   bool get _isReadyState =>
       state is PlayerStateReady ||
       state is PlayerStatePlaying ||
       state is PlayerStatePaused;
 
   Future<void> _doInitialize(String url, Emitter<PlayerState> emit) async {
-    
-    
     _bufferingTimer?.cancel();
     _bufferingTimer = null;
     _logger.i('[PLAYER_INIT_EXECUTED] url=${AppLogger.sanitizeUrl(url)}');
@@ -173,9 +152,6 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
         'player.init: PlayerStateReady emitted [total_elapsed=${DateTime.now().millisecondsSinceEpoch - initStartMs}ms]',
       );
 
-      
-      
-      
       if (!_isRoomMode) {
         _logger.i('player.init: auto-playing (solo mode)');
         await _playerController.play();
@@ -189,19 +165,19 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       _logger.e(
         '[PLAYER_INIT_FAILED] url=${AppLogger.sanitizeUrl(url)} — $e\n$st',
       );
-      
+
       _processedContentKeys.remove(url);
       _readyUrl = null;
 
       var msg = e.toString();
-      
+
       const prefix = 'Exception: ';
       if (msg.startsWith(prefix)) {
         msg = msg.substring(prefix.length);
       }
-      
+
       msg = _humanizeError(msg);
-      
+
       emit(PlayerStateError(msg));
     }
   }
@@ -273,14 +249,11 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       'pos=$pos, dur=$dur, isPlaying=$isPlaying, state=${state.runtimeType}',
     );
 
-    
     if (pos < Duration.zero) {
       _logger.w('player.buffering: ignored — negative position ($pos)');
       return;
     }
 
-    
-    
     if (dur > Duration.zero && pos > dur + const Duration(seconds: 10)) {
       _logger.w(
         'player.buffering: ignored — position exceeds duration '
@@ -289,7 +262,6 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       return;
     }
 
-    
     if (state is PlayerStatePaused ||
         state is PlayerStateIdle ||
         state is PlayerStateLoading) {
@@ -297,8 +269,6 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       return;
     }
 
-    
-    
     _bufferingTimer?.cancel();
     _bufferingTimer = Timer(const Duration(milliseconds: 400), () {
       if (!isClosed) add(const PlayerEventBufferingConfirmed());
@@ -341,13 +311,11 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     PlayerEventDispose event,
     Emitter<PlayerState> emit,
   ) async {
-    
-    
     if (state is PlayerStateIdle) return;
     _bufferingTimer?.cancel();
     await _playerSubscription?.cancel();
     await _playerController.dispose();
-    
+
     _isInitializing = false;
     _activeUrl = null;
     _pendingUrl = null;
@@ -363,7 +331,6 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     return super.close();
   }
 
-  
   static String _humanizeError(String raw) {
     if (RegExp(
       r'HTTP error 403|403 Forbidden',

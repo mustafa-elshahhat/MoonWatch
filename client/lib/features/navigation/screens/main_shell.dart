@@ -70,7 +70,6 @@ class MainShellState extends State<MainShell> {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth > 800) {
-          
           return Scaffold(
             body: Row(
               children: [
@@ -80,9 +79,8 @@ class MainShellState extends State<MainShell> {
             ),
           );
         } else {
-          
           return Scaffold(
-            extendBody: true, 
+            extendBody: true,
             body: _buildScreen(_currentIndex),
             bottomNavigationBar: _buildPremiumBottomNav(),
           );
@@ -136,7 +134,6 @@ class MainShellState extends State<MainShell> {
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.xl),
-          
           const CustomPaint(
             size: Size(24, 24),
             painter: _CrescentPainter(color: AppColors.textPrimary),
@@ -146,7 +143,6 @@ class MainShellState extends State<MainShell> {
           _buildSideNavItem(1, Icons.explore_rounded, 'Browse'),
           _buildSideNavItem(2, Icons.meeting_room_rounded, 'Rooms'),
           const Spacer(),
-          
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.lg),
             child: Text(
@@ -233,7 +229,6 @@ class MainShellState extends State<MainShell> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            
             Positioned(
               left: 0,
               child: AnimatedContainer(
@@ -250,7 +245,6 @@ class MainShellState extends State<MainShell> {
                 ),
               ),
             ),
-            
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -295,8 +289,6 @@ class MainShellState extends State<MainShell> {
   }
 }
 
-
-
 class _CrescentPainter extends CustomPainter {
   final Color color;
   const _CrescentPainter({required this.color});
@@ -311,10 +303,9 @@ class _CrescentPainter extends CustomPainter {
     final cy = size.height / 2;
     final r = size.width * 0.46;
 
-    
     final outer = Path()
       ..addOval(Rect.fromCircle(center: Offset(cx, cy), radius: r));
-    
+
     final inner = Path()
       ..addOval(
         Rect.fromCircle(
@@ -322,7 +313,7 @@ class _CrescentPainter extends CustomPainter {
           radius: r * 0.78,
         ),
       );
-    
+
     final crescent = Path.combine(PathOperation.difference, outer, inner);
     canvas.drawPath(crescent, paint);
   }

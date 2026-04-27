@@ -75,7 +75,6 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          
           Positioned(
             top: -150,
             right: -100,
@@ -96,11 +95,8 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
           SafeArea(
             child: Column(
               children: [
-                
                 _buildHeader(hPad),
-                
                 _buildSearchBar(hPad),
-                
                 Expanded(
                   child: BlocBuilder<IptvBloc, IptvState>(
                     builder: (context, state) {
@@ -228,7 +224,7 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
     }
 
     final sw = MediaQuery.of(context).size.width;
-    
+
     final cols = switch (widget.contentType) {
       IptvContentType.live => sw > 1200
           ? 5
@@ -255,11 +251,10 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
                   : 2,
     };
 
-    
     final aspect = switch (widget.contentType) {
-      IptvContentType.live => 1.4, 
-      IptvContentType.movie => 0.68, 
-      IptvContentType.series => 0.68, 
+      IptvContentType.live => 1.4,
+      IptvContentType.movie => 0.68,
+      IptvContentType.series => 0.68,
     };
 
     return GridView.builder(
@@ -367,8 +362,6 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
   }
 }
 
-
-
 class _LiveChannelCard extends StatefulWidget {
   final LiveStream stream;
   final int index;
@@ -440,7 +433,6 @@ class _LiveChannelCardState extends State<_LiveChannelCard>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
                 Expanded(
                   child: Stack(
                     fit: StackFit.expand,
@@ -458,7 +450,6 @@ class _LiveChannelCardState extends State<_LiveChannelCard>
                               )
                             : _channelPlaceholder(),
                       ),
-                      
                       Positioned(
                         top: 8,
                         left: 8,
@@ -497,7 +488,6 @@ class _LiveChannelCardState extends State<_LiveChannelCard>
                           ),
                         ),
                       ),
-                      
                       AnimatedOpacity(
                         duration: const Duration(milliseconds: 200),
                         opacity: _h ? 1.0 : 0.0,
@@ -522,7 +512,6 @@ class _LiveChannelCardState extends State<_LiveChannelCard>
                     ],
                   ),
                 ),
-                
                 Padding(
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   child: Text(
@@ -555,8 +544,6 @@ class _LiveChannelCardState extends State<_LiveChannelCard>
         ),
       );
 }
-
-
 
 class _MovieCard extends StatefulWidget {
   final VodStream stream;
@@ -632,7 +619,6 @@ class _MovieCardState extends State<_MovieCard>
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  
                   s.streamIcon != null && s.streamIcon!.isNotEmpty
                       ? Image.network(
                           s.streamIcon!,
@@ -640,7 +626,6 @@ class _MovieCardState extends State<_MovieCard>
                           errorBuilder: (_, __, ___) => _posterPlaceholder(),
                         )
                       : _posterPlaceholder(),
-                  
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -696,7 +681,6 @@ class _MovieCardState extends State<_MovieCard>
                       ),
                     ),
                   ),
-                  
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 200),
                     opacity: _h ? 1.0 : 0.0,
@@ -711,7 +695,6 @@ class _MovieCardState extends State<_MovieCard>
                       ),
                     ),
                   ),
-                  
                   if (_h)
                     Container(
                       decoration: BoxDecoration(
@@ -758,8 +741,6 @@ class _MovieCardState extends State<_MovieCard>
         ),
       );
 }
-
-
 
 class _SeriesCard extends StatefulWidget {
   final SeriesItem series;
@@ -835,7 +816,6 @@ class _SeriesCardState extends State<_SeriesCard>
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  
                   s.cover != null && s.cover!.isNotEmpty
                       ? Image.network(
                           s.cover!,
@@ -843,7 +823,6 @@ class _SeriesCardState extends State<_SeriesCard>
                           errorBuilder: (_, __, ___) => _seriesPlaceholder(),
                         )
                       : _seriesPlaceholder(),
-                  
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -918,7 +897,6 @@ class _SeriesCardState extends State<_SeriesCard>
                       ),
                     ),
                   ),
-                  
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 200),
                     opacity: _h ? 1.0 : 0.0,
@@ -979,8 +957,6 @@ class _SeriesCardState extends State<_SeriesCard>
         ),
       );
 }
-
-
 
 class _BackBtn extends StatefulWidget {
   final VoidCallback onTap;

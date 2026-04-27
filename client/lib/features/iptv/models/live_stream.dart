@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-
 class LiveStream extends Equatable {
   final int streamId;
   final String name;

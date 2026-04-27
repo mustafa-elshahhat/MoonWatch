@@ -16,15 +16,11 @@ const _testDescriptor = IptvContentDescriptor(
   title: 'Test Channel',
 );
 
-
-
 class MockSignalRClient extends Mock implements SignalRClient {}
 
 class MockRoomRepository extends Mock implements RoomRepository {}
 
 class MockHttpClient extends Mock implements HttpClient {}
-
-
 
 void main() {
   late MockSignalRClient mockSignalRClient;
@@ -74,10 +70,8 @@ void main() {
 
   group('host_disconnect integration ', () {
     test('host disconnects → guest RoomBloc transitions to Closed', () async {
-      
       roomBloc.startListening();
 
-      
       roomBloc.add(
         const RoomEventRoomJoined(
           roomCode: 'ABC123',
@@ -97,11 +91,9 @@ void main() {
         ),
       );
 
-      
       repoEventsController.add(const RoomEventRoomClosed('host_disconnected'));
       await Future.delayed(const Duration(milliseconds: 50));
 
-      
       expect(roomBloc.state, const RoomStateClosed('host_disconnected'));
     });
 
@@ -111,19 +103,14 @@ void main() {
         reconnectBloc.storeRoomCredentials('ABC123', 'guest');
         reconnectBloc.startListening();
 
-        
-        
         reconnectBloc.add(const ReconnectEventReset());
         await Future.delayed(const Duration(milliseconds: 50));
 
         expect(reconnectBloc.state, const ReconnectStateIdle());
 
-        
         connectionStateController.add(SignalRConnectionState.reconnecting);
         await Future.delayed(const Duration(milliseconds: 50));
 
-        
-        
         expect(
           reconnectBloc.state,
           const ReconnectStateAttempting(attemptNumber: 1),
@@ -132,7 +119,6 @@ void main() {
         connectionStateController.add(SignalRConnectionState.connected);
         await Future.delayed(const Duration(milliseconds: 100));
 
-        
         expect(
           reconnectBloc.state,
           const ReconnectStateFailed('no_credentials'),
@@ -143,7 +129,6 @@ void main() {
     test(
       'host disconnect with room:error(room_closed) → RoomBloc Closed',
       () async {
-        
         roomBloc.add(
           const RoomEventRoomJoined(
             roomCode: 'ABC123',
@@ -154,7 +139,6 @@ void main() {
         );
         await Future.delayed(const Duration(milliseconds: 50));
 
-        
         roomBloc.add(
           const RoomEventError(
             code: 'room_closed',
@@ -163,7 +147,6 @@ void main() {
         );
         await Future.delayed(const Duration(milliseconds: 50));
 
-        
         expect(roomBloc.state, const RoomStateClosed('room_closed'));
       },
     );
@@ -171,7 +154,6 @@ void main() {
     test(
       'guest_left from Active → peerStatus.away (host perspective)',
       () async {
-        
         roomBloc.add(
           const RoomEventRoomJoined(
             roomCode: 'ABC123',
@@ -182,7 +164,6 @@ void main() {
         );
         await Future.delayed(const Duration(milliseconds: 50));
 
-        
         roomBloc.add(const RoomEventGuestLeft());
         await Future.delayed(const Duration(milliseconds: 50));
 
@@ -196,7 +177,6 @@ void main() {
           ),
         );
 
-        
         roomBloc.add(const RoomEventGuestReconnected());
         await Future.delayed(const Duration(milliseconds: 50));
 

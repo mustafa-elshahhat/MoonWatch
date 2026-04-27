@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 
-
-
-
-
-
 class AppTypography {
   AppTypography._();
 
@@ -28,13 +23,11 @@ class AppTypography {
     'monospace',
   ];
 
-  
   static TextStyle get displayHero => TextStyle(
         fontFamily: _fontFamilySerif,
         fontFamilyFallback: _fallbackSerifFonts,
-        fontSize: 56, 
-        fontWeight:
-            FontWeight.w400, 
+        fontSize: 56,
+        fontWeight: FontWeight.w400,
         fontStyle: FontStyle.italic,
         color: AppColors.textPrimary,
         letterSpacing: -1.5,
@@ -51,7 +44,6 @@ class AppTypography {
         height: 1.1,
       );
 
-  
   static TextStyle get titleLarge => TextStyle(
         fontFamily: _fontFamily,
         fontFamilyFallback: _fallbackFonts,
@@ -82,7 +74,6 @@ class AppTypography {
         height: 1.3,
       );
 
-  
   static TextStyle get sectionLabel => TextStyle(
         fontFamily: _fontFamily,
         fontFamilyFallback: _fallbackFonts,
@@ -93,7 +84,6 @@ class AppTypography {
         height: 1.4,
       );
 
-  
   static TextStyle get bodyLarge => TextStyle(
         fontFamily: _fontFamily,
         fontFamilyFallback: _fallbackFonts,
@@ -121,7 +111,6 @@ class AppTypography {
         height: 1.5,
       );
 
-  
   static TextStyle get caption => TextStyle(
         fontFamily: _fontFamily,
         fontFamilyFallback: _fallbackFonts,
@@ -140,7 +129,6 @@ class AppTypography {
         height: 1.4,
       );
 
-  
   static TextStyle get button => TextStyle(
         fontFamily: _fontFamily,
         fontFamilyFallback: _fallbackFonts,
@@ -161,7 +149,6 @@ class AppTypography {
         height: 1.2,
       );
 
-  
   static TextStyle get chip => TextStyle(
         fontFamily: _fontFamily,
         fontFamilyFallback: _fallbackFonts,
@@ -179,7 +166,6 @@ class AppTypography {
         height: 1.2,
       );
 
-  
   static TextStyle get tab => TextStyle(
         fontFamily: _fontFamily,
         fontFamilyFallback: _fallbackFonts,
@@ -188,7 +174,6 @@ class AppTypography {
         height: 1.2,
       );
 
-  
   static TextStyle get mono => TextStyle(
         fontFamily: _fontFamilyMono,
         fontFamilyFallback: _fallbackMonoFonts,

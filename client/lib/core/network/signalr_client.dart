@@ -10,8 +10,6 @@ enum SignalRConnectionState {
   reconnecting,
 }
 
-
-
 class SignalRClient {
   final AppLogger _logger;
   late HubConnection _hubConnection;
@@ -67,8 +65,6 @@ class SignalRClient {
 
     if (_hubConnection.state == HubConnectionState.Connecting ||
         _hubConnection.state == HubConnectionState.Reconnecting) {
-      
-      
       _updateState(SignalRConnectionState.connecting);
       _isConnecting = false;
       return;
@@ -83,7 +79,7 @@ class SignalRClient {
       } catch (e) {
         _updateState(SignalRConnectionState.disconnected);
         _logger.e('SignalR connect failed: $e');
-        
+
         _isConnecting = false;
         rethrow;
       }

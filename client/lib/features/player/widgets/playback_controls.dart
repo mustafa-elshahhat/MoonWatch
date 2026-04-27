@@ -11,8 +11,6 @@ import '../bloc/player_bloc.dart';
 import '../bloc/player_state.dart';
 import '../screens/watch_screen.dart';
 
-
-
 class PlaybackControls extends StatefulWidget {
   const PlaybackControls({super.key});
 
@@ -88,17 +86,13 @@ class _PlaybackControlsState extends State<PlaybackControls> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            
             if (!isLive) _buildSeekBar(context, position, duration, canControl),
-            
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.xs),
               child: Row(
                 children: [
-                  
                   _buildTimeDisplay(position, duration, isLive),
                   const Spacer(),
-                  
                   _buildTransportControls(
                     context,
                     playerState,
@@ -108,7 +102,6 @@ class _PlaybackControlsState extends State<PlaybackControls> {
                     isLive,
                   ),
                   const Spacer(),
-                  
                   _buildUtilityControls(_playerController),
                 ],
               ),
@@ -229,7 +222,6 @@ class _PlaybackControlsState extends State<PlaybackControls> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        
         if (!isLive)
           _ChrBtn(
             icon: Icons.replay_10_rounded,
@@ -239,7 +231,6 @@ class _PlaybackControlsState extends State<PlaybackControls> {
                 : null,
           ),
         const SizedBox(width: AppSpacing.sm),
-        
         _PlayPauseBtn(
           isPlaying: isPlaying,
           canControl: canControl,
@@ -254,7 +245,6 @@ class _PlaybackControlsState extends State<PlaybackControls> {
           },
         ),
         const SizedBox(width: AppSpacing.sm),
-        
         if (!isLive)
           _ChrBtn(
             icon: Icons.forward_10_rounded,
@@ -415,8 +405,6 @@ class _PlaybackControlsState extends State<PlaybackControls> {
   }
 }
 
-
-
 class _PlayPauseBtn extends StatefulWidget {
   final bool isPlaying;
   final bool canControl;
@@ -470,8 +458,6 @@ class _PlayPauseBtnState extends State<_PlayPauseBtn> {
         ),
       );
 }
-
-
 
 class _ChrBtn extends StatefulWidget {
   final IconData icon;

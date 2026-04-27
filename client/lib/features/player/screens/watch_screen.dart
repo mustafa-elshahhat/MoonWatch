@@ -29,12 +29,6 @@ import '../models/video_fit_mode.dart';
 import '../widgets/player_top_bar.dart';
 import '../widgets/smart_playback_controls.dart';
 
-
-
-
-
-
-
 class WatchScreen extends StatelessWidget {
   const WatchScreen({super.key});
 
@@ -60,11 +54,8 @@ class WatchScreenContent extends StatefulWidget {
 class WatchScreenContentState extends State<WatchScreenContent> {
   static final AppLogger _logger = AppLogger('WatchScreen');
 
-  
   String? _lastContentKey;
 
-  
-  
   bool _roomWired = false;
   bool _isRoomClosed = false;
 
@@ -76,30 +67,25 @@ class WatchScreenContentState extends State<WatchScreenContent> {
   final GlobalKey<SmartPlaybackControlsState> _controlsKey =
       GlobalKey<SmartPlaybackControlsState>();
 
-  
   VideoFitMode _fitMode = VideoFitMode.contain;
 
-  
-  
   bool _topBarVisible = true;
   Timer? _topBarHideTimer;
 
   @override
   void initState() {
     super.initState();
-    
+
     _playerController = GetIt.instance<PlayerController>();
     _roomRepository = GetIt.instance<RoomRepository>();
     _latencyEstimator = GetIt.instance<LatencyEstimator>();
     _iptvRepository = GetIt.instance<IptvRepository>();
-    
+
     _playerBloc = context.read<PlayerBloc>();
     _playerBloc.setRoomMode(true);
-    
+
     FullscreenService().addListener(_onFullscreenChanged);
-    
-    
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final roomState = context.read<RoomBloc>().state;
@@ -113,11 +99,11 @@ class WatchScreenContentState extends State<WatchScreenContent> {
   void dispose() {
     FullscreenService().removeListener(_onFullscreenChanged);
     _topBarHideTimer?.cancel();
-    
+
     FullscreenService().exitFullscreen();
-    
+
     _playerBloc.setRoomMode(false);
-    
+
     _latencyEstimator.stop();
     super.dispose();
   }
@@ -125,7 +111,6 @@ class WatchScreenContentState extends State<WatchScreenContent> {
   void _onFullscreenChanged() {
     if (!mounted) return;
     if (FullscreenService().isFullscreen) {
-      
       setState(() => _topBarVisible = true);
       _scheduleTopBarHide();
     } else {
@@ -134,14 +119,12 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     }
   }
 
-  
   void _showOverlays() {
     if (!_topBarVisible) setState(() => _topBarVisible = true);
     _controlsKey.currentState?.showControls();
     _scheduleTopBarHide();
   }
 
-  
   void _scheduleTopBarHide() {
     _topBarHideTimer?.cancel();
     if (FullscreenService().isFullscreen) {
@@ -151,7 +134,6 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     }
   }
 
-  
   static String? _roleOf(RoomState s) => switch (s) {
         RoomStateWaiting(role: final r) => r,
         RoomStateJoined(role: final r) => r,
@@ -159,7 +141,6 @@ class WatchScreenContentState extends State<WatchScreenContent> {
         _ => null,
       };
 
-  
   static String? _roomCodeOf(RoomState s) => switch (s) {
         RoomStateWaiting(roomCode: final c) => c,
         RoomStateJoined(roomCode: final c) => c,
@@ -178,37 +159,27 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     return roomState.contentKey;
   }
 
-  
-  
-  
   void invokePlay(Duration position) {
     final now = DateTime.now().millisecondsSinceEpoch;
     _logger.i('host.play: positionMs=${position.inMilliseconds}');
 
-    
     _playerController.play();
 
-    
     _roomRepository.invokePlay(position.inMilliseconds, now);
   }
 
-  
   void invokePauseAction(Duration position) {
     _logger.i('host.pause: positionMs=${position.inMilliseconds}');
     _playerController.pause();
     _roomRepository.invokePause(position.inMilliseconds);
   }
 
-  
   void invokeSeekAction(Duration targetPosition) {
     _logger.d('host.seek: targetMs=${targetPosition.inMilliseconds}');
     _playerController.seekTo(targetPosition);
     _roomRepository.invokeSeek(targetPosition.inMilliseconds);
   }
 
-  
-  
-  
   void invokeNextEpisode() {
     final navCtx = EpisodeNavService().current;
     final next = navCtx?.nextEpisode;
@@ -217,12 +188,9 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     context.read<RoomBloc>().add(RoomEventSetContent(next.toDescriptor()));
   }
 
-  
-  
   void _handleNewContent(RoomStateActive state) {
     final contentKey = _contentKeyOf(state.contentDescriptor);
 
-    
     if (contentKey == _lastContentKey) {
       _logger.i('[CONTENT_SET_DUPLICATE_IGNORED] key=$contentKey');
       return;
@@ -235,7 +203,6 @@ class WatchScreenContentState extends State<WatchScreenContent> {
 
     _logger.i('[PLAYER_INIT_SOURCE] source=room_active, key=$contentKey');
 
-    
     if (!_roomWired) {
       _roomWired = true;
       _latencyEstimator.onRttUpdated = (rttMs) {
@@ -251,10 +218,8 @@ class WatchScreenContentState extends State<WatchScreenContent> {
       reconnectBloc.startListening();
     }
 
-    
     context.read<SyncBloc>().setRole(state.role);
 
-    
     context.read<PlayerBloc>().add(
           PlayerEventInitialize(
             localUrl,
@@ -271,31 +236,23 @@ class WatchScreenContentState extends State<WatchScreenContent> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        
         BlocListener<RoomBloc, RoomState>(
           listenWhen: (previous, current) {
-            
             if (current is RoomStateClosed) return true;
 
-            
-            
             if (current is! RoomStateActive) return false;
 
-            
             if (previous is! RoomStateActive) return true;
 
-            
             return previous.contentDescriptor != current.contentDescriptor;
           },
           listener: (context, state) {
             if (state is RoomStateClosed) {
-              
               context.read<PlayerBloc>().add(const PlayerEventDispose());
-              
+
               context.read<ReconnectBloc>().add(const ReconnectEventReset());
               GetIt.I<IptvNavigationMemory>().clear();
-              
-              
+
               _latencyEstimator.stop();
               setState(() {
                 _isRoomClosed = true;
@@ -310,10 +267,6 @@ class WatchScreenContentState extends State<WatchScreenContent> {
         ),
         BlocListener<PlayerBloc, PlayerState>(
           listener: (context, playerState) {
-            
-            
-            
-            
             if (playerState is PlayerStateIdle ||
                 playerState is PlayerStateLoading ||
                 playerState is PlayerStateError) {
@@ -321,7 +274,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                     false,
                     contentKey: _activeContentKey(context),
                   );
-              
+
               if (playerState is PlayerStateError) {
                 _lastContentKey = null;
               }
@@ -334,7 +287,6 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                   );
             }
 
-            
             if (playerState is PlayerStateBuffering) {
               context.read<SyncBloc>().add(const SyncEventPlayerStalled());
             } else if (playerState is PlayerStatePlaying ||
@@ -368,7 +320,6 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                       ? roomState.peerStatus
                       : null;
 
-                  
                   final navCtx = EpisodeNavService().current;
                   final hasNext =
                       descriptor?.contentType == IptvDescriptorType.episode &&
@@ -399,8 +350,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                   );
                 },
               );
-              
-              
+
               return playerBody;
             },
           ),
@@ -409,8 +359,6 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     );
   }
 
-  
-  
   Widget _buildPlayerStack(
     BuildContext context,
     PlayerUIContext uiContext,
@@ -426,11 +374,9 @@ class WatchScreenContentState extends State<WatchScreenContent> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            
             BlocBuilder<PlayerBloc, PlayerState>(
               builder: (context, _) => _buildVideoView(_fitMode.boxFit),
             ),
-            
             BlocBuilder<RoomBloc, RoomState>(
               builder: (context, roomState) =>
                   BlocBuilder<PlayerBloc, PlayerState>(
@@ -438,7 +384,6 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                     _buildStateOverlay(playerState, roomState),
               ),
             ),
-            
             Positioned(
               top: 0,
               left: 0,
@@ -463,7 +408,6 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                 ),
               ),
             ),
-            
             Positioned(
               bottom: 0,
               left: 0,
@@ -482,8 +426,6 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     );
   }
 
-  
-  
   Widget _buildStateOverlay(PlayerState playerState, [RoomState? roomState]) {
     final isWaitingForPeer = roomState is RoomStateActive &&
         !roomState.bothReady &&
@@ -551,13 +493,12 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                 const SizedBox(height: AppSpacing.lg),
                 TextButton.icon(
                   onPressed: () {
-                    
                     final roomState = context.read<RoomBloc>().state;
                     if (roomState is RoomStateActive) {
                       final localUrl = _iptvRepository.resolvePlaybackUrl(
                         roomState.contentDescriptor,
                       );
-                      
+
                       _lastContentKey = null;
                       context.read<PlayerBloc>().clearDedupState();
                       context.read<PlayerBloc>().add(
@@ -603,13 +544,10 @@ class WatchScreenContentState extends State<WatchScreenContent> {
         roomState is RoomStateActive &&
         !roomState.bothReady;
 
-    
-    
     final isPlaying = playerState is PlayerStatePlaying;
     final isPaused =
         playerState is PlayerStatePaused || playerState is PlayerStateReady;
 
-    
     final canInteract = (isPlaying || isPaused) && !isWaitingForPeer;
 
     return SmartPlaybackControls(
@@ -669,9 +607,6 @@ class WatchScreenContentState extends State<WatchScreenContent> {
       icon: Icons.exit_to_app_rounded,
     ).then((confirmed) {
       if (confirmed == true && context.mounted) {
-        
-        
-        
         context.read<RoomBloc>().add(const RoomEventLeaveRoom());
       }
     });
@@ -696,7 +631,6 @@ class WatchScreenContentState extends State<WatchScreenContent> {
       ),
     );
 
-    
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (context.mounted) {
         Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);

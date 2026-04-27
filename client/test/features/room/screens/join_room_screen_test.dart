@@ -19,8 +19,6 @@ void main() {
   late MockRoomListBloc mockRoomListBloc;
 
   setUpAll(() {
-    
-    
     registerFallbackValue(const RoomEventLeaveRoom());
     registerFallbackValue(const RoomListFetch());
   });
@@ -56,9 +54,6 @@ void main() {
     });
 
     testWidgets('shows error for empty input', (tester) async {
-      
-      
-      
       await tester.binding.setSurfaceSize(const Size(800, 1200));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -94,7 +89,6 @@ void main() {
       await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
 
-      
       await tester.enterText(find.byType(TextFormField), 'A01IOB');
       await tester.tap(find.text('Connect to Room'));
       await tester.pumpAndSettle();
@@ -111,14 +105,9 @@ void main() {
 
       await tester.enterText(find.byType(TextFormField), 'A3K9PX');
       await tester.tap(find.text('Connect to Room'));
-      
-      
-      
-      
-      
+
       await tester.pump();
 
-      
       expect(find.text('Must be 6 characters'), findsNothing);
       expect(find.text('Invalid code format'), findsNothing);
     });
@@ -128,8 +117,6 @@ void main() {
     ) async {
       await tester.pumpWidget(buildTestWidget());
 
-      
-      
       final textField = tester.widget<TextField>(find.byType(TextField));
       expect(textField.textCapitalization, TextCapitalization.characters);
     });
@@ -137,7 +124,6 @@ void main() {
     testWidgets('input has maxLength of 6', (tester) async {
       await tester.pumpWidget(buildTestWidget());
 
-      
       final textField = tester.widget<TextField>(find.byType(TextField));
       expect(textField.maxLength, 6);
     });

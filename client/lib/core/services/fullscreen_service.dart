@@ -3,9 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
-
-
-
 class FullscreenService extends ChangeNotifier {
   bool _isFullscreen = false;
   bool _wasMaximized = false;
@@ -27,9 +24,7 @@ class FullscreenService extends ChangeNotifier {
           DeviceOrientation.landscapeLeft,
           DeviceOrientation.landscapeRight,
         ]);
-        
-        
-        
+
         SystemChrome.setSystemUIOverlayStyle(
           const SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
@@ -43,7 +38,7 @@ class FullscreenService extends ChangeNotifier {
         _wasMaximized = await windowManager.isMaximized();
         if (_wasMaximized) {
           await windowManager.unmaximize();
-          
+
           await Future.delayed(const Duration(milliseconds: 50));
         }
         await windowManager.setFullScreen(true);

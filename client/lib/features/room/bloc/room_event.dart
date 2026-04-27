@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../../core/protocol/payloads.dart';
 
-
 sealed class RoomEvent extends Equatable {
   const RoomEvent();
 

@@ -36,12 +36,10 @@ void main() {
     test('calling start() a second time while already running is a no-op', () {
       estimator.start();
 
-      
       clearInteractions(mockSignalR);
 
-      estimator.start(); 
+      estimator.start();
 
-      
       verifyNever(() => mockSignalR.invoke(any(), args: any(named: 'args')));
       verifyNever(() => mockSignalR.on(any(), any()));
     });
@@ -54,7 +52,6 @@ void main() {
 
       estimator.start();
 
-      
       verify(
         () => mockSignalR.invoke(RoomEvents.hubPing, args: any(named: 'args')),
       ).called(1);
@@ -65,8 +62,8 @@ void main() {
       estimator.stop();
 
       verify(() => mockSignalR.off(RoomEvents.pong)).called(1);
-      
-      expect(estimator.currentRttMs, greaterThan(0)); 
+
+      expect(estimator.currentRttMs, greaterThan(0));
       expect(estimator.clockOffsetMs, 0);
     });
 
@@ -78,9 +75,8 @@ void main() {
         estimator.start();
         estimator.stop();
 
-        
         verify(() => mockSignalR.on(RoomEvents.pong, any())).called(2);
-        
+
         verify(() => mockSignalR.off(RoomEvents.pong)).called(2);
       },
     );

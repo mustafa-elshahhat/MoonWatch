@@ -24,7 +24,6 @@ const _nextDescriptor = IptvContentDescriptor(
   title: 'Episode 2',
 );
 
-
 class MockHttpClient extends Mock implements HttpClient {}
 
 class MockSignalRClient extends Mock implements SignalRClient {}
@@ -440,6 +439,70 @@ void main() {
           code: RoomErrorCode.roleUnauthorized,
           message: 'Only the host can perform this action',
         ),
+      ],
+    );
+
+    blocTest<RoomBloc, RoomState>(
+      'room:error during pending create completes the pending operation',
+      build: buildBloc,
+      act: (bloc) async {
+        bloc.add(const RoomEventCreateRoom());
+        await Future.delayed(const Duration(milliseconds: 50));
+        bloc.add(
+          const RoomEventError(
+            code: 'internal_error',
+            message: 'Server failed to create room',
+          ),
+        );
+      },
+      wait: const Duration(milliseconds: 100),
+      expect: () => [
+        const RoomStateConnecting(),
+        const RoomStateCreating(),
+        const RoomStateError(
+          code: RoomErrorCode.internalError,
+          message: 'Server failed to create room',
+        ),
+      ],
+    );
+
+    blocTest<RoomBloc, RoomState>(
+      'room:error during pending join emits the real server error and does not later emit timeout/internalError',
+      build: buildBloc,
+      act: (bloc) async {
+        bloc.add(const RoomEventJoinRoom('MISSING'));
+        await Future.delayed(const Duration(milliseconds: 50));
+        bloc.add(
+          const RoomEventError(
+            code: 'room_not_found',
+            message: 'Room does not exist',
+          ),
+        );
+      },
+      wait: const Duration(milliseconds: 100),
+      expect: () => [
+        const RoomStateConnecting(),
+        const RoomStateCreating(),
+        const RoomStateError(
+          code: RoomErrorCode.roomNotFound,
+          message: 'Room does not exist',
+        ),
+      ],
+    );
+
+    blocTest<RoomBloc, RoomState>(
+      'room:closed during pending join emits RoomStateClosed and does not later emit timeout/internalError',
+      build: buildBloc,
+      act: (bloc) async {
+        bloc.add(const RoomEventJoinRoom('CLOSED'));
+        await Future.delayed(const Duration(milliseconds: 50));
+        bloc.add(const RoomEventRoomClosed('room_closed'));
+      },
+      wait: const Duration(milliseconds: 100),
+      expect: () => [
+        const RoomStateConnecting(),
+        const RoomStateCreating(),
+        const RoomStateClosed('room_closed'),
       ],
     );
   });

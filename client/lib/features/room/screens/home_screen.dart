@@ -68,9 +68,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           return Stack(
             fit: StackFit.expand,
             children: [
-              
               _buildAtmosphere(c.maxWidth, c.maxHeight),
-              
               SafeArea(
                 child: isDesktop
                     ? _buildDesktopLayout(context, c.maxWidth, isWide)
@@ -83,12 +81,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  
-
   Widget _buildAtmosphere(double w, double h) {
     return Stack(
       children: [
-        
         Container(
           decoration: const BoxDecoration(
             gradient: RadialGradient(
@@ -99,7 +94,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ),
-        
         Positioned(
           top: -h * 0.2,
           left: -w * 0.15,
@@ -117,7 +111,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ),
-        
         Positioned(
           bottom: -h * 0.1,
           right: -w * 0.2,
@@ -135,7 +128,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ),
-        
         AnimatedBuilder(
           animation: _particleCtrl,
           builder: (_, __) {
@@ -145,7 +137,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             );
           },
         ),
-        
         Positioned(
           top: h * 0.3,
           left: 0,
@@ -183,8 +174,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ],
     );
   }
-
-  
 
   Widget _buildDesktopLayout(BuildContext context, double w, bool isWide) {
     final hPad = isWide ? w * 0.12 : w * 0.08;
@@ -252,8 +241,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  
-
   Widget _buildMobileLayout(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -306,17 +293,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  
-
   Widget _buildHero({required bool isDesktop}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        
         const SectionEyebrow('Tonight on moon', color: AppColors.accentPrimary),
         const SizedBox(height: AppSpacing.lg),
-
-        
         RichText(
           text: TextSpan(
             children: [
@@ -354,9 +336,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
         ),
-
         const SizedBox(height: AppSpacing.lg),
-        
         Text(
           'A quiet place to watch live TV, films, and series with the\npeople you care about — latency measured in milliseconds,\nnot moods.',
           style: AppTypography.bodyLarge.copyWith(
@@ -364,9 +344,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             height: 1.7,
           ),
         ),
-
         const SizedBox(height: AppSpacing.xxl),
-        
         const Wrap(
           spacing: AppSpacing.xl,
           runSpacing: AppSpacing.md,
@@ -380,8 +358,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 }
-
-
 
 class _WatchSoloCard extends StatefulWidget {
   final VoidCallback onTap;
@@ -435,7 +411,6 @@ class _WatchSoloCardState extends State<_WatchSoloCard> {
             padding: const EdgeInsets.all(AppSpacing.xl),
             child: Row(
               children: [
-                
                 Stack(
                   children: [
                     AnimatedContainer(
@@ -487,7 +462,6 @@ class _WatchSoloCardState extends State<_WatchSoloCard> {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      
                       const Wrap(
                         spacing: 6,
                         children: [
@@ -514,8 +488,6 @@ class _WatchSoloCardState extends State<_WatchSoloCard> {
         ),
       );
 }
-
-
 
 enum _RoomCardType { create, join }
 
@@ -673,10 +645,6 @@ class _RoomCardState extends State<_RoomCard> {
       );
 }
 
-
-
-
-
 class _StatChip extends StatelessWidget {
   final String label;
   final String value;
@@ -736,18 +704,16 @@ class _MiniTag extends StatelessWidget {
       );
 }
 
-
-
 class _ParticlePainter extends CustomPainter {
   final double progress;
   static final _rng = math.Random(42);
   static final _particles = List.generate(
     25,
     (i) => [
-      _rng.nextDouble(), 
-      _rng.nextDouble(), 
-      _rng.nextDouble() * 0.5 + 0.5, 
-      _rng.nextDouble() * 2 + 1, 
+      _rng.nextDouble(),
+      _rng.nextDouble(),
+      _rng.nextDouble() * 0.5 + 0.5,
+      _rng.nextDouble() * 2 + 1,
     ],
   );
 

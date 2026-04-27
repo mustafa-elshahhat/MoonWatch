@@ -44,16 +44,13 @@ void main() {
 
   group('Bloc Session Scoping tests', () {
     test('SyncBloc state does not bleed across room sessions', () async {
-      
       var syncBlocA = SyncBloc(
         playerController: playerController,
         roomRepository: roomRepository,
       );
 
-      
       syncBlocA.setPlayerReady(true);
 
-      
       syncBlocA.add(
         const SyncEventPlayReceived(
           positionMs: 1000,
@@ -63,84 +60,69 @@ void main() {
         ),
       );
 
-      
       await Future.delayed(const Duration(milliseconds: 50));
 
-      
       verify(() => playerController.play()).called(1);
 
-      
       syncBlocA.add(
         const SyncEventPlayReceived(
           positionMs: 2000,
           serverTimestampMs: 6000,
           hostRttMs: 50,
-          seqNo: 50, 
+          seqNo: 50,
         ),
       );
       await Future.delayed(const Duration(milliseconds: 50));
-      
+
       verifyNever(
         () => playerController.seekTo(const Duration(milliseconds: 2000)),
       );
 
-      
       await syncBlocA.close();
 
-      
       var syncBlocB = SyncBloc(
         playerController: playerController,
         roomRepository: roomRepository,
       );
       syncBlocB.setPlayerReady(true);
 
-      
       syncBlocB.add(
         const SyncEventPlayReceived(
           positionMs: 5000,
           serverTimestampMs: 10000,
           hostRttMs: 50,
-          seqNo: 1, 
+          seqNo: 1,
         ),
       );
 
       await Future.delayed(const Duration(milliseconds: 50));
 
-      
       verify(() => playerController.play()).called(1);
 
       await syncBlocB.close();
     });
 
     test('PlayerBloc state does not bleed across room sessions', () async {
-      
       var playerBlocA = PlayerBloc(playerController: playerController);
       playerBlocA.setRoomMode(true);
 
-      
       playerBlocA.add(const PlayerEventInitialize('urlA', source: 'test'));
       await Future.delayed(const Duration(milliseconds: 50));
 
-      
       verify(() => playerController.initialize('urlA')).called(1);
 
-      
       playerBlocA.add(const PlayerEventInitialize('urlA', source: 'test'));
       await Future.delayed(const Duration(milliseconds: 50));
       verifyNever(() => playerController.initialize('urlB'));
 
-      
       await playerBlocA.close();
 
-      
       var playerBlocB = PlayerBloc(playerController: playerController);
       playerBlocB.setRoomMode(true);
 
-      
       playerBlocB.add(const PlayerEventInitialize('urlB', source: 'test2'));
       await Future.delayed(const Duration(milliseconds: 50));
 
-      
       verify(() => playerController.initialize('urlB')).called(1);
 
       await playerBlocB.close();

@@ -8,7 +8,6 @@ sealed class IptvEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-
 class IptvLoadCategories extends IptvEvent {
   final IptvContentType contentType;
   const IptvLoadCategories(this.contentType);
@@ -16,7 +15,6 @@ class IptvLoadCategories extends IptvEvent {
   @override
   List<Object?> get props => [contentType];
 }
-
 
 class IptvLoadCategoryContent extends IptvEvent {
   final IptvContentType contentType;
@@ -33,7 +31,6 @@ class IptvLoadCategoryContent extends IptvEvent {
   List<Object?> get props => [contentType, categoryId, categoryName];
 }
 
-
 class IptvLoadSeriesInfo extends IptvEvent {
   final int seriesId;
   final String seriesName;
@@ -43,7 +40,6 @@ class IptvLoadSeriesInfo extends IptvEvent {
   @override
   List<Object?> get props => [seriesId, seriesName];
 }
-
 
 class IptvSelectContent extends IptvEvent {
   final IptvContentType contentType;
@@ -62,7 +58,6 @@ class IptvSelectContent extends IptvEvent {
   List<Object?> get props => [contentType, streamId, title];
 }
 
-
 class IptvSelectEpisode extends IptvEvent {
   final String episodeId;
   final String containerExtension;
@@ -77,7 +72,6 @@ class IptvSelectEpisode extends IptvEvent {
   @override
   List<Object?> get props => [episodeId, title];
 }
-
 
 class IptvReset extends IptvEvent {
   const IptvReset();

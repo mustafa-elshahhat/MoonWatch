@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-
 class SeriesItem extends Equatable {
   final int seriesId;
   final String name;
@@ -45,7 +44,6 @@ class SeriesItem extends Equatable {
   List<Object?> get props => [seriesId, name, categoryId];
 }
 
-
 class SeriesInfo extends Equatable {
   final Map<String, dynamic> info;
   final Map<String, List<SeriesEpisode>> seasons;
@@ -87,7 +85,6 @@ class SeriesInfo extends Equatable {
   @override
   List<Object?> get props => [info, seasons];
 }
-
 
 class SeriesEpisode extends Equatable {
   final String id;

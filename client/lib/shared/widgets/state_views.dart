@@ -3,8 +3,6 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 
-
-
 class LoadingState extends StatefulWidget {
   final String? message;
   const LoadingState({super.key, this.message});
@@ -103,8 +101,6 @@ class _LoadingStateState extends State<LoadingState>
       );
 }
 
-
-
 class ErrorState extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
@@ -127,7 +123,6 @@ class ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            
             Container(
               width: 72,
               height: 72,
@@ -230,8 +225,6 @@ class _RetryBtnState extends State<_RetryBtn> {
       );
 }
 
-
-
 class EmptyState extends StatelessWidget {
   final String message;
   final String? hint;
@@ -256,7 +249,6 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            
             Container(
               width: 80,
               height: 80,

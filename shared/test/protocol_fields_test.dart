@@ -2,9 +2,6 @@ import 'package:test/test.dart';
 import 'package:watch_party_protocol/protocol/payloads.dart';
 import 'package:watch_party_protocol/protocol/room_events.dart';
 
-
-
-
 void main() {
   group('RoomEvents constants', () {
     test('hub method names are non-empty', () {

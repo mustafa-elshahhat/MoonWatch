@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'player_controller.dart';
 
-
-
 class MockPlayerImpl implements PlayerController {
   final _eventController = StreamController<PlayerEvent>.broadcast();
   final _positionStreamController = StreamController<Duration>.broadcast();
@@ -14,10 +12,8 @@ class MockPlayerImpl implements PlayerController {
   bool _isPlaying = false;
   bool _isBuffering = false;
 
-  
   final List<Duration> seekHistory = [];
 
-  
   final List<String> actionHistory = [];
 
   @override
@@ -89,19 +85,16 @@ class MockPlayerImpl implements PlayerController {
     actionHistory.add('setVolume:$volume');
   }
 
-  
   void setPosition(Duration position) {
     _position = position;
     _positionStreamController.add(position);
   }
 
-  
   void setDuration(Duration d) {
     _duration = d;
     _durationStreamController.add(d);
   }
 
-  
   void simulateBufferingStall() {
     _isBuffering = true;
     _eventController.add(
@@ -109,7 +102,6 @@ class MockPlayerImpl implements PlayerController {
     );
   }
 
-  
   void simulateBufferingEnd() {
     _isBuffering = false;
     _eventController.add(
@@ -117,7 +109,6 @@ class MockPlayerImpl implements PlayerController {
     );
   }
 
-  
   void simulateError(String message) {
     _eventController.add(
       PlayerEvent(PlayerEventType.error, errorMessage: message),

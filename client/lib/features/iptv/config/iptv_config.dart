@@ -1,5 +1,3 @@
-
-
 class IptvConfig {
   final String username;
   final String password;
@@ -11,10 +9,6 @@ class IptvConfig {
     required this.baseUrl,
   });
 
-  
-  
-  
-  
   static const String _kBaseUrl = String.fromEnvironment('IPTV_BASE_URL');
   static const String _kUsername = String.fromEnvironment('IPTV_USERNAME');
   static const String _kPassword = String.fromEnvironment('IPTV_PASSWORD');
@@ -25,12 +19,9 @@ class IptvConfig {
         baseUrl: _kBaseUrl,
       );
 
-  
   bool get isConfigured =>
       username.isNotEmpty && password.isNotEmpty && baseUrl.isNotEmpty;
 
-  
-  
   void ensureConfigured() {
     if (!isConfigured) {
       throw StateError(
@@ -43,15 +34,11 @@ class IptvConfig {
     }
   }
 
-  
-
   String get _authParams => 'username=$username&password=$password';
 
   String get playerApiBase => '$baseUrl/player_api.php?$_authParams';
 
   Uri get authUrl => Uri.parse('$playerApiBase&action=get_server_info');
-
-  
 
   Uri get liveCategoriesUrl =>
       Uri.parse('$playerApiBase&action=get_live_categories');
@@ -64,16 +51,12 @@ class IptvConfig {
     return Uri.parse(base);
   }
 
-  
-  
   String livePlaybackUrl(String streamId, {String? extension}) {
     if (extension != null && extension.isNotEmpty) {
       return '$baseUrl/$username/$password/$streamId.$extension';
     }
     return '$baseUrl/$username/$password/$streamId';
   }
-
-  
 
   Uri get vodCategoriesUrl =>
       Uri.parse('$playerApiBase&action=get_vod_categories');
@@ -92,8 +75,6 @@ class IptvConfig {
     }
     return '$baseUrl/movie/$username/$password/$streamId.$containerExtension';
   }
-
-  
 
   Uri get seriesCategoriesUrl =>
       Uri.parse('$playerApiBase&action=get_series_categories');

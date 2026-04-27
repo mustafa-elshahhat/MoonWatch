@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-
 sealed class PlayerEvent extends Equatable {
   const PlayerEvent();
 
@@ -11,8 +10,6 @@ sealed class PlayerEvent extends Equatable {
 class PlayerEventInitialize extends PlayerEvent {
   final String streamUrl;
 
-  
-  
   final String? source;
 
   final bool isRoomMode;

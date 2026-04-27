@@ -10,14 +10,11 @@ import 'package:watch_party/features/room/bloc/room_state.dart';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 import 'package:watch_party/core/network/http_client.dart';
 
-
-
 class MockSignalRClient extends Mock implements SignalRClient {}
 
 class MockRoomRepository extends Mock implements RoomRepository {}
 
 class MockHttpClient extends Mock implements HttpClient {}
-
 
 void main() {
   late MockSignalRClient mockSignalRClient;
@@ -69,11 +66,9 @@ void main() {
     test(
       'SignalR drop → reconnect → rejoin invocation → room:joined → Success',
       () async {
-        
         reconnectBloc.storeRoomCredentials('ABC123', 'guest');
         reconnectBloc.startListening();
 
-        
         connectionStateController.add(SignalRConnectionState.reconnecting);
         await Future.delayed(const Duration(milliseconds: 50));
 
@@ -82,11 +77,9 @@ void main() {
           const ReconnectStateAttempting(attemptNumber: 1),
         );
 
-        
         connectionStateController.add(SignalRConnectionState.connected);
         await Future.delayed(const Duration(milliseconds: 100));
 
-        
         verify(
           () => mockSignalRClient.invoke(
             RoomEvents.hubJoinRoom,
@@ -94,8 +87,6 @@ void main() {
           ),
         ).called(1);
 
-        
-        
         repoEventsController.add(
           const RoomEventRoomJoined(
             roomCode: 'ABC123',
@@ -115,7 +106,6 @@ void main() {
         reconnectBloc.storeRoomCredentials('ABC123', 'guest');
         reconnectBloc.startListening();
 
-        
         connectionStateController.add(SignalRConnectionState.reconnecting);
         await Future.delayed(const Duration(milliseconds: 50));
 
@@ -124,7 +114,6 @@ void main() {
           const ReconnectStateAttempting(attemptNumber: 1),
         );
 
-        
         connectionStateController.add(SignalRConnectionState.disconnected);
         await Future.delayed(const Duration(milliseconds: 50));
 
@@ -136,14 +125,11 @@ void main() {
       reconnectBloc.storeRoomCredentials('ABC123', 'guest');
       reconnectBloc.startListening();
 
-      
       connectionStateController.add(SignalRConnectionState.reconnecting);
       await Future.delayed(const Duration(milliseconds: 50));
       connectionStateController.add(SignalRConnectionState.connected);
       await Future.delayed(const Duration(milliseconds: 100));
 
-      
-      
       repoEventsController.add(
         const RoomEventError(
           code: 'room_closed',
@@ -156,12 +142,8 @@ void main() {
     });
 
     test('RoomBloc receives room:closed during disconnect', () async {
-      
       roomBloc.startListening();
 
-      
-      
-      
       roomBloc.add(
         const RoomEventRoomJoined(
           roomCode: 'ABC123',
@@ -171,7 +153,6 @@ void main() {
       );
       await Future.delayed(const Duration(milliseconds: 50));
 
-      
       repoEventsController.add(const RoomEventRoomClosed('host_disconnected'));
       await Future.delayed(const Duration(milliseconds: 100));
 

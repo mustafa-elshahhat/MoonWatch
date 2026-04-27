@@ -9,9 +9,6 @@ import 'core/logging/app_logger.dart';
 import 'app.dart';
 
 void main() {
-  
-  
-  
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +31,6 @@ void main() {
 
       configureDependencies();
 
-      
       FlutterError.onError = (FlutterErrorDetails details) {
         AppLogger('FlutterError').e(
           'Framework error: ${details.exceptionAsString()}',
@@ -43,8 +39,6 @@ void main() {
         );
       };
 
-      
-      
       PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
         AppLogger(
           'UncaughtError',

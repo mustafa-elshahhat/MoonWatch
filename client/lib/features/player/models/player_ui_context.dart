@@ -1,12 +1,6 @@
 import '../../../core/protocol/payloads.dart';
 
-
-
-
-
-
 class PlayerUIContext {
-  
   final bool isRoomMode;
   final bool isHost;
   final bool isGuest;
@@ -14,54 +8,36 @@ class PlayerUIContext {
   final bool isMovie;
   final bool isEpisode;
 
-  
-  
   final bool canControlPlayback;
 
-  
   final bool canSeek;
 
-  
   final bool canSkip;
 
-  
   final bool canChangeContent;
 
-  
   final bool canUseSpeed;
 
-  
   final bool canShowNextEpisode;
 
-  
   final bool canShowPrevEpisode;
 
-  
-  
   final bool showRoomCode;
 
-  
   final bool showRoleBadge;
 
-  
   final bool showPeerStatus;
 
-  
   final bool showViewOnlyLabel;
 
-  
   final bool showSeekBar;
 
-  
   final bool showTimeDisplay;
 
-  
   final bool showLiveBadge;
 
-  
   final String title;
 
-  
   final String? subtitle;
 
   const PlayerUIContext._({
@@ -89,7 +65,6 @@ class PlayerUIContext {
     this.subtitle,
   });
 
-  
   factory PlayerUIContext.solo({
     required IptvDescriptorType contentType,
     required String title,
@@ -128,7 +103,6 @@ class PlayerUIContext {
     );
   }
 
-  
   factory PlayerUIContext.roomHost({
     required IptvDescriptorType contentType,
     required String title,
@@ -150,7 +124,7 @@ class PlayerUIContext {
       canSeek: isVod,
       canSkip: isVod,
       canChangeContent: true,
-      canUseSpeed: false, 
+      canUseSpeed: false,
       canShowNextEpisode:
           contentType == IptvDescriptorType.episode && hasNextEpisode,
       canShowPrevEpisode: false,
@@ -166,7 +140,6 @@ class PlayerUIContext {
     );
   }
 
-  
   factory PlayerUIContext.roomGuest({
     required IptvDescriptorType contentType,
     required String title,
@@ -200,7 +173,6 @@ class PlayerUIContext {
     );
   }
 
-  
   factory PlayerUIContext.fromRoom({
     required String role,
     required IptvContentDescriptor descriptor,

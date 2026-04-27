@@ -18,7 +18,7 @@ void main() {
       await tester.pumpWidget(buildTestWidget(PeerStatus.connected));
 
       expect(find.text('Peer connected'), findsOneWidget);
-      
+
       final dotFinder = find.descendant(
         of: find.byType(PeerStatusIndicator),
         matching: find.byType(Container),
@@ -44,7 +44,7 @@ void main() {
       await tester.pumpWidget(buildTestWidget(PeerStatus.away));
 
       expect(find.text('Peer away'), findsOneWidget);
-      
+
       final dotFinder = find.descendant(
         of: find.byType(PeerStatusIndicator),
         matching: find.byType(Container),

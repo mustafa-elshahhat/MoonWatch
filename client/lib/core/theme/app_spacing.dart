@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
-
 class AppSpacing {
   AppSpacing._();
 
-  
   static const double xxs = 2;
   static const double xs = 4;
   static const double sm = 8;
@@ -16,7 +14,6 @@ class AppSpacing {
   static const double huge = 40;
   static const double massive = 48;
 
-  
   static const double xl2 = xxl;
   static const double xl4 = huge;
   static const double radiusSm = AppRadius.sm;
@@ -24,7 +21,6 @@ class AppSpacing {
   static const double radiusLg = AppRadius.lg;
   static const double radiusXl = AppRadius.xl;
 
-  
   static const screenH = EdgeInsets.symmetric(horizontal: 24);
   static const screenAll = EdgeInsets.all(24);
   static const cardPadding = EdgeInsets.all(16);
@@ -35,7 +31,6 @@ class AppSpacing {
   );
   static const chipPadding = EdgeInsets.symmetric(horizontal: 10, vertical: 4);
 }
-
 
 class AppRadius {
   AppRadius._();
@@ -54,7 +49,6 @@ class AppRadius {
   static BorderRadius get xlBorder => BorderRadius.circular(xl);
   static BorderRadius get pillBorder => BorderRadius.circular(pill);
 }
-
 
 class AppElevation {
   AppElevation._();
@@ -86,7 +80,6 @@ class AppElevation {
       ];
 }
 
-
 class AppIconSize {
   AppIconSize._();
 
@@ -99,7 +92,6 @@ class AppIconSize {
   static const double huge = 48;
   static const double display = 56;
 }
-
 
 class AppAnimation {
   AppAnimation._();
@@ -114,7 +106,6 @@ class AppAnimation {
   static const Curve exitCurve = Curves.easeIn;
 }
 
-
 class AppBreakpoint {
   AppBreakpoint._();
 
@@ -122,14 +113,12 @@ class AppBreakpoint {
   static const double tablet = 720;
   static const double desktop = 1024;
 
-  
   static double contentWidth(double screenWidth) {
     if (screenWidth >= desktop) return 560;
     if (screenWidth >= tablet) return 520;
     return screenWidth * 0.9;
   }
 
-  
   static int gridColumns(double screenWidth) {
     if (screenWidth >= desktop) return 4;
     if (screenWidth >= tablet) return 3;

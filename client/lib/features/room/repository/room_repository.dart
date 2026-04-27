@@ -6,7 +6,6 @@ import '../../../core/protocol/room_events.dart';
 import '../../../core/protocol/payloads.dart';
 import '../bloc/room_event.dart';
 
-
 typedef PlaybackEventCallback = void Function(Map<String, dynamic> json);
 typedef BufferingStallCallback = void Function(
     BufferingStallBroadcastPayload payload);
@@ -17,21 +16,16 @@ typedef PlaybackSeekCallback = void Function(PlaybackSeekPayload payload);
 typedef PlaybackStateSyncCallback = void Function(
     PlaybackStateSyncPayload payload);
 
-
-
 class RoomRepository {
   final SignalRClient _signalRClient;
   final HttpClient _httpClient;
   final AppLogger _logger = AppLogger('RoomRepository');
   final _eventController = StreamController<RoomEvent>.broadcast();
 
-  
   BufferingStallCallback? onBufferingStall;
 
-  
   BufferingResumeCallback? onBufferingResume;
 
-  
   PlaybackPlayCallback? onPlaybackPlay;
   PlaybackPauseCallback? onPlaybackPause;
   PlaybackSeekCallback? onPlaybackSeek;
@@ -171,7 +165,6 @@ class RoomRepository {
     _signalRClient.off(RoomEvents.playbackStateSync);
   }
 
-  
   Future<void> notifyBufferingStall(int positionMs, int episodeId) async {
     await _signalRClient.invoke(
       RoomEvents.hubNotifyBufferingStall,
@@ -179,7 +172,6 @@ class RoomRepository {
     );
   }
 
-  
   Future<void> notifyBufferingReady(int episodeId) async {
     await _signalRClient.invoke(
       RoomEvents.hubNotifyBufferingReady,
@@ -195,8 +187,6 @@ class RoomRepository {
     _eventController.add(RoomEventLocalReady(contentKey));
   }
 
-  
-  
   Future<void> invokePlay(int positionMs, int clientTimestampMs) async {
     _logger.i('RoomRepository.invokePlay: positionMs=$positionMs');
     await _signalRClient.invoke(
@@ -205,19 +195,16 @@ class RoomRepository {
     );
   }
 
-  
   Future<void> invokePause(int positionMs) async {
     _logger.i('RoomRepository.invokePause: positionMs=$positionMs');
     await _signalRClient.invoke(RoomEvents.hubPause, args: [positionMs]);
   }
 
-  
   Future<void> invokeSeek(int targetPositionMs) async {
     _logger.d('RoomRepository.invokeSeek: targetPositionMs=$targetPositionMs');
     await _signalRClient.invoke(RoomEvents.hubSeek, args: [targetPositionMs]);
   }
 
-  
   Future<List<Map<String, dynamic>>> listRooms() => _httpClient.listRooms();
 
   Future<void> dispose() async {

@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
 
-
-
 enum VideoFitMode {
-  
   contain,
 
-  
   cover,
 
-  
   fill,
 }
 
 extension VideoFitModeX on VideoFitMode {
-  
   BoxFit get boxFit {
     return switch (this) {
       VideoFitMode.contain => BoxFit.contain,
@@ -23,7 +17,6 @@ extension VideoFitModeX on VideoFitMode {
     };
   }
 
-  
   String get label {
     return switch (this) {
       VideoFitMode.contain => 'Fit',
@@ -32,7 +25,6 @@ extension VideoFitModeX on VideoFitMode {
     };
   }
 
-  
   IconData get icon {
     return switch (this) {
       VideoFitMode.contain => Icons.fit_screen_rounded,
@@ -41,7 +33,6 @@ extension VideoFitModeX on VideoFitMode {
     };
   }
 
-  
   VideoFitMode get next {
     return switch (this) {
       VideoFitMode.contain => VideoFitMode.cover,

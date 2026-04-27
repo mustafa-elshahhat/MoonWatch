@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-
 class VodStream extends Equatable {
   final int streamId;
   final String name;

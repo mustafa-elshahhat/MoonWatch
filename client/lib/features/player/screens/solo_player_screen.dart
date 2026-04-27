@@ -19,8 +19,6 @@ import '../widgets/player_top_bar.dart';
 import '../widgets/player_state_overlay.dart';
 import '../widgets/smart_playback_controls.dart';
 
-
-
 class SoloPlayerScreen extends StatelessWidget {
   const SoloPlayerScreen({super.key});
 
@@ -49,10 +47,8 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
   final GlobalKey<SmartPlaybackControlsState> _controlsKey =
       GlobalKey<SmartPlaybackControlsState>();
 
-  
   VideoFitMode _fitMode = VideoFitMode.contain;
 
-  
   bool _topBarVisible = true;
   Timer? _topBarHideTimer;
 
@@ -146,8 +142,6 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
     );
   }
 
-  
-  
   void _handleNextEpisode() {
     final navCtx = EpisodeNavService().current;
     final next = navCtx?.nextEpisode;
@@ -158,8 +152,6 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
       next.containerExtension,
     );
 
-    
-    
     EpisodeNavService().advanceTo(next.id);
 
     setState(() {
@@ -183,16 +175,13 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
             uiContext,
             isFullscreen,
           );
-          
-          
+
           return playerBody;
         },
       ),
     );
   }
 
-  
-  
   Widget _buildPlayerStack(
     BuildContext context,
     PlayerUIContext uiContext,
@@ -223,9 +212,7 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
             return Stack(
               fit: StackFit.expand,
               children: [
-                
                 _buildVideoView(_fitMode.boxFit),
-                
                 if (overlayType != null)
                   PlayerStateOverlay(
                     type: overlayType,
@@ -239,7 +226,6 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
                         : null,
                     onBack: () => Navigator.pop(context),
                   ),
-                
                 Positioned(
                   top: 0,
                   left: 0,
@@ -259,7 +245,6 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
                     ),
                   ),
                 ),
-                
                 Positioned(
                   bottom: 0,
                   left: 0,

@@ -7,7 +7,6 @@ import '../service/iptv_api_service.dart';
 import 'iptv_event.dart';
 import 'iptv_state.dart';
 
-
 class IptvBloc extends Bloc<IptvEvent, IptvState> {
   final IptvRepository _repository;
   final AppLogger _logger;
@@ -31,7 +30,7 @@ class IptvBloc extends Bloc<IptvEvent, IptvState> {
     if (state is IptvCategoriesLoaded) {
       final current = state as IptvCategoriesLoaded;
       if (current.contentType == event.contentType) {
-        return; 
+        return;
       }
     }
 
@@ -120,7 +119,7 @@ class IptvBloc extends Bloc<IptvEvent, IptvState> {
       contentType: switch (event.contentType) {
         IptvContentType.live => IptvDescriptorType.live,
         IptvContentType.movie => IptvDescriptorType.movie,
-        IptvContentType.series => IptvDescriptorType.live, 
+        IptvContentType.series => IptvDescriptorType.live,
       },
       streamId: event.streamId.toString(),
       containerExtension: event.containerExtension,

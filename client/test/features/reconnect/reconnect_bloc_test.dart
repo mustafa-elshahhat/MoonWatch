@@ -8,8 +8,6 @@ import 'package:watch_party/features/reconnect/reconnect_bloc.dart';
 import 'package:watch_party/features/room/bloc/room_event.dart';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 
-
-
 class MockSignalRClient extends Mock implements SignalRClient {}
 
 class MockRoomRepository extends Mock implements RoomRepository {}
@@ -48,8 +46,6 @@ void main() {
         roomRepository: mockRoomRepository,
       );
 
-  
-
   group('ReconnectBloc — initial state', () {
     test('initial state is ReconnectStateIdle', () {
       final bloc = buildBloc();
@@ -57,8 +53,6 @@ void main() {
       bloc.close();
     });
   });
-
-  
 
   group('ReconnectBloc — Disconnected', () {
     blocTest<ReconnectBloc, ReconnectState>(
@@ -84,8 +78,6 @@ void main() {
       expect: () => <ReconnectState>[],
     );
   });
-
-  
 
   group('ReconnectBloc — AttemptRejoin', () {
     blocTest<ReconnectBloc, ReconnectState>(
@@ -129,8 +121,6 @@ void main() {
     );
   });
 
-  
-
   group('ReconnectBloc — Succeeded', () {
     blocTest<ReconnectBloc, ReconnectState>(
       'Succeeded → Success then Idle',
@@ -140,8 +130,6 @@ void main() {
       expect: () => [const ReconnectStateSuccess(), const ReconnectStateIdle()],
     );
   });
-
-  
 
   group('ReconnectBloc — Failed', () {
     blocTest<ReconnectBloc, ReconnectState>(
@@ -160,8 +148,6 @@ void main() {
       expect: () => [const ReconnectStateFailed('max_retries')],
     );
   });
-
-  
 
   group('ReconnectBloc — Network events', () {
     blocTest<ReconnectBloc, ReconnectState>(
@@ -186,8 +172,6 @@ void main() {
       expect: () => <ReconnectState>[],
     );
   });
-
-  
 
   group('ReconnectBloc — Reset', () {
     blocTest<ReconnectBloc, ReconnectState>(
@@ -220,8 +204,6 @@ void main() {
       ],
     );
   });
-
-  
 
   group('ReconnectBloc — startListening', () {
     blocTest<ReconnectBloc, ReconnectState>(
@@ -282,13 +264,11 @@ void main() {
     );
   });
 
-  
-
   group('ReconnectBloc — storeRoomCredentials', () {
     test('stores room code and role for rejoin', () async {
       final bloc = buildBloc();
       bloc.storeRoomCredentials('ROOM42', 'host');
-      
+
       bloc.add(const ReconnectEventAttemptRejoin());
       await Future.delayed(const Duration(milliseconds: 50));
       verify(
@@ -300,8 +280,6 @@ void main() {
       await bloc.close();
     });
   });
-
-  
 
   group('ReconnectBloc — room event listening /', () {
     blocTest<ReconnectBloc, ReconnectState>(

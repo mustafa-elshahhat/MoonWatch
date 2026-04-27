@@ -20,9 +20,6 @@ const _testDescriptor = IptvContentDescriptor(
   title: 'Test Movie',
 );
 
-
-
-
 class _FakePlayerController extends Fake implements pc.PlayerController {
   @override
   Stream<pc.PlayerEvent> get events => const Stream<pc.PlayerEvent>.empty();
@@ -114,9 +111,8 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      
       expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
-      
+
       expect(find.byType(Slider), findsOneWidget);
     });
 
@@ -154,9 +150,8 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      
       expect(find.text('02:30'), findsOneWidget);
-      
+
       expect(find.byIcon(Icons.play_arrow), findsNothing);
       expect(find.byIcon(Icons.pause), findsNothing);
       expect(find.byType(Slider), findsNothing);

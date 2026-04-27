@@ -1,10 +1,6 @@
-
-
-
 class RoomEvents {
   RoomEvents._();
 
-  
   static const String roomJoined = 'room:joined';
   static const String roomGuestJoined = 'room:guest_joined';
   static const String roomGuestLeft = 'room:guest_left';
@@ -14,21 +10,17 @@ class RoomEvents {
   static const String roomError = 'room:error';
   static const String playerReady = 'player:ready';
 
-  
   static const String playbackPlay = 'playback:play';
   static const String playbackPause = 'playback:pause';
   static const String playbackSeek = 'playback:seek';
   static const String playbackStateSync = 'playback:state_sync';
 
-  
   static const String bufferingStall = 'buffering:stall';
   static const String bufferingReady = 'buffering:ready';
   static const String bufferingResume = 'buffering:resume';
 
-  
   static const String pong = 'pong';
 
-  
   static const String hubCreateRoom = 'CreateRoom';
   static const String hubJoinRoom = 'JoinRoom';
   static const String hubLeaveRoom = 'LeaveRoom';

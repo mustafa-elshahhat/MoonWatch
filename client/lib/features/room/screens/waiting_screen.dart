@@ -14,7 +14,6 @@ import '../../reconnect/reconnect_bloc.dart';
 import '../../iptv/service/iptv_navigation_memory.dart';
 import 'package:get_it/get_it.dart';
 
-
 class WaitingScreen extends StatefulWidget {
   const WaitingScreen({super.key});
   @override
@@ -88,12 +87,10 @@ class _WaitingScreenState extends State<WaitingScreen>
         body: Stack(
           fit: StackFit.expand,
           children: [
-            
             _buildAtmosphere(sw),
             SafeArea(
               child: Column(
                 children: [
-                  
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.xxl,
@@ -179,7 +176,6 @@ class _WaitingScreenState extends State<WaitingScreen>
   Widget _buildAtmosphere(double w) {
     return Stack(
       children: [
-        
         Positioned(
           top: -w * 0.3,
           right: -w * 0.2,
@@ -197,7 +193,6 @@ class _WaitingScreenState extends State<WaitingScreen>
             ),
           ),
         ),
-        
         Positioned(
           bottom: -w * 0.2,
           left: -w * 0.15,
@@ -226,7 +221,6 @@ class _WaitingScreenState extends State<WaitingScreen>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          
           AnimatedBuilder(
             animation: _orbitAnim,
             builder: (_, __) {
@@ -266,7 +260,6 @@ class _WaitingScreenState extends State<WaitingScreen>
               );
             },
           ),
-          
           AnimatedBuilder(
             animation: _orbitAnim,
             builder: (_, __) {
@@ -298,7 +291,6 @@ class _WaitingScreenState extends State<WaitingScreen>
               );
             },
           ),
-          
           AnimatedBuilder(
             animation: _pulseAnim,
             builder: (_, __) => Container(
@@ -315,7 +307,6 @@ class _WaitingScreenState extends State<WaitingScreen>
               ),
             ),
           ),
-          
           Container(
             width: 68,
             height: 68,
@@ -341,7 +332,6 @@ class _WaitingScreenState extends State<WaitingScreen>
               size: 28,
             ),
           ),
-          
           SizedBox(
             width: 76,
             height: 76,
@@ -388,7 +378,6 @@ class _WaitingScreenState extends State<WaitingScreen>
       ),
       child: Column(
         children: [
-          
           Text(
             'ROOM CODE',
             style: AppTypography.sectionLabel.copyWith(
@@ -397,7 +386,6 @@ class _WaitingScreenState extends State<WaitingScreen>
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -408,7 +396,6 @@ class _WaitingScreenState extends State<WaitingScreen>
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
-          
           GestureDetector(
             onTap: () {
               Clipboard.setData(ClipboardData(text: roomCode));
@@ -459,8 +446,6 @@ class _WaitingScreenState extends State<WaitingScreen>
     );
   }
 }
-
-
 
 class _CodeChar extends StatelessWidget {
   final String char;

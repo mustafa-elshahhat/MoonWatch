@@ -40,6 +40,15 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
   static bool _matchesActiveContent(RoomStateActive state, String contentKey) =>
       state.contentKey == contentKey;
 
+  void _completePendingRoomOperation() {
+    _timeoutTimer?.cancel();
+    _timeoutTimer = null;
+    if (_joinCompleter != null && !_joinCompleter!.isCompleted) {
+      _joinCompleter!.complete();
+    }
+    _joinCompleter = null;
+  }
+
   void startListening() {
     _repoSubscription?.cancel();
     _repoSubscription = _roomRepository.events.listen((event) {
@@ -62,31 +71,42 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
       _roomRepository.registerHandlers();
       startListening();
 
-      _joinCompleter = Completer<void>();
+      final completer = Completer<void>();
+      _joinCompleter = completer;
+
       _timeoutTimer?.cancel();
       _timeoutTimer = Timer(const Duration(seconds: 15), () {
-        if (_joinCompleter != null && !_joinCompleter!.isCompleted) {
-          _joinCompleter!.completeError(
+        if (!completer.isCompleted) {
+          completer.completeError(
             TimeoutException('Room creation timed out.'),
           );
         }
       });
 
       await _signalRClient.invoke(RoomEvents.hubCreateRoom);
-      await _joinCompleter!.future;
-      _timeoutTimer?.cancel();
+      await completer.future;
+      _completePendingRoomOperation();
     } catch (e) {
       if (isClosed) return;
-      _timeoutTimer?.cancel();
+      _completePendingRoomOperation();
       _roomRepository.unregisterHandlers();
       _repoSubscription?.cancel();
       _repoSubscription = null;
-      emit(
-        RoomStateError(
-          code: RoomErrorCode.internalError,
-          message: e.toString(),
-        ),
-      );
+      if (e is TimeoutException) {
+        emit(
+          const RoomStateError(
+            code: RoomErrorCode.internalError,
+            message: 'Room creation timed out.',
+          ),
+        );
+      } else {
+        emit(
+          RoomStateError(
+            code: RoomErrorCode.internalError,
+            message: e.toString(),
+          ),
+        );
+      }
     }
   }
 
@@ -105,11 +125,13 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
       _roomRepository.registerHandlers();
       startListening();
 
-      _joinCompleter = Completer<void>();
+      final completer = Completer<void>();
+      _joinCompleter = completer;
+
       _timeoutTimer?.cancel();
       _timeoutTimer = Timer(const Duration(seconds: 15), () {
-        if (_joinCompleter != null && !_joinCompleter!.isCompleted) {
-          _joinCompleter!.completeError(
+        if (!completer.isCompleted) {
+          completer.completeError(
             TimeoutException('Room join timed out.'),
           );
         }
@@ -119,29 +141,35 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
         RoomEvents.hubJoinRoom,
         args: [event.roomCode, 'guest'],
       );
-      await _joinCompleter!.future;
-      _timeoutTimer?.cancel();
+      await completer.future;
+      _completePendingRoomOperation();
     } catch (e) {
       if (isClosed) return;
-      _timeoutTimer?.cancel();
+      _completePendingRoomOperation();
       _roomRepository.unregisterHandlers();
       _repoSubscription?.cancel();
       _repoSubscription = null;
-      emit(
-        RoomStateError(
-          code: RoomErrorCode.internalError,
-          message: e.toString(),
-        ),
-      );
+      if (e is TimeoutException) {
+        emit(
+          const RoomStateError(
+            code: RoomErrorCode.internalError,
+            message: 'Room join timed out.',
+          ),
+        );
+      } else {
+        emit(
+          RoomStateError(
+            code: RoomErrorCode.internalError,
+            message: e.toString(),
+          ),
+        );
+      }
     }
   }
 
   void _onRoomJoined(RoomEventRoomJoined event, Emitter<RoomState> emit) {
     if (isClosed) return;
-    _timeoutTimer?.cancel();
-    if (_joinCompleter != null && !_joinCompleter!.isCompleted) {
-      _joinCompleter!.complete();
-    }
+    _completePendingRoomOperation();
 
     if (event.guestPresent && event.contentDescriptor != null) {
       emit(
@@ -220,9 +248,6 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
         ),
       );
     } else if (current is RoomStateWaiting) {
-      
-      
-      
       emit(
         RoomStateActive(
           roomCode: current.roomCode,
@@ -301,6 +326,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
 
   void _onRoomClosed(RoomEventRoomClosed event, Emitter<RoomState> emit) {
     if (isClosed) return;
+    _completePendingRoomOperation();
     emit(RoomStateClosed(event.reason));
   }
 
@@ -324,6 +350,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
 
   void _onError(RoomEventError event, Emitter<RoomState> emit) {
     if (isClosed) return;
+    _completePendingRoomOperation();
     const fatalCodes = {'room_closed', 'role_invalid', 'timeout'};
     if (fatalCodes.contains(event.code)) {
       emit(RoomStateClosed(event.code));

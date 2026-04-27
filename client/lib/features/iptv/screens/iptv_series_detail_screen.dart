@@ -17,7 +17,6 @@ import '../repository/iptv_repository.dart';
 import '../service/iptv_navigation_memory.dart';
 import '../../../core/services/episode_nav_service.dart';
 
-
 class IptvSeriesDetailScreen extends StatefulWidget {
   final int seriesId;
   final String seriesName;
@@ -382,8 +381,6 @@ class _MetaChip extends StatelessWidget {
       );
 }
 
-
-
 class _EpisodeCard extends StatefulWidget {
   final SeriesEpisode episode;
   final String seriesName;
@@ -433,7 +430,6 @@ class _EpisodeCardState extends State<_EpisodeCard> {
           ),
           child: Row(
             children: [
-              
               SizedBox(
                 width: 120,
                 child: Stack(
@@ -496,7 +492,6 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                   ],
                 ),
               ),
-              
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
@@ -530,7 +525,6 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                           ],
                         ],
                       ),
-                      
                       Padding(
                         padding: const EdgeInsets.only(top: 2),
                         child: Text(

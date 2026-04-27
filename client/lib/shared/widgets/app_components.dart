@@ -4,7 +4,6 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 
-
 class AppLogo extends StatelessWidget {
   final double size;
   final Color? color;
@@ -79,7 +78,6 @@ class _LogoPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-
 class SectionEyebrow extends StatelessWidget {
   final String text;
   final Color? color;
@@ -97,7 +95,6 @@ class SectionEyebrow extends StatelessWidget {
     );
   }
 }
-
 
 class StripedPoster extends StatelessWidget {
   final String? label;
@@ -186,7 +183,6 @@ class _StripedPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-
 class SectionHeader extends StatelessWidget {
   final String title;
   final IconData? icon;
@@ -214,7 +210,6 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
-
 class LabeledDivider extends StatelessWidget {
   final String label;
 
@@ -237,7 +232,6 @@ class LabeledDivider extends StatelessWidget {
     );
   }
 }
-
 
 class StatusBadge extends StatelessWidget {
   final String label;
@@ -279,7 +273,6 @@ class StatusBadge extends StatelessWidget {
     );
   }
 }
-
 
 class StatusChip extends StatelessWidget {
   final String label;
@@ -328,7 +321,6 @@ class StatusChip extends StatelessWidget {
   }
 }
 
-
 class RoomCodeCard extends StatelessWidget {
   final String roomCode;
   final VoidCallback? onCopy;
@@ -369,7 +361,6 @@ class RoomCodeCard extends StatelessWidget {
     );
   }
 }
-
 
 class AppConfirmDialog extends StatelessWidget {
   final String title;
@@ -504,7 +495,6 @@ class AppConfirmDialog extends StatelessWidget {
   }
 }
 
-
 class MediaTile extends StatelessWidget {
   final String? imageUrl;
   final String title;
@@ -567,7 +557,6 @@ class MediaTile extends StatelessWidget {
     );
   }
 }
-
 
 class PlayIconButton extends StatelessWidget {
   const PlayIconButton({super.key});

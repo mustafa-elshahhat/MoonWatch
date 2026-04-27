@@ -9,12 +9,9 @@ import '../../../core/theme/app_spacing.dart';
 import '../models/player_ui_context.dart';
 import '../models/video_fit_mode.dart';
 
-
 typedef PlayCallback = void Function(Duration position);
 typedef PauseCallback = void Function(Duration position);
 typedef SeekCallback = void Function(Duration target);
-
-
 
 class SmartPlaybackControls extends StatefulWidget {
   static SmartPlaybackControlsState? of(BuildContext context) =>
@@ -56,7 +53,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
   bool _isDragging = false;
   double? _dragValue;
   bool _hoveredTrack = false;
-  final GlobalKey _trackKey = GlobalKey(); 
+  final GlobalKey _trackKey = GlobalKey();
 
   Timer? _hideTimer;
   final FocusNode _focusNode = FocusNode();
@@ -82,7 +79,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     );
     _scheduleHide();
     _pc = GetIt.instance<PlayerController>();
-    
+
     _currentPosition = _pc.currentPosition;
     _currentDuration = _pc.duration;
     _posSub = _pc.positionStream.listen((p) {
@@ -99,7 +96,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     _durSub = _pc.durationStream.listen((d) {
       if (mounted) setState(() => _currentDuration = d);
     });
-    
+
     if (_currentDuration == Duration.zero) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -182,8 +179,6 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
       ? _currentDuration
       : const Duration(hours: 4);
 
-  
-  
   bool get _isVOD => ctx.showSeekBar && !ctx.isLive;
 
   @override
@@ -209,8 +204,6 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     );
   }
 
-  
-
   Widget _buildGuestBar() {
     return _ChromeContainer(
       child: Wrap(
@@ -219,7 +212,6 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
         spacing: 8,
         runSpacing: 8,
         children: [
-          
           Wrap(
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,
@@ -231,7 +223,6 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
               if (ctx.isLive && ctx.showLiveBadge) const _LiveBadge(),
             ],
           ),
-          
           Wrap(
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 4,
@@ -265,28 +256,21 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     );
   }
 
-  
-
   Widget _buildHostBar() {
     final safe = _safeDuration;
     return _ChromeContainer(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          
           if (_isVOD && ctx.showSeekBar) _buildPremiumTimeline(safe),
           const SizedBox(height: 8),
-          
           Wrap(
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,
             runSpacing: 8,
             children: [
-              
               _buildTimeArea(),
-
-              
               Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: 4,
@@ -329,8 +313,6 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
                     ),
                 ],
               ),
-
-              
               Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: 4,
@@ -364,8 +346,6 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
       ),
     );
   }
-
-  
 
   Widget _buildPremiumTimeline(Duration safe) {
     final maxMs = safe.inMilliseconds.toDouble().clamp(1.0, double.infinity);
@@ -419,7 +399,6 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
             child: Stack(
               alignment: Alignment.center,
               children: [
-                
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   height: (_isDragging || _hoveredTrack) ? 5 : 3,
@@ -428,7 +407,6 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
-                
                 Align(
                   alignment: Alignment.centerLeft,
                   child: LayoutBuilder(
@@ -464,7 +442,6 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
                     },
                   ),
                 ),
-                
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 150),
                   opacity: (_isDragging || _hoveredTrack) ? 1.0 : 0.0,
@@ -555,8 +532,6 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     return h > 0 ? '$h:$m:$s' : '$m:$s';
   }
 }
-
-
 
 class _ChromeContainer extends StatelessWidget {
   final Widget child;
@@ -759,15 +734,15 @@ class _HostControlsBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.only(left: 4), 
+        margin: const EdgeInsets.only(left: 4),
         padding: const EdgeInsets.symmetric(
           horizontal: 6,
           vertical: 3,
-        ), 
+        ),
         decoration: BoxDecoration(
           color: Colors.white.withValues(
             alpha: 0.1,
-          ), 
+          ),
           borderRadius: BorderRadius.circular(4),
         ),
         child: Text(
@@ -775,10 +750,10 @@ class _HostControlsBadge extends StatelessWidget {
           style: TextStyle(
             color: Colors.white.withValues(
               alpha: 0.6,
-            ), 
+            ),
             fontSize: 9,
-            fontWeight: FontWeight.w600, 
-            letterSpacing: 0.5, 
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

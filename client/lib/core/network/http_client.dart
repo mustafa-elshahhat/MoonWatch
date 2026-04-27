@@ -13,8 +13,6 @@ class NetworkException implements Exception {
   String toString() => 'NetworkException($statusCode): $message';
 }
 
-
-
 class HttpClient {
   final Dio _dio;
   final AppLogger _logger;

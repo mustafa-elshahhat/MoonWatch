@@ -2,15 +2,11 @@ import 'dart:async';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 import 'package:watch_party/features/room/bloc/room_event.dart';
 
-
-
 class MockRoomRepository implements RoomRepository {
   final _eventController = StreamController<RoomEvent>.broadcast();
 
-  
   final List<int> notifyBufferingStallCalls = [];
 
-  
   int notifyBufferingReadyCalls = 0;
 
   @override
@@ -50,7 +46,6 @@ class MockRoomRepository implements RoomRepository {
     notifyBufferingReadyCalls++;
   }
 
-  
   final List<String> notifyPlayerReadyCalls = [];
 
   @override
@@ -58,13 +53,10 @@ class MockRoomRepository implements RoomRepository {
     notifyPlayerReadyCalls.add(contentKey);
   }
 
-  
   final List<List<int>> invokePlayCalls = [];
 
-  
   final List<int> invokePauseCalls = [];
 
-  
   final List<int> invokeSeekCalls = [];
 
   @override
@@ -82,7 +74,6 @@ class MockRoomRepository implements RoomRepository {
     invokeSeekCalls.add(targetPositionMs);
   }
 
-  
   void injectEvent(RoomEvent event) {
     _eventController.add(event);
   }

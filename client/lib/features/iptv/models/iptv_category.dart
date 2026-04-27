@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-
 class IptvCategory extends Equatable {
   final String categoryId;
   final String categoryName;
@@ -23,7 +22,5 @@ class IptvCategory extends Equatable {
   @override
   List<Object?> get props => [categoryId, categoryName, parentId];
 }
-
-
 
 enum IptvContentType { live, movie, series }

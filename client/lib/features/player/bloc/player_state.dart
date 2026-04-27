@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-
 sealed class PlayerState extends Equatable {
   const PlayerState();
 

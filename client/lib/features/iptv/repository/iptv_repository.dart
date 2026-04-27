@@ -7,13 +7,10 @@ import '../models/vod_stream.dart';
 import '../models/series_item.dart';
 import '../service/iptv_api_service.dart';
 
-
-
 class IptvRepository {
   final IptvApiService _apiService;
   final AppLogger _logger;
 
-  
   final Map<IptvContentType, List<IptvCategory>> _categoryCache = {};
   final Map<String, List<LiveStream>> _liveStreamsCache = {};
   final Map<String, List<VodStream>> _vodStreamsCache = {};
@@ -33,8 +30,6 @@ class IptvRepository {
     _seriesListCache.clear();
     _seriesInfoCache.clear();
   }
-
-  
 
   Future<List<IptvCategory>> getCategories(
     IptvContentType type, {
@@ -59,8 +54,6 @@ class IptvRepository {
     }
   }
 
-  
-
   Future<List<LiveStream>> getLiveStreams(
     String categoryId, {
     bool forceRefresh = false,
@@ -82,8 +75,6 @@ class IptvRepository {
     }
   }
 
-  
-
   Future<List<VodStream>> getVodStreams(
     String categoryId, {
     bool forceRefresh = false,
@@ -104,8 +95,6 @@ class IptvRepository {
       rethrow;
     }
   }
-
-  
 
   Future<List<SeriesItem>> getSeriesList(
     String categoryId, {
@@ -146,8 +135,6 @@ class IptvRepository {
     }
   }
 
-  
-
   String getLivePlaybackUrl(int streamId) =>
       config.livePlaybackUrl(streamId.toString());
 
@@ -177,8 +164,6 @@ class IptvRepository {
     return url;
   }
 
-  
-  
   String resolvePlaybackUrl(IptvContentDescriptor descriptor) {
     final String url = switch (descriptor.contentType) {
       IptvDescriptorType.live => config.livePlaybackUrl(descriptor.streamId),

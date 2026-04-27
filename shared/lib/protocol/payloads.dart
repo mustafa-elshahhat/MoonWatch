@@ -1,11 +1,4 @@
-
-
-
-
-
 enum IptvDescriptorType { live, movie, episode }
-
-
 
 class IptvContentDescriptor {
   final IptvDescriptorType contentType;
@@ -53,8 +46,6 @@ class IptvContentDescriptor {
   int get hashCode =>
       Object.hash(contentType, streamId, containerExtension, title);
 }
-
-
 
 class RoomJoinedPayload {
   final String roomCode;
@@ -175,15 +166,11 @@ class ErrorPayload {
       );
 }
 
-
-
 class PlaybackPlayPayload {
   final int positionMs;
   final int serverTimestampMs;
   final int hostRttMs;
 
-  
-  
   final int seqNo;
 
   const PlaybackPlayPayload({
@@ -206,7 +193,6 @@ class PlaybackPausePayload {
   final int positionMs;
   final int serverTimestampMs;
 
-  
   final int seqNo;
 
   const PlaybackPausePayload({
@@ -227,11 +213,8 @@ class PlaybackSeekPayload {
   final int targetPositionMs;
   final int serverTimestampMs;
 
-  
   final int seqNo;
 
-  
-  
   final bool isPlaying;
 
   const PlaybackSeekPayload({
@@ -255,8 +238,6 @@ class PlaybackStateSyncPayload {
   final bool isPlaying;
   final int serverTimestampMs;
 
-  
-  
   final int seqNo;
 
   const PlaybackStateSyncPayload({
@@ -289,8 +270,6 @@ class PongPayload {
         serverTimestampMs: json['serverTimestampMs'] as int,
       );
 }
-
-
 
 class BufferingStallBroadcastPayload {
   final int episodeId;

@@ -19,16 +19,12 @@ import '../../features/room/bloc/room_list_bloc.dart';
 
 final getIt = GetIt.instance;
 
-
 void configureDependencies() {
-  
   AppConstants.requireServerBaseUrl();
 
-  
   getIt.registerLazySingleton<SignalRClient>(() => SignalRClient());
   getIt.registerLazySingleton<HttpClient>(() => HttpClient());
 
-  
   getIt.registerLazySingleton<RoomRepository>(
     () => RoomRepository(
       signalRClient: getIt<SignalRClient>(),
@@ -36,15 +32,12 @@ void configureDependencies() {
     ),
   );
 
-  
   getIt.registerLazySingleton<PlayerController>(() => MediaKitPlayerImpl());
 
-  
   getIt.registerLazySingleton<LatencyEstimator>(
     () => LatencyEstimator(signalRClient: getIt<SignalRClient>()),
   );
 
-  
   getIt.registerFactory<RoomBloc>(
     () => RoomBloc(
       roomRepository: getIt<RoomRepository>(),
@@ -73,7 +66,6 @@ void configureDependencies() {
     ),
   );
 
-  
   getIt.registerLazySingleton<IptvConfig>(() => IptvConfig.defaultProvider);
   getIt.registerLazySingleton<IptvNavigationMemory>(
     () => IptvNavigationMemory(),

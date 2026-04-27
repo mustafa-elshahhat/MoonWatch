@@ -117,11 +117,9 @@ void main() {
     });
 
     testWidgets('no error code exposes internal strings', (tester) async {
-      
       for (final code in RoomErrorCode.values) {
         await tester.pumpWidget(buildTestWidget(code));
 
-        
         expect(find.text('room_not_found'), findsNothing);
         expect(find.text('room_full'), findsNothing);
         expect(find.text('role_unauthorized'), findsNothing);

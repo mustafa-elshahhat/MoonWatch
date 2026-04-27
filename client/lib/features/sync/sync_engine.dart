@@ -6,8 +6,6 @@ import '../../core/constants/app_constants.dart';
 import '../../core/player/player_controller.dart';
 import '../../features/room/repository/room_repository.dart';
 
-
-
 sealed class SyncEvent extends Equatable {
   const SyncEvent();
 
@@ -20,7 +18,6 @@ class SyncEventPlayReceived extends SyncEvent {
   final int serverTimestampMs;
   final int hostRttMs;
 
-  
   final int seqNo;
 
   const SyncEventPlayReceived({
@@ -37,10 +34,8 @@ class SyncEventPlayReceived extends SyncEvent {
 class SyncEventPauseReceived extends SyncEvent {
   final int positionMs;
 
-  
   final int serverTimestampMs;
 
-  
   final int seqNo;
 
   const SyncEventPauseReceived({
@@ -56,15 +51,10 @@ class SyncEventPauseReceived extends SyncEvent {
 class SyncEventSeekReceived extends SyncEvent {
   final int targetPositionMs;
 
-  
   final int serverTimestampMs;
 
-  
   final int seqNo;
 
-  
-  
-  
   final bool? isPlaying;
 
   const SyncEventSeekReceived({
@@ -88,7 +78,6 @@ class SyncEventStateSyncReceived extends SyncEvent {
   final bool isPlaying;
   final int serverTimestampMs;
 
-  
   final int seqNo;
 
   const SyncEventStateSyncReceived({
@@ -107,16 +96,13 @@ class SyncEventStateSyncReceived extends SyncEvent {
       ];
 }
 
-
 class SyncEventPlayerStalled extends SyncEvent {
   const SyncEventPlayerStalled();
 }
 
-
 class SyncEventPlayerReady extends SyncEvent {
   const SyncEventPlayerReady();
 }
-
 
 class SyncEventPeerStalled extends SyncEvent {
   final int positionMs;
@@ -130,7 +116,6 @@ class SyncEventPeerStalled extends SyncEvent {
   List<Object?> get props => [positionMs, episodeId];
 }
 
-
 class SyncEventBufferingResumeReceived extends SyncEvent {
   final int resumePositionMs;
   final int episodeId;
@@ -143,19 +128,13 @@ class SyncEventBufferingResumeReceived extends SyncEvent {
   List<Object?> get props => [resumePositionMs, episodeId];
 }
 
-
-
 class SyncEventExcessiveDrift extends SyncEvent {
   const SyncEventExcessiveDrift();
 }
 
-
-
 class _SyncEventFlushDeferred extends SyncEvent {
   const _SyncEventFlushDeferred();
 }
-
-
 
 sealed class SyncState extends Equatable {
   const SyncState();
@@ -188,65 +167,33 @@ class SyncStateDegraded extends SyncState {
   List<Object?> get props => [correctionCount];
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class SyncBloc extends Bloc<SyncEvent, SyncState> {
   final PlayerController _playerController;
   final RoomRepository _roomRepository;
   final AppLogger _logger = AppLogger('SyncBloc');
 
-  
   String _role = 'guest';
 
   int _guestRttMs = AppConstants.kDefaultRttMs;
   final List<int> _correctionTimestamps = [];
 
-  
-  
-  
-  
   int _clockOffsetMs = 0;
 
   bool _localStallSent = false;
   bool _wasPlayingBeforeBuffering = false;
 
-  
   bool _playerReady = false;
   String? _playerContentKey;
   String? _lastNotifiedReadyContentKey;
 
-  
-  
   final List<SyncEvent> _deferredQueue = [];
 
-  
-  
   int _lastAppliedSeqNo = 0;
 
-  
-  
-  
   int _lastAuthoritativeCommandAtMs = 0;
 
-  
-  
   static const int _kPostCommandCooldownMs = 3000;
 
-  
   int _bufferingEpisodeId = 0;
   int? _currentEpisodeId;
   int? _lastStallPositionMs;
@@ -257,13 +204,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   static const int _kPostResumeCooldownMs = 3000;
   static const int _kPositionToleranceMs = 2000;
 
-  
-  
-  
   int _consecutiveDriftHits = 0;
 
-  
-  
   static const int _kRequiredDriftHits = 2;
 
   SyncBloc({
@@ -283,7 +225,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     on<SyncEventExcessiveDrift>(_onExcessiveDrift);
     on<_SyncEventFlushDeferred>(_onFlushDeferred);
 
-    
     _roomRepository.onBufferingStall = (payload) {
       add(
         SyncEventPeerStalled(
@@ -301,7 +242,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       );
     };
 
-    
     _roomRepository.onPlaybackPlay = (payload) {
       add(
         SyncEventPlayReceived(
@@ -343,7 +283,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     };
   }
 
-  
   void setRole(String role) {
     if (_role == role) {
       _logger.d('[SYNC_ROLE_DUPLICATE_IGNORED] role=$role');
@@ -357,18 +296,10 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     _guestRttMs = rttMs;
   }
 
-  
-  
   void updateClockOffset(int offsetMs) {
     _clockOffsetMs = offsetMs;
   }
 
-  
-  
-  
-  
-  
-  
   void setPlayerReady(bool ready, {String? contentKey}) {
     final nextContentKey = contentKey ?? (ready ? _playerContentKey : null);
     final contentChanged = nextContentKey != _playerContentKey;
@@ -387,8 +318,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         _lastNotifiedReadyContentKey = readyContentKey;
         _roomRepository.notifyPlayerReady(readyContentKey);
       }
-      
-      
+
       if (_deferredQueue.isNotEmpty) {
         _logger.i(
           'SyncBloc: scheduling deferred queue flush [queue_size=${_deferredQueue.length}]',
@@ -399,10 +329,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       if (contentChanged) {
         _lastNotifiedReadyContentKey = null;
       }
-      
-      
+
       _consecutiveDriftHits = 0;
-      
+
       if (_deferredQueue.isNotEmpty) {
         _logger.d(
           'SyncBloc: player not ready — clearing ${_deferredQueue.length} deferred commands',
@@ -412,15 +341,12 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     }
   }
 
-  
-
   Future<void> _onPlayReceived(
     SyncEventPlayReceived event,
     Emitter<SyncState> emit,
   ) async {
     final receivedAtMs = DateTime.now().millisecondsSinceEpoch;
 
-    
     if (_role == 'host') {
       _logger.d(
         'SyncBloc: host ignoring own playback:play broadcast [seqNo=${event.seqNo}]',
@@ -434,7 +360,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       'serverTs=${event.serverTimestampMs}, playerReady=$_playerReady]',
     );
 
-    
     if (event.seqNo > 0 && event.seqNo <= _lastAppliedSeqNo) {
       _logger.w(
         'SyncBloc: ignoring stale playback:play '
@@ -460,7 +385,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     SyncEventPauseReceived event,
     Emitter<SyncState> emit,
   ) async {
-    
     if (_role == 'host') {
       _logger.d(
         'SyncBloc: host ignoring own playback:pause broadcast [seqNo=${event.seqNo}]',
@@ -492,7 +416,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     SyncEventSeekReceived event,
     Emitter<SyncState> emit,
   ) async {
-    
     if (_role == 'host') {
       _logger.d(
         'SyncBloc: host ignoring own playback:seek broadcast [seqNo=${event.seqNo}]',
@@ -524,7 +447,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     SyncEventStateSyncReceived event,
     Emitter<SyncState> emit,
   ) async {
-    
     if (_role == 'host') {
       return;
     }
@@ -535,14 +457,12 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         '[seqNo=${event.seqNo}, hostPositionMs=${event.hostPositionMs}, '
         'isPlaying=${event.isPlaying}]',
       );
-      
+
       _deferredQueue.removeWhere((e) => e is SyncEventStateSyncReceived);
       _deferredQueue.add(event);
       return;
     }
 
-    
-    
     if (event.seqNo > 0 && event.seqNo < _lastAppliedSeqNo) {
       _logger.d(
         'SyncBloc: ignoring stale state_sync '
@@ -553,8 +473,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
 
     final now = DateTime.now().millisecondsSinceEpoch;
 
-    
-    
     final msSinceLastCommand = now - _lastAuthoritativeCommandAtMs;
     if (_lastAuthoritativeCommandAtMs > 0 &&
         msSinceLastCommand < _kPostCommandCooldownMs) {
@@ -565,9 +483,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       return;
     }
 
-    
-    
-    
     final adjustedNow = now + _clockOffsetMs;
     final rawAgeMs = adjustedNow - event.serverTimestampMs;
     final ageMs = rawAgeMs.clamp(0, 30000);
@@ -592,8 +507,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         '[consecutiveHits=$_consecutiveDriftHits / $_kRequiredDriftHits]',
       );
 
-      
-      
       if (_consecutiveDriftHits < _kRequiredDriftHits) {
         return;
       }
@@ -623,7 +536,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         Duration(milliseconds: adjustedHostPositionMs),
       );
 
-      
       _lastAuthoritativeCommandAtMs = DateTime.now().millisecondsSinceEpoch;
 
       if (event.isPlaying) {
@@ -635,13 +547,10 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         emit(const SyncStatePaused());
       }
     } else {
-      
       _consecutiveDriftHits = 0;
     }
   }
 
-  
-  
   Future<void> _onFlushDeferred(
     _SyncEventFlushDeferred event,
     Emitter<SyncState> emit,
@@ -649,10 +558,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     await _flushDeferredQueue(emit);
   }
 
-  
   bool _isInBufferingCooldown() {
     final now = DateTime.now().millisecondsSinceEpoch;
-    
+
     if (_lastSeekAppliedAtMs > 0 &&
         now - _lastSeekAppliedAtMs < _kPostSeekCooldownMs) {
       final posMs = _playerController.currentPosition.inMilliseconds;
@@ -660,7 +568,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         return true;
       }
     }
-    
+
     if (_lastBufferingResumeAtMs > 0 &&
         now - _lastBufferingResumeAtMs < _kPostResumeCooldownMs) {
       return true;
@@ -672,7 +580,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     SyncEventPlayerStalled event,
     Emitter<SyncState> emit,
   ) async {
-    
     if (_isInBufferingCooldown()) {
       _logger.d('[BUFFERING_STALL_IGNORED_COOLDOWN]');
       return;
@@ -683,7 +590,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       _wasPlayingBeforeBuffering = _playerController.isPlaying;
       final positionMs = _playerController.currentPosition.inMilliseconds;
 
-      
       if (_lastStallPositionMs != null &&
           (positionMs - _lastStallPositionMs!).abs() < _kPositionToleranceMs &&
           _currentEpisodeId != null) {
@@ -724,8 +630,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       _localStallSent = false;
 
       if (_currentEpisodeId == null) {
-        
-        
         _logger.d(
           '[BUFFERING_RESOLVED_EXTERNALLY] Skipping ready notification',
         );
@@ -740,8 +644,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       }
     }
 
-    
-    
     if (state is SyncStateBuffering) {
       return;
     }
@@ -758,12 +660,11 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     SyncEventPeerStalled event,
     Emitter<SyncState> emit,
   ) async {
-    
     if (_isInBufferingCooldown()) {
       _logger.d('[PEER_STALL_IGNORED_COOLDOWN] pos=${event.positionMs}');
       return;
     }
-    
+
     if (state is SyncStateBuffering) {
       _logger.d(
         '[PEER_STALL_IGNORED_ALREADY_BUFFERING] pos=${event.positionMs}',
@@ -786,7 +687,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     Emitter<SyncState> emit,
   ) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    
+
     if (_lastBufferingResumeAtMs > 0 &&
         now - _lastBufferingResumeAtMs < _kPostResumeCooldownMs) {
       _logger.d(
@@ -796,9 +697,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     }
 
     if (_currentEpisodeId == null) {
-      
-      
-      
       _logger.d('[BUFFERING_RESUME_WITHOUT_STALL] Ignoring resume');
       return;
     }
@@ -818,7 +716,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       Duration(milliseconds: event.resumePositionMs),
     );
 
-    
     _lastAuthoritativeCommandAtMs = now;
 
     if (_wasPlayingBeforeBuffering) {
@@ -840,27 +737,15 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     emit(SyncStateDegraded(_correctionTimestamps.length));
   }
 
-  
-
-  
-  
-  
-  
-  
   Future<void> _applyPlay(
     SyncEventPlayReceived event,
     Emitter<SyncState> emit,
   ) async {
     if (event.seqNo > 0) _lastAppliedSeqNo = event.seqNo;
 
-    
     final now = DateTime.now().millisecondsSinceEpoch + _clockOffsetMs;
     final elapsedMs = (now - event.serverTimestampMs).clamp(0, 30000);
 
-    
-    
-    
-    
     final adjustedPositionMs =
         event.positionMs + elapsedMs + (event.hostRttMs ~/ 2);
 
@@ -883,7 +768,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     emit(const SyncStateSyncing());
   }
 
-  
   Future<void> _applyPause(
     SyncEventPauseReceived event,
     Emitter<SyncState> emit,
@@ -901,20 +785,12 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     emit(const SyncStatePaused());
   }
 
-  
-  
-  
-  
-  
-  
-  
   Future<void> _applySeek(
     SyncEventSeekReceived event,
     Emitter<SyncState> emit,
   ) async {
     if (event.seqNo > 0) _lastAppliedSeqNo = event.seqNo;
 
-    
     final shouldPlay = event.isPlaying ?? (state is SyncStateSyncing);
 
     _logger.i(
@@ -923,15 +799,13 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       'shouldPlay=$shouldPlay, seqNo=${event.seqNo}',
     );
 
-    
     _lastSeekTargetMs = event.targetPositionMs;
     _lastSeekAppliedAtMs = DateTime.now().millisecondsSinceEpoch;
-    
+
     _localStallSent = false;
     _currentEpisodeId = null;
     _lastStallPositionMs = null;
 
-    
     await _playerController.pause();
     await _playerController.seekTo(
       Duration(milliseconds: event.targetPositionMs),
@@ -955,12 +829,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     }
   }
 
-  
-  
-  
-  
-  
-  
   Future<void> _flushDeferredQueue(Emitter<SyncState> emit) async {
     if (_deferredQueue.isEmpty) return;
 
@@ -985,12 +853,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       final seqNo = _seqNoOf(event);
       final ts = _serverTsOf(event);
 
-      
-      
       final existingScore = bestSeqNo * 2 + (_isStateSyncEvent(event) ? 0 : 1);
       final candidateScore = seqNo * 2 + (_isStateSyncEvent(event) ? 1 : 0);
 
-      
       final isNewer =
           seqNo > 0 ? candidateScore > existingScore : ts > serverTimestampMs;
 
@@ -1031,7 +896,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       return;
     }
 
-    
     if (bestSeqNo > 0 && bestSeqNo <= _lastAppliedSeqNo) {
       _logger.d(
         'SyncBloc: deferred queue result already applied '
@@ -1040,7 +904,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       return;
     }
 
-    
     final now = DateTime.now().millisecondsSinceEpoch + _clockOffsetMs;
     final elapsedMs = (shouldPlay && serverTimestampMs > 0)
         ? (now - serverTimestampMs).clamp(0, 30000)

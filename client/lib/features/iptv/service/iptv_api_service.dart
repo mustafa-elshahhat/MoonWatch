@@ -16,7 +16,6 @@ class IptvApiException implements Exception {
   String toString() => 'IptvApiException($statusCode): $message';
 }
 
-
 class IptvApiService {
   final Dio _dio;
   final IptvConfig _config;
@@ -48,15 +47,11 @@ class IptvApiService {
     );
   }
 
-  
-  
   static String _sanitizeUri(Uri uri) {
     return AppLogger.sanitizeUrl(uri.toString());
   }
 
   IptvConfig get config => _config;
-
-  
 
   void _checkCredentials() {
     if (!_config.isConfigured) {
@@ -67,8 +62,6 @@ class IptvApiService {
     }
   }
 
-  
-
   Future<Map<String, dynamic>> authenticate() async {
     _checkCredentials();
     try {
@@ -78,8 +71,6 @@ class IptvApiService {
       throw _mapError(e);
     }
   }
-
-  
 
   Future<List<IptvCategory>> getLiveCategories() async {
     _checkCredentials();
@@ -102,8 +93,6 @@ class IptvApiService {
     }
   }
 
-  
-
   Future<List<IptvCategory>> getVodCategories() async {
     _checkCredentials();
     return _fetchCategories(_config.vodCategoriesUrl);
@@ -124,8 +113,6 @@ class IptvApiService {
       throw _mapError(e);
     }
   }
-
-  
 
   Future<List<IptvCategory>> getSeriesCategories() async {
     _checkCredentials();
@@ -157,8 +144,6 @@ class IptvApiService {
       throw _mapError(e);
     }
   }
-
-  
 
   Future<List<IptvCategory>> _fetchCategories(Uri url) async {
     try {

@@ -4,7 +4,6 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../models/player_ui_context.dart';
 
-
 class PlayerStateOverlay extends StatelessWidget {
   final PlayerUIContext uiContext;
   final PlayerOverlayType type;
@@ -309,6 +308,5 @@ class _PlayerActionBtnState extends State<_PlayerActionBtn> {
         ),
       );
 }
-
 
 enum PlayerOverlayType { loading, buffering, error, ended, idle }

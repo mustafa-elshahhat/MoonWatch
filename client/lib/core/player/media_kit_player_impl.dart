@@ -6,22 +6,14 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'player_controller.dart';
 
-
-
 class MediaKitPlayerImpl implements PlayerController {
   Player? _player;
   VideoController? _videoController;
 
-  
-  
   Widget? _cachedVideoWidget;
   StreamController<PlayerEvent> _eventController =
       StreamController<PlayerEvent>.broadcast();
 
-  
-  
-  
-  
   final StreamController<Duration> _positionController =
       StreamController<Duration>.broadcast();
   final StreamController<Duration> _durationController =
@@ -29,7 +21,6 @@ class MediaKitPlayerImpl implements PlayerController {
 
   final AppLogger _logger = AppLogger('MediaKitPlayer');
 
-  
   final List<StreamSubscription> _subscriptions = [];
   bool _isBuffering = false;
   bool _hasCompleted = false;
@@ -38,28 +29,18 @@ class MediaKitPlayerImpl implements PlayerController {
   bool _disposing = false;
   bool _initialized = false;
 
-  
   Completer<void>? _lifecycleLock;
 
-  
   int _mediaSessionId = 0;
 
-  
   bool _fatalErrorEmittedForSession = false;
 
-  
   String? _currentStreamUrl;
 
-  
   int _transientErrorCount = 0;
 
-  
-  
   static const int _maxTransientErrors = 30;
 
-  
-  
-  
   static final List<RegExp> _transientErrorPatterns = [
     RegExp(r'Error decoding audio', caseSensitive: false),
     RegExp(r'Error decoding video', caseSensitive: false),
@@ -68,8 +49,6 @@ class MediaKitPlayerImpl implements PlayerController {
     RegExp(r'Could not open/read file', caseSensitive: false),
     RegExp(r'cache.* failed', caseSensitive: false),
     RegExp(r'surface.*NULL|native_window.*NULL', caseSensitive: false),
-    
-    
     RegExp(
       r'Cannot reuse HTTP connection for different host',
       caseSensitive: false,
@@ -77,8 +56,6 @@ class MediaKitPlayerImpl implements PlayerController {
     RegExp(r'keepalive request failed', caseSensitive: false),
   ];
 
-  
-  
   static final List<RegExp> _fatalLogPatterns = [
     RegExp(r'HTTP error 4\d{2}', caseSensitive: false),
     RegExp(r'Failed to open segment', caseSensitive: false),
@@ -86,20 +63,16 @@ class MediaKitPlayerImpl implements PlayerController {
     RegExp(r'Server returned [45]\d{2}', caseSensitive: false),
   ];
 
-  
   int _fatalLogHitCount = 0;
 
-  
   static const int _fatalLogThreshold = 3;
 
   @override
   Stream<PlayerEvent> get events => _eventController.stream;
 
-  
   @override
   Stream<Duration> get positionStream => _positionController.stream;
 
-  
   @override
   Stream<Duration> get durationStream => _durationController.stream;
 
@@ -119,8 +92,6 @@ class MediaKitPlayerImpl implements PlayerController {
   bool get isInitialized =>
       _videoController != null && _player != null && _initialized;
 
-  
-  
   BoxFit _cachedFit = BoxFit.contain;
 
   @override
@@ -129,8 +100,7 @@ class MediaKitPlayerImpl implements PlayerController {
   @override
   Widget? buildVideoView({BoxFit fit = BoxFit.contain}) {
     if (_videoController == null || _disposed) return null;
-    
-    
+
     if (_cachedVideoWidget != null && _cachedFit != fit) {
       _cachedVideoWidget = null;
     }
@@ -144,7 +114,6 @@ class MediaKitPlayerImpl implements PlayerController {
     return _cachedVideoWidget;
   }
 
-  
   Future<void> _acquireLifecycleLock() async {
     while (_lifecycleLock != null) {
       await _lifecycleLock!.future;
@@ -152,7 +121,6 @@ class MediaKitPlayerImpl implements PlayerController {
     _lifecycleLock = Completer<void>();
   }
 
-  
   void _releaseLifecycleLock() {
     final lock = _lifecycleLock;
     _lifecycleLock = null;
@@ -177,27 +145,22 @@ class MediaKitPlayerImpl implements PlayerController {
       'MediaKitPlayerImpl.initialize: url=${AppLogger.sanitizeUrl(streamUrl)}',
     );
 
-    
     _disposed = false;
     _initialized = false;
 
-    
     try {
       MediaKit.ensureInitialized();
     } catch (e) {
       _logger.d('MediaKit already initialized');
     }
 
-    
     if (_eventController.isClosed) {
       _logger.d('MediaKitPlayerImpl: recreating closed _eventController');
       _eventController = StreamController<PlayerEvent>.broadcast();
     }
 
-    
     await _disposeInternal();
 
-    
     if (_disposed) {
       _logger.w(
         'MediaKitPlayerImpl.initialize: aborted — disposed during cleanup',
@@ -206,16 +169,13 @@ class MediaKitPlayerImpl implements PlayerController {
     }
 
     try {
-      
       bool initSuccess = false;
       int retries = Platform.isAndroid ? 1 : 0;
 
       for (int i = 0; i <= retries; i++) {
         try {
-          
           await Future.delayed(Duration.zero);
 
-          
           if (_disposed) {
             _logger.w(
               'MediaKitPlayerImpl.initialize: aborted — disposed during retry',
@@ -225,8 +185,7 @@ class MediaKitPlayerImpl implements PlayerController {
 
           _player = Player(
             configuration: const PlayerConfiguration(
-              
-              bufferSize: 32 * 1024 * 1024, 
+              bufferSize: 32 * 1024 * 1024,
               logLevel: MPVLogLevel.warn,
             ),
           );
@@ -234,14 +193,14 @@ class MediaKitPlayerImpl implements PlayerController {
           final mpv = _player!.platform as NativePlayer;
           await mpv.getProperty(
             'stream-pos',
-          ); 
+          );
 
           initSuccess = true;
-          break; 
+          break;
         } catch (e) {
           _logger.w('Player initialization failed (attempt ${i + 1}): $e');
           await _disposeInternal();
-          if (i == retries) rethrow; 
+          if (i == retries) rethrow;
         }
       }
 
@@ -249,7 +208,6 @@ class MediaKitPlayerImpl implements PlayerController {
         throw Exception('Failed to initialize Player native reference');
       }
 
-      
       if (_disposed) {
         _logger.w(
           'MediaKitPlayerImpl.initialize: aborted — disposed after player creation',
@@ -258,21 +216,19 @@ class MediaKitPlayerImpl implements PlayerController {
         return;
       }
 
-      
       final mpv = _player!.platform as NativePlayer;
       await mpv.setProperty('cache', 'auto');
       await mpv.setProperty('demuxer-max-bytes', '32MiB');
       await mpv.setProperty('demuxer-max-back-bytes', '16MiB');
       await mpv.setProperty('force-seekable', 'yes');
-      
+
       await mpv.setProperty(
         'http-header-fields',
         'User-Agent: VLC/3.0.16 LibVLC/3.0.16',
       );
-      
+
       await mpv.setProperty('hwdec', 'auto-safe');
-      
-      
+
       await mpv.setProperty('rebase-start-time', 'yes');
 
       _videoController = VideoController(_player!);
@@ -284,7 +240,6 @@ class MediaKitPlayerImpl implements PlayerController {
 
       _subscribeToStreams();
 
-      
       if (_disposed) {
         _logger.w(
           'MediaKitPlayerImpl.initialize: aborted — disposed after subscriptions',
@@ -294,14 +249,11 @@ class MediaKitPlayerImpl implements PlayerController {
       }
 
       _logger.d('MediaKitPlayerImpl: opening media');
-      
+
       await _player!.open(Media(streamUrl), play: false);
 
-      
-      
       await _waitForReady();
 
-      
       if (_disposed) {
         _logger.w(
           'MediaKitPlayerImpl.initialize: aborted — disposed after waitForReady',
@@ -310,16 +262,13 @@ class MediaKitPlayerImpl implements PlayerController {
         return;
       }
 
-      
-      
-      
       await _player!.play();
       await Future.delayed(const Duration(milliseconds: 50));
-      if (_disposed) return; 
+      if (_disposed) return;
       await _player!.pause();
       await _player!.seek(Duration.zero);
 
-      if (_disposed) return; 
+      if (_disposed) return;
 
       _initialized = true;
 
@@ -347,30 +296,23 @@ class MediaKitPlayerImpl implements PlayerController {
     Timer? timeout;
     String? initError;
 
-    
-    
-    final durSub = _player!.stream.duration.listen((d) {
-      
-    });
+    final durSub = _player!.stream.duration.listen((d) {});
 
-    
     final widthSub = _player!.stream.width.listen((w) {
       if (!completer.isCompleted && w != null && w > 0) {
         completer.complete();
       }
     });
 
-    
     final errSub = _player!.stream.error.listen((err) {
       if (err.isNotEmpty) {
-        initError ??= err; 
+        initError ??= err;
         if (!completer.isCompleted) {
-          completer.complete(); 
+          completer.complete();
         }
       }
     });
 
-    
     final logSub = _player!.stream.log.listen((log) {
       if (_fatalLogPatterns.any((p) => p.hasMatch(log.text))) {
         initError ??= log.text;
@@ -380,7 +322,6 @@ class MediaKitPlayerImpl implements PlayerController {
       }
     });
 
-    
     timeout = Timer(const Duration(seconds: 15), () {
       if (!completer.isCompleted) {
         completer.complete();
@@ -394,7 +335,6 @@ class MediaKitPlayerImpl implements PlayerController {
     await errSub.cancel();
     await logSub.cancel();
 
-    
     final d = _player!.state.duration;
     final w = _player!.state.width;
     final hasDuration = d > Duration.zero;
@@ -420,7 +360,6 @@ class MediaKitPlayerImpl implements PlayerController {
       return;
     }
 
-    
     if (hasDuration) {
       final waitElapsedMs = DateTime.now().millisecondsSinceEpoch - waitStartMs;
       _logger.w(
@@ -430,21 +369,16 @@ class MediaKitPlayerImpl implements PlayerController {
       return;
     }
 
-    
     throw Exception('Stream failed to load: no playable media detected.');
   }
 
   void _subscribeToStreams() {
     final sessionId = _mediaSessionId;
 
-    
-    
-    
-    
     _subscriptions.add(
       _player!.stream.position.listen((p) {
         if (_disposed || sessionId != _mediaSessionId) {
-          return; 
+          return;
         }
         final dur = _player?.state.duration ?? Duration.zero;
         if (p < Duration.zero) {
@@ -462,7 +396,6 @@ class MediaKitPlayerImpl implements PlayerController {
       }),
     );
 
-    
     _subscriptions.add(
       _player!.stream.duration.listen((d) {
         if (_disposed || sessionId != _mediaSessionId) return;
@@ -470,12 +403,11 @@ class MediaKitPlayerImpl implements PlayerController {
       }),
     );
 
-    
     _subscriptions.add(
       _player!.stream.playing.listen((playing) {
         if (_disposed || sessionId != _mediaSessionId) return;
         if (playing) {
-          _transientErrorCount = 0; 
+          _transientErrorCount = 0;
           _fatalLogHitCount = 0;
           _eventController.add(
             PlayerEvent(PlayerEventType.playing, position: currentPosition),
@@ -488,7 +420,6 @@ class MediaKitPlayerImpl implements PlayerController {
       }),
     );
 
-    
     _subscriptions.add(
       _player!.stream.buffering.listen((buffering) {
         if (_disposed || sessionId != _mediaSessionId) return;
@@ -499,7 +430,7 @@ class MediaKitPlayerImpl implements PlayerController {
           );
         } else if (!buffering && _isBuffering) {
           _isBuffering = false;
-          _transientErrorCount = 0; 
+          _transientErrorCount = 0;
           _fatalLogHitCount = 0;
           _eventController.add(
             PlayerEvent(
@@ -511,7 +442,6 @@ class MediaKitPlayerImpl implements PlayerController {
       }),
     );
 
-    
     _subscriptions.add(
       _player!.stream.completed.listen((completed) {
         if (_disposed || sessionId != _mediaSessionId) return;
@@ -522,7 +452,6 @@ class MediaKitPlayerImpl implements PlayerController {
       }),
     );
 
-    
     _subscriptions.add(
       _player!.stream.error.listen((error) {
         if (_disposed || sessionId != _mediaSessionId) return;
@@ -565,13 +494,11 @@ class MediaKitPlayerImpl implements PlayerController {
       }),
     );
 
-    
     _subscriptions.add(
       _player!.stream.log.listen((log) {
         if (_disposed || sessionId != _mediaSessionId) return;
         if (_fatalErrorEmittedForSession) return;
-        
-        
+
         final isTransientLog = _transientErrorPatterns.any(
           (p) => p.hasMatch(log.text),
         );
@@ -608,16 +535,14 @@ class MediaKitPlayerImpl implements PlayerController {
 
   @override
   Future<void> play() async {
-    if (_disposed || _disposing) return; 
+    if (_disposed || _disposing) return;
     await _player?.play();
-    
   }
 
   @override
   Future<void> pause() async {
     if (_disposed || _disposing) return;
     await _player?.pause();
-    
   }
 
   @override
@@ -670,8 +595,7 @@ class MediaKitPlayerImpl implements PlayerController {
     _transientErrorCount = 0;
     _fatalLogHitCount = 0;
     _fatalErrorEmittedForSession = false;
-    
-    
+
     if (!_positionController.isClosed) _positionController.add(Duration.zero);
     if (!_durationController.isClosed) _durationController.add(Duration.zero);
   }

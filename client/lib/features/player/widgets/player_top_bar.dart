@@ -7,7 +7,6 @@ import '../../room/bloc/room_state.dart';
 import '../models/player_ui_context.dart';
 import 'peer_status_indicator.dart';
 
-
 class PlayerTopBar extends StatelessWidget {
   final PlayerUIContext uiContext;
   final String? roomCode;
@@ -44,7 +43,6 @@ class PlayerTopBar extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          
           Padding(
             padding: const EdgeInsets.only(top: 2),
             child: _TopBarBtn(
@@ -54,14 +52,11 @@ class PlayerTopBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-
-          
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                
                 if (uiContext.showRoomCode ||
                     uiContext.showRoleBadge ||
                     uiContext.isLive ||
@@ -139,8 +134,6 @@ class PlayerTopBar extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                
                 Text(
                   uiContext.title,
                   style: const TextStyle(
@@ -170,8 +163,6 @@ class PlayerTopBar extends StatelessWidget {
               ],
             ),
           ),
-
-          
           if (uiContext.showPeerStatus && peerStatus != null) ...[
             const SizedBox(width: AppSpacing.sm),
             PeerStatusIndicator(status: peerStatus!),
@@ -189,8 +180,6 @@ class PlayerTopBar extends StatelessWidget {
     );
   }
 }
-
-
 
 class _LiveChip extends StatefulWidget {
   const _LiveChip();
@@ -264,8 +253,6 @@ class _LiveChipState extends State<_LiveChip>
       );
 }
 
-
-
 class _ContentTypeChip extends StatelessWidget {
   final String label;
   final Color color;
@@ -290,8 +277,6 @@ class _ContentTypeChip extends StatelessWidget {
         ),
       );
 }
-
-
 
 class _TopBarBtn extends StatefulWidget {
   final IconData icon;
