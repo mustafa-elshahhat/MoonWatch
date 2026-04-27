@@ -65,13 +65,12 @@ class ErrorOverlay extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed:
-                      onDismiss ??
+                  onPressed: onDismiss ??
                       () => Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        '/',
-                        (route) => false,
-                      ),
+                            context,
+                            '/',
+                            (route) => false,
+                          ),
                   child: const Text('Go Home'),
                 ),
               ),

@@ -21,11 +21,11 @@ class IptvContentDescriptor {
   });
 
   Map<String, dynamic> toJson() => {
-    'contentType': contentType.name,
-    'streamId': streamId,
-    'containerExtension': containerExtension,
-    'title': title,
-  };
+        'contentType': contentType.name,
+        'streamId': streamId,
+        'containerExtension': containerExtension,
+        'title': title,
+      };
 
   factory IptvContentDescriptor.fromJson(Map<String, dynamic> json) =>
       IptvContentDescriptor(
@@ -169,10 +169,10 @@ class ErrorPayload {
   });
 
   factory ErrorPayload.fromJson(Map<String, dynamic> json) => ErrorPayload(
-    code: json['code'] as String,
-    message: json['message'] as String,
-    serverTimestampMs: json['serverTimestampMs'] as int,
-  );
+        code: json['code'] as String,
+        message: json['message'] as String,
+        serverTimestampMs: json['serverTimestampMs'] as int,
+      );
 }
 
 // ── Playback payloads ────────────────────────────────────────────────────────
@@ -285,9 +285,9 @@ class PongPayload {
   });
 
   factory PongPayload.fromJson(Map<String, dynamic> json) => PongPayload(
-    clientTimestampMs: json['clientTimestampMs'] as int,
-    serverTimestampMs: json['serverTimestampMs'] as int,
-  );
+        clientTimestampMs: json['clientTimestampMs'] as int,
+        serverTimestampMs: json['serverTimestampMs'] as int,
+      );
 }
 
 // ── Buffering payloads ───────────────────────────────────────────────────────

@@ -39,13 +39,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       parent: _entryCtrl,
       curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
     );
-    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero)
-        .animate(
-          CurvedAnimation(
-            parent: _entryCtrl,
-            curve: const Interval(0.0, 0.8, curve: Curves.easeOutCubic),
-          ),
-        );
+    _slideAnim =
+        Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero).animate(
+      CurvedAnimation(
+        parent: _entryCtrl,
+        curve: const Interval(0.0, 0.8, curve: Curves.easeOutCubic),
+      ),
+    );
     _entryCtrl.forward();
   }
 
@@ -240,8 +240,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: _RoomCard(
                 type: _RoomCardType.join,
                 onTap: () {
-                  final shell = context
-                      .findAncestorStateOfType<MainShellState>();
+                  final shell =
+                      context.findAncestorStateOfType<MainShellState>();
                   shell?.switchToRooms();
                 },
               ),
@@ -274,8 +274,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               const SizedBox(height: AppSpacing.md),
               _WatchSoloCard(
                 onTap: () {
-                  final shell = context
-                      .findAncestorStateOfType<MainShellState>();
+                  final shell =
+                      context.findAncestorStateOfType<MainShellState>();
                   shell?.switchToIptv();
                 },
               ),
@@ -293,8 +293,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               _RoomCard(
                 type: _RoomCardType.join,
                 onTap: () {
-                  final shell = context
-                      .findAncestorStateOfType<MainShellState>();
+                  final shell =
+                      context.findAncestorStateOfType<MainShellState>();
                   shell?.switchToRooms();
                 },
               ),
@@ -322,36 +322,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             children: [
               TextSpan(
                 text: 'Cinema,\nshared ',
-                style:
-                    (isDesktop
-                            ? AppTypography.displayHero
-                            : AppTypography.display)
-                        .copyWith(
-                          color: AppColors.textPrimary,
-                          height: 1.05,
-                          letterSpacing: -1.5,
-                        ),
+                style: (isDesktop
+                        ? AppTypography.displayHero
+                        : AppTypography.display)
+                    .copyWith(
+                  color: AppColors.textPrimary,
+                  height: 1.05,
+                  letterSpacing: -1.5,
+                ),
               ),
               TextSpan(
                 text: 'in sync.',
-                style:
-                    (isDesktop
-                            ? AppTypography.displayHero
-                            : AppTypography.display)
-                        .copyWith(
-                          color: AppColors.accentPrimary,
-                          height: 1.05,
-                          letterSpacing: -1.5,
-                          fontStyle: FontStyle.italic,
-                          shadows: [
-                            Shadow(
-                              color: AppColors.accentPrimary.withValues(
-                                alpha: 0.3,
-                              ),
-                              blurRadius: 40,
-                            ),
-                          ],
-                        ),
+                style: (isDesktop
+                        ? AppTypography.displayHero
+                        : AppTypography.display)
+                    .copyWith(
+                  color: AppColors.accentPrimary,
+                  height: 1.05,
+                  letterSpacing: -1.5,
+                  fontStyle: FontStyle.italic,
+                  shadows: [
+                    Shadow(
+                      color: AppColors.accentPrimary.withValues(
+                        alpha: 0.3,
+                      ),
+                      blurRadius: 40,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -396,125 +394,125 @@ class _WatchSoloCardState extends State<_WatchSoloCard> {
   bool _h = false;
   @override
   Widget build(BuildContext context) => MouseRegion(
-    onEnter: (_) => setState(() => _h = true),
-    onExit: (_) => setState(() => _h = false),
-    child: GestureDetector(
-      onTap: widget.onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 280),
-        curve: Curves.easeOutQuart,
-        transform: Matrix4.translationValues(0.0, _h ? -4.0 : 0.0, 0.0),
-        decoration: BoxDecoration(
-          gradient: _h
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.accentPrimary.withValues(alpha: 0.12),
-                    AppColors.surfaceElevated,
-                  ],
-                )
-              : const LinearGradient(
-                  colors: [AppColors.surface, AppColors.surface],
-                ),
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(
-            color: _h
-                ? AppColors.accentPrimary.withValues(alpha: 0.35)
-                : AppColors.border,
-            width: _h ? 1.5 : 1,
-          ),
-          boxShadow: _h
-              ? [
-                  BoxShadow(
-                    color: AppColors.accentPrimary.withValues(alpha: 0.15),
-                    blurRadius: 32,
-                    offset: const Offset(0, 12),
-                  ),
-                ]
-              : [],
-        ),
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Row(
-          children: [
-            // Icon cluster
-            Stack(
+        onEnter: (_) => setState(() => _h = true),
+        onExit: (_) => setState(() => _h = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 280),
+            curve: Curves.easeOutQuart,
+            transform: Matrix4.translationValues(0.0, _h ? -4.0 : 0.0, 0.0),
+            decoration: BoxDecoration(
+              gradient: _h
+                  ? LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.accentPrimary.withValues(alpha: 0.12),
+                        AppColors.surfaceElevated,
+                      ],
+                    )
+                  : const LinearGradient(
+                      colors: [AppColors.surface, AppColors.surface],
+                    ),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(
+                color: _h
+                    ? AppColors.accentPrimary.withValues(alpha: 0.35)
+                    : AppColors.border,
+                width: _h ? 1.5 : 1,
+              ),
+              boxShadow: _h
+                  ? [
+                      BoxShadow(
+                        color: AppColors.accentPrimary.withValues(alpha: 0.15),
+                        blurRadius: 32,
+                        offset: const Offset(0, 12),
+                      ),
+                    ]
+                  : [],
+            ),
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Row(
               children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 280),
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: _h
-                        ? AppColors.accentPrimary.withValues(alpha: 0.18)
-                        : AppColors.accentPrimary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    boxShadow: _h
-                        ? [
-                            BoxShadow(
-                              color: AppColors.accentPrimary.withValues(
-                                alpha: 0.25,
-                              ),
-                              blurRadius: 20,
-                              offset: const Offset(0, 6),
-                            ),
-                          ]
-                        : [],
+                // Icon cluster
+                Stack(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 280),
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: _h
+                            ? AppColors.accentPrimary.withValues(alpha: 0.18)
+                            : AppColors.accentPrimary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        boxShadow: _h
+                            ? [
+                                BoxShadow(
+                                  color: AppColors.accentPrimary.withValues(
+                                    alpha: 0.25,
+                                  ),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ]
+                            : [],
+                      ),
+                      child: Icon(
+                        Icons.play_circle_rounded,
+                        color: AppColors.accentPrimary,
+                        size: _h ? 38 : 34,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: AppSpacing.lg),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Watch Solo',
+                        style: AppTypography.titleLarge.copyWith(
+                          letterSpacing: -0.3,
+                          fontSize: 22,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Live TV  -  Movies  -  Series — all in one place',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      // Mini tags
+                      const Wrap(
+                        spacing: 6,
+                        children: [
+                          _MiniTag('LIVE', AppColors.error),
+                          _MiniTag('MOVIES', AppColors.accentPrimary),
+                          _MiniTag('SERIES', AppColors.success),
+                        ],
+                      ),
+                    ],
                   ),
-                  child: Icon(
-                    Icons.play_circle_rounded,
-                    color: AppColors.accentPrimary,
-                    size: _h ? 38 : 34,
+                ),
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 280),
+                  opacity: _h ? 1.0 : 0.3,
+                  child: const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: AppColors.textMuted,
+                    size: 16,
                   ),
                 ),
               ],
             ),
-            const SizedBox(width: AppSpacing.lg),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Watch Solo',
-                    style: AppTypography.titleLarge.copyWith(
-                      letterSpacing: -0.3,
-                      fontSize: 22,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Live TV  -  Movies  -  Series — all in one place',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  // Mini tags
-                  const Wrap(
-                    spacing: 6,
-                    children: [
-                      _MiniTag('LIVE', AppColors.error),
-                      _MiniTag('MOVIES', AppColors.accentPrimary),
-                      _MiniTag('SERIES', AppColors.success),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 280),
-              opacity: _h ? 1.0 : 0.3,
-              child: const Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: AppColors.textMuted,
-                size: 16,
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
-    ),
-  );
+      );
 }
 
 // —— Room Cards —————————————————————————————————————————————————————
@@ -548,130 +546,131 @@ class _RoomCardState extends State<_RoomCard> {
 
   @override
   Widget build(BuildContext context) => MouseRegion(
-    onEnter: (_) => setState(() => _h = true),
-    onExit: (_) => setState(() => _h = false),
-    child: GestureDetector(
-      onTap: widget.onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutQuart,
-        transform: Matrix4.translationValues(0.0, _h ? -4.0 : 0.0, 0.0),
-        decoration: BoxDecoration(
-          color: _h ? AppColors.surfaceElevated : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(
-            color: _h
-                ? _accent.withValues(alpha: 0.35)
-                : AppColors.borderSubtle,
-            width: _h ? 1.5 : 1,
-          ),
-          boxShadow: _h
-              ? [
-                  BoxShadow(
-                    color: _accent.withValues(alpha: 0.12),
-                    blurRadius: 28,
-                    offset: const Offset(0, 10),
-                  ),
-                ]
-              : [],
-        ),
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+        onEnter: (_) => setState(() => _h = true),
+        onExit: (_) => setState(() => _h = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutQuart,
+            transform: Matrix4.translationValues(0.0, _h ? -4.0 : 0.0, 0.0),
+            decoration: BoxDecoration(
+              color: _h ? AppColors.surfaceElevated : AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(
+                color: _h
+                    ? _accent.withValues(alpha: 0.35)
+                    : AppColors.borderSubtle,
+                width: _h ? 1.5 : 1,
+              ),
+              boxShadow: _h
+                  ? [
+                      BoxShadow(
+                        color: _accent.withValues(alpha: 0.12),
+                        blurRadius: 28,
+                        offset: const Offset(0, 10),
+                      ),
+                    ]
+                  : [],
+            ),
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: _h
-                        ? _accent.withValues(alpha: 0.18)
-                        : _accent.withValues(alpha: 0.09),
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    boxShadow: _h
-                        ? [
-                            BoxShadow(
-                              color: _accent.withValues(alpha: 0.3),
-                              blurRadius: 16,
-                            ),
-                          ]
-                        : [],
-                  ),
-                  child: Icon(_icon, color: _accent, size: 22),
+                Row(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: _h
+                            ? _accent.withValues(alpha: 0.18)
+                            : _accent.withValues(alpha: 0.09),
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        boxShadow: _h
+                            ? [
+                                BoxShadow(
+                                  color: _accent.withValues(alpha: 0.3),
+                                  blurRadius: 16,
+                                ),
+                              ]
+                            : [],
+                      ),
+                      child: Icon(_icon, color: _accent, size: 22),
+                    ),
+                    const Spacer(),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _h
+                            ? _accent.withValues(alpha: 0.15)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                        border: Border.all(
+                          color: _accent.withValues(alpha: _h ? 0.4 : 0.2),
+                        ),
+                      ),
+                      child: Text(
+                        _label,
+                        style: TextStyle(
+                          color: _accent,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const Spacer(),
-                AnimatedContainer(
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  _title,
+                  style: AppTypography.title.copyWith(
+                    fontSize: 19,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  _sub,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textMuted,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                AnimatedOpacity(
                   duration: const Duration(milliseconds: 250),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _h
-                        ? _accent.withValues(alpha: 0.15)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                    border: Border.all(
-                      color: _accent.withValues(alpha: _h ? 0.4 : 0.2),
-                    ),
-                  ),
-                  child: Text(
-                    _label,
-                    style: TextStyle(
-                      color: _accent,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1,
-                    ),
+                  opacity: _h ? 1.0 : 0.5,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _h
+                            ? 'Tap to continue'
+                            : 'Tap to ${widget.type == _RoomCardType.create ? 'create' : 'join'}',
+                        style: TextStyle(
+                          color: _accent,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.arrow_forward_rounded,
+                          color: _accent, size: 14),
+                    ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              _title,
-              style: AppTypography.title.copyWith(
-                fontSize: 19,
-                letterSpacing: -0.3,
-              ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              _sub,
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textMuted,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 250),
-              opacity: _h ? 1.0 : 0.5,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _h
-                        ? 'Tap to continue'
-                        : 'Tap to ${widget.type == _RoomCardType.create ? 'create' : 'join'}',
-                    style: TextStyle(
-                      color: _accent,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(Icons.arrow_forward_rounded, color: _accent, size: 14),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
-    ),
-  );
+      );
 }
 
 // —— Shared micro-components ————————————————————————————————————————
@@ -684,33 +683,33 @@ class _StatChip extends StatelessWidget {
   const _StatChip({required this.label, required this.value});
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-    decoration: BoxDecoration(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(AppRadius.sm),
-      border: Border.all(color: AppColors.borderSubtle),
-    ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          value,
-          style: AppTypography.titleSmall.copyWith(
-            color: AppColors.accentPrimary,
-            fontWeight: FontWeight.w800,
-            fontSize: 18,
-          ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          border: Border.all(color: AppColors.borderSubtle),
         ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: AppTypography.captionSmall.copyWith(
-            color: AppColors.textMuted,
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              value,
+              style: AppTypography.titleSmall.copyWith(
+                color: AppColors.accentPrimary,
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: AppTypography.captionSmall.copyWith(
+                color: AppColors.textMuted,
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 }
 
 class _MiniTag extends StatelessWidget {
@@ -719,22 +718,22 @@ class _MiniTag extends StatelessWidget {
   const _MiniTag(this.text, this.color);
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.12),
-      borderRadius: BorderRadius.circular(3),
-      border: Border.all(color: color.withValues(alpha: 0.25)),
-    ),
-    child: Text(
-      text,
-      style: TextStyle(
-        color: color,
-        fontSize: 9,
-        fontWeight: FontWeight.w800,
-        letterSpacing: 0.8,
-      ),
-    ),
-  );
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(3),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: color,
+            fontSize: 9,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.8,
+          ),
+        ),
+      );
 }
 
 // —— Particle painter for cinematic atmosphere ——————————————————————
@@ -762,7 +761,7 @@ class _ParticlePainter extends CustomPainter {
       final y = ((p[1] + progress * p[2] * 0.3) % 1.0) * size.height;
       final opacity =
           (math.sin(progress * math.pi * 2 + p[0] * math.pi) * 0.5 + 0.5) *
-          0.08;
+              0.08;
       paint.color = AppColors.textPrimary.withValues(alpha: opacity);
       canvas.drawCircle(Offset(x, y), p[3], paint);
     }

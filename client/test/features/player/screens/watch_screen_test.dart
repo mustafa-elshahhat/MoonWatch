@@ -225,9 +225,8 @@ void main() {
     await tester.pump();
 
     final captured = verify(() => playerBloc.add(captureAny())).captured;
-    final initializeEvents = captured
-        .whereType<PlayerEventInitialize>()
-        .toList();
+    final initializeEvents =
+        captured.whereType<PlayerEventInitialize>().toList();
     expect(initializeEvents, hasLength(1));
     expect(initializeEvents.single.contentKey, _contentA.contentKey);
   });
@@ -276,9 +275,8 @@ void main() {
       await tester.pump();
 
       final captured = verify(() => playerBloc.add(captureAny())).captured;
-      final initializeEvents = captured
-          .whereType<PlayerEventInitialize>()
-          .toList();
+      final initializeEvents =
+          captured.whereType<PlayerEventInitialize>().toList();
       expect(initializeEvents, hasLength(1));
       expect(initializeEvents.single.contentKey, _contentA.contentKey);
     },
@@ -332,9 +330,8 @@ void main() {
     await tester.pump();
 
     final captured = verify(() => playerBloc.add(captureAny())).captured;
-    final initializeEvents = captured
-        .whereType<PlayerEventInitialize>()
-        .toList();
+    final initializeEvents =
+        captured.whereType<PlayerEventInitialize>().toList();
     expect(initializeEvents.map((event) => event.contentKey).toList(), [
       _contentA.contentKey,
       _contentB.contentKey,

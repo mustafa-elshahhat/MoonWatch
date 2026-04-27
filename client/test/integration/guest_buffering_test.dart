@@ -3,7 +3,7 @@ import 'package:watch_party/features/sync/sync_engine.dart';
 import 'package:watch_party/core/player/mock_player_impl.dart';
 import '../mocks/mock_room_repository.dart';
 
-/// : Integration test — guest_buffering_test.
+/// Integration test for guest buffering behavior.
 /// Both playing, mock guest stall, verify both pause.
 /// Both report ready, verify resume with position.
 void main() {

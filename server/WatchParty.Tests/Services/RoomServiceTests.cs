@@ -391,8 +391,8 @@ public class RoomServiceTests
     }
 
     /// <summary>
-    /// : Full buffering gate sequence.
-    /// Guest stalls → host stalls → guest ready (gate still closed) → host ready (gate opens).
+    /// Full buffering gate sequence: guest stalls, host stalls, guest ready (gate stays closed),
+    /// then host ready opens the gate.
     /// </summary>
     [Fact]
     public async Task BufferingGate_BothStall_GateOpensOnlyWhenBothReady()
@@ -425,7 +425,7 @@ public class RoomServiceTests
     }
 
     /// <summary>
-    /// : Guest stalls while host was playing → buffering:stall sent to host.
+    /// Guest stalls while host was playing — buffering:stall is sent to host.
     /// Guest ready → gate does not open until host also ready.
     /// (In this scenario host never stalls — peer stays Ready on server.)
     /// </summary>
@@ -465,7 +465,7 @@ public class RoomServiceTests
     // ── Guest Reconnection ,  ─────────────────────────────────
 
     /// <summary>
-    /// : Guest reconnects within 30s — grace timer cancelled,
+    /// Guest reconnects within 30s — grace timer cancelled,
     /// guest re-associated, state sync data returned, room stays Active.
     /// </summary>
     [Fact]
@@ -495,7 +495,7 @@ public class RoomServiceTests
     }
 
     /// <summary>
-    /// : Reconnecting guest has BufferingState reset to Ready.
+    /// Reconnecting guest has BufferingState reset to Ready.
     /// </summary>
     [Fact]
     public async Task GuestReconnect_ResetsBufferingStateToReady()
@@ -515,7 +515,7 @@ public class RoomServiceTests
     }
 
     /// <summary>
-    /// : Guest does not reconnect — grace timer fires, guest slot cleared,
+    /// Guest does not reconnect — grace timer fires, guest slot cleared,
     /// room remains open, host can still receive a new guest.
     /// </summary>
     [Fact]
@@ -563,7 +563,7 @@ public class RoomServiceTests
     }
 
     /// <summary>
-    /// : Guest reconnects from Joined state —
+    /// Guest reconnects from Joined state —
     /// transitions back to Joined (no stream URL) or Active (with stream URL).
     /// </summary>
     [Fact]

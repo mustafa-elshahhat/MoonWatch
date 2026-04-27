@@ -3,8 +3,7 @@ import 'package:watch_party/features/sync/sync_engine.dart';
 import 'package:watch_party/core/player/mock_player_impl.dart';
 import '../mocks/mock_room_repository.dart';
 
-/// : Integration tests — host seeks, verify guest behavior.
-/// Per : host_guest_seek_test is a separate test file.
+/// Integration tests — host seeks, verify guest behavior.
 void main() {
   late MockPlayerImpl mockPlayer;
   late MockRoomRepository mockRepo;

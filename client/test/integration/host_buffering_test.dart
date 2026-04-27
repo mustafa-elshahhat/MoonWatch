@@ -3,8 +3,7 @@ import 'package:watch_party/features/sync/sync_engine.dart';
 import 'package:watch_party/core/player/mock_player_impl.dart';
 import '../mocks/mock_room_repository.dart';
 
-/// : Integration test — host_buffering_test.
-/// Same as guest buffering but from host's side.
+/// Integration test for host buffering behavior.
 /// Host stalls, guest pauses when receiving buffering:stall from peer.
 void main() {
   late MockPlayerImpl mockPlayer;

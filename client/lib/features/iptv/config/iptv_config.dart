@@ -20,10 +20,10 @@ class IptvConfig {
   static const String _kPassword = String.fromEnvironment('IPTV_PASSWORD');
 
   static IptvConfig get defaultProvider => const IptvConfig(
-    username: _kUsername,
-    password: _kPassword,
-    baseUrl: _kBaseUrl,
-  );
+        username: _kUsername,
+        password: _kPassword,
+        baseUrl: _kBaseUrl,
+      );
 
   /// True when all required credentials have been supplied via --dart-define.
   bool get isConfigured =>

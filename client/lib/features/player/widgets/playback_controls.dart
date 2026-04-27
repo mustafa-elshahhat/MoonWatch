@@ -22,6 +22,13 @@ class PlaybackControls extends StatefulWidget {
 
 class _PlaybackControlsState extends State<PlaybackControls> {
   bool _isMuted = false;
+  late final PlayerController _playerController;
+
+  @override
+  void initState() {
+    super.initState();
+    _playerController = GetIt.instance<PlayerController>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +63,7 @@ class _PlaybackControlsState extends State<PlaybackControls> {
     final isPaused = playerState is PlayerStatePaused;
     final canControl = isPlaying || isPaused || playerState is PlayerStateReady;
     final position = _position(playerState);
-    final playerController = GetIt.instance<PlayerController>();
-    final duration = _duration(playerController);
+    final duration = _duration(_playerController);
     final isLive = duration >= const Duration(hours: 3, minutes: 59);
 
     return KeyboardListener(
@@ -103,7 +109,7 @@ class _PlaybackControlsState extends State<PlaybackControls> {
                   ),
                   const Spacer(),
                   // Utilities
-                  _buildUtilityControls(playerController),
+                  _buildUtilityControls(_playerController),
                 ],
               ),
             ),
@@ -120,9 +126,9 @@ class _PlaybackControlsState extends State<PlaybackControls> {
     bool canControl,
   ) {
     final maxMs = duration.inMilliseconds.toDouble().clamp(
-      1.0,
-      double.infinity,
-    );
+          1.0,
+          double.infinity,
+        );
     final valMs = position.inMilliseconds.toDouble().clamp(0.0, maxMs);
     return SliderTheme(
       data: SliderThemeData(
@@ -143,8 +149,8 @@ class _PlaybackControlsState extends State<PlaybackControls> {
         max: maxMs,
         onChanged: canControl
             ? (v) {
-                final ws = context
-                    .findAncestorStateOfType<WatchScreenContentState>();
+                final ws =
+                    context.findAncestorStateOfType<WatchScreenContentState>();
                 ws?.invokeSeekAction(Duration(milliseconds: v.toInt()));
               }
             : null,
@@ -238,8 +244,8 @@ class _PlaybackControlsState extends State<PlaybackControls> {
           isPlaying: isPlaying,
           canControl: canControl,
           onTap: () {
-            final ws = context
-                .findAncestorStateOfType<WatchScreenContentState>();
+            final ws =
+                context.findAncestorStateOfType<WatchScreenContentState>();
             if (isPlaying) {
               ws?.invokePauseAction(position);
             } else {
@@ -279,8 +285,7 @@ class _PlaybackControlsState extends State<PlaybackControls> {
   Widget _buildGuestDisplay(BuildContext context, PlayerState playerState) {
     final position = _position(playerState);
     final isPlaying = playerState is PlayerStatePlaying;
-    final playerController = GetIt.instance<PlayerController>();
-    final duration = _duration(playerController);
+    final duration = _duration(_playerController);
     final isLive = duration >= const Duration(hours: 3, minutes: 59);
 
     return Container(
@@ -372,7 +377,7 @@ class _PlaybackControlsState extends State<PlaybackControls> {
     final canControl = isPlaying || isPaused || playerState is PlayerStateReady;
     if (!canControl) return;
     final pos = _position(playerState);
-    final dur = _duration(GetIt.instance<PlayerController>());
+    final dur = _duration(_playerController);
     final ws = context.findAncestorStateOfType<WatchScreenContentState>();
     if (event.logicalKey == LogicalKeyboardKey.space) {
       if (isPlaying) {
@@ -386,16 +391,16 @@ class _PlaybackControlsState extends State<PlaybackControls> {
       _seekRel(context, pos, dur, 10);
     } else if (event.logicalKey == LogicalKeyboardKey.keyM) {
       setState(() => _isMuted = !_isMuted);
-      GetIt.instance<PlayerController>().setVolume(_isMuted ? 0.0 : 1.0);
+      _playerController.setVolume(_isMuted ? 0.0 : 1.0);
     }
   }
 
   Duration _position(PlayerState state) => switch (state) {
-    PlayerStatePlaying(position: final p) => p,
-    PlayerStatePaused(position: final p) => p,
-    PlayerStateBuffering(lastKnownPosition: final p) => p,
-    _ => Duration.zero,
-  };
+        PlayerStatePlaying(position: final p) => p,
+        PlayerStatePaused(position: final p) => p,
+        PlayerStateBuffering(lastKnownPosition: final p) => p,
+        _ => Duration.zero,
+      };
 
   Duration _duration(PlayerController c) {
     final d = c.duration;
@@ -429,39 +434,41 @@ class _PlayPauseBtnState extends State<_PlayPauseBtn> {
   bool _hovered = false;
   @override
   Widget build(BuildContext context) => MouseRegion(
-    onEnter: (_) => setState(() => _hovered = true),
-    onExit: (_) => setState(() => _hovered = false),
-    child: GestureDetector(
-      onTap: widget.canControl ? widget.onTap : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        width: 52,
-        height: 52,
-        decoration: BoxDecoration(
-          color: _hovered ? Colors.white : Colors.white.withValues(alpha: 0.15),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.white.withValues(alpha: _hovered ? 0.0 : 0.25),
-            width: 1.5,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          onTap: widget.canControl ? widget.onTap : null,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: _hovered
+                  ? Colors.white
+                  : Colors.white.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white.withValues(alpha: _hovered ? 0.0 : 0.25),
+                width: 1.5,
+              ),
+              boxShadow: _hovered
+                  ? [
+                      const BoxShadow(
+                        color: Colors.black38,
+                        blurRadius: 16,
+                        offset: Offset(0, 6),
+                      ),
+                    ]
+                  : [],
+            ),
+            child: Icon(
+              widget.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+              color: _hovered ? AppColors.background : Colors.white,
+              size: 26,
+            ),
           ),
-          boxShadow: _hovered
-              ? [
-                  const BoxShadow(
-                    color: Colors.black38,
-                    blurRadius: 16,
-                    offset: Offset(0, 6),
-                  ),
-                ]
-              : [],
         ),
-        child: Icon(
-          widget.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-          color: _hovered ? AppColors.background : Colors.white,
-          size: 26,
-        ),
-      ),
-    ),
-  );
+      );
 }
 
 // —— Chrome button —————————————————————————————————————————————————————————————
@@ -479,31 +486,31 @@ class _ChrBtnState extends State<_ChrBtn> {
   bool _hovered = false;
   @override
   Widget build(BuildContext context) => Tooltip(
-    message: widget.tooltip,
-    child: MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: _hovered
-                ? Colors.white.withValues(alpha: 0.15)
-                : Colors.transparent,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            widget.icon,
-            color: widget.onTap == null
-                ? Colors.white.withValues(alpha: 0.25)
-                : Colors.white,
-            size: 20,
+        message: widget.tooltip,
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _hovered = true),
+          onExit: (_) => setState(() => _hovered = false),
+          child: GestureDetector(
+            onTap: widget.onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: _hovered
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                widget.icon,
+                color: widget.onTap == null
+                    ? Colors.white.withValues(alpha: 0.25)
+                    : Colors.white,
+                size: 20,
+              ),
+            ),
           ),
         ),
-      ),
-    ),
-  );
+      );
 }

@@ -27,7 +27,6 @@ class WatchPartyApp extends StatelessWidget {
         BlocProvider<IptvBloc>(create: (_) => getIt<IptvBloc>()),
         BlocProvider<RoomListBloc>(create: (_) => getIt<RoomListBloc>()),
       ],
-
       child: MaterialApp(
         title: 'WatchParty',
         debugShowCheckedModeBanner: false,

@@ -44,9 +44,9 @@ void main() {
   });
 
   ReconnectBloc buildBloc() => ReconnectBloc(
-    signalRClient: mockSignalRClient,
-    roomRepository: mockRoomRepository,
-  );
+        signalRClient: mockSignalRClient,
+        roomRepository: mockRoomRepository,
+      );
 
   // —— Initial state ——————————————————————————————————————————————————————
 

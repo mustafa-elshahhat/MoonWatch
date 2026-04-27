@@ -58,9 +58,9 @@ void main() {
   });
 
   RoomBloc buildBloc() => RoomBloc(
-    roomRepository: mockRoomRepository,
-    signalRClient: mockSignalRClient,
-  );
+        roomRepository: mockRoomRepository,
+        signalRClient: mockSignalRClient,
+      );
 
   group('RoomBloc - CreateRoom', () {
     blocTest<RoomBloc, RoomState>(

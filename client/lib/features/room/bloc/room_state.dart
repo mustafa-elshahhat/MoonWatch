@@ -113,24 +113,25 @@ class RoomStateActive extends RoomState {
     PeerStatus? peerStatus,
     bool? localReady,
     bool? peerReady,
-  }) => RoomStateActive(
-    roomCode: roomCode,
-    role: role,
-    contentDescriptor: contentDescriptor ?? this.contentDescriptor,
-    peerStatus: peerStatus ?? this.peerStatus,
-    localReady: localReady ?? this.localReady,
-    peerReady: peerReady ?? this.peerReady,
-  );
+  }) =>
+      RoomStateActive(
+        roomCode: roomCode,
+        role: role,
+        contentDescriptor: contentDescriptor ?? this.contentDescriptor,
+        peerStatus: peerStatus ?? this.peerStatus,
+        localReady: localReady ?? this.localReady,
+        peerReady: peerReady ?? this.peerReady,
+      );
 
   @override
   List<Object?> get props => [
-    roomCode,
-    role,
-    contentDescriptor,
-    peerStatus,
-    localReady,
-    peerReady,
-  ];
+        roomCode,
+        role,
+        contentDescriptor,
+        peerStatus,
+        localReady,
+        peerReady,
+      ];
 }
 
 class RoomStateClosed extends RoomState {

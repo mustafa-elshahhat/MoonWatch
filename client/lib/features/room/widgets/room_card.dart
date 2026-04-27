@@ -116,8 +116,8 @@ class _RoomCardState extends State<RoomCard> {
                 child: Icon(
                   isJoinable
                       ? (contentSet
-                            ? Icons.play_circle_outline_rounded
-                            : Icons.sensors_rounded)
+                          ? Icons.play_circle_outline_rounded
+                          : Icons.sensors_rounded)
                       : Icons.do_not_disturb_alt_rounded,
                   color: isJoinable ? statusColor : AppColors.error,
                   size: 24,
@@ -253,15 +253,15 @@ class _JoinBtnState extends State<_JoinBtn> {
             color: !widget.canJoin
                 ? AppColors.surfaceElevated
                 : _hovered
-                ? widget.accentColor
-                : widget.accentColor.withValues(alpha: 0.15),
+                    ? widget.accentColor
+                    : widget.accentColor.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(AppRadius.pill),
             border: Border.all(
               color: !widget.canJoin
                   ? AppColors.border
                   : _hovered
-                  ? widget.accentColor
-                  : widget.accentColor.withValues(alpha: 0.3),
+                      ? widget.accentColor
+                      : widget.accentColor.withValues(alpha: 0.3),
             ),
             boxShadow: _hovered && widget.canJoin
                 ? [
@@ -288,8 +288,8 @@ class _JoinBtnState extends State<_JoinBtn> {
                     color: !widget.canJoin
                         ? AppColors.textDisabled
                         : _hovered
-                        ? Colors.white
-                        : widget.accentColor,
+                            ? Colors.white
+                            : widget.accentColor,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

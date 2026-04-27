@@ -64,17 +64,18 @@ class _CreateRoomScreenState extends State<CreateRoomScreen>
       if (mounted && _creating) {
         setState(() => _creating = false);
         context.read<RoomBloc>().add(
-          const RoomEventError(
-            code: 'timeout',
-            message: 'Room creation timed out. The server might be waking up.',
-          ),
-        );
+              const RoomEventError(
+                code: 'timeout',
+                message:
+                    'Room creation timed out. The server might be waking up.',
+              ),
+            );
       }
     });
     _logger.i('[$_correlationId] Dispatching RoomEventCreateRoom');
     context.read<RoomBloc>().add(
-      RoomEventCreateRoom(correlationId: _correlationId),
-    );
+          RoomEventCreateRoom(correlationId: _correlationId),
+        );
   }
 
   @override
@@ -113,8 +114,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen>
         }
       },
       builder: (context, state) {
-        final isLoading =
-            _creating ||
+        final isLoading = _creating ||
             state is RoomStateConnecting ||
             state is RoomStateCreating ||
             state is RoomStateWaiting;
@@ -422,40 +422,40 @@ class _BackBtnState extends State<_BackBtn> {
   bool _h = false;
   @override
   Widget build(BuildContext context) => MouseRegion(
-    onEnter: (_) => setState(() => _h = true),
-    onExit: (_) => setState(() => _h = false),
-    child: GestureDetector(
-      onTap: widget.onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: _h ? AppColors.surfaceElevated : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          border: Border.all(
-            color: _h ? AppColors.border : AppColors.borderSubtle,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              size: 12,
-              color: AppColors.textMuted,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'BACK',
-              style: AppTypography.mono.copyWith(
-                fontSize: 10,
-                color: AppColors.textMuted,
-                letterSpacing: 1.5,
+        onEnter: (_) => setState(() => _h = true),
+        onExit: (_) => setState(() => _h = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: _h ? AppColors.surfaceElevated : AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+              border: Border.all(
+                color: _h ? AppColors.border : AppColors.borderSubtle,
               ),
             ),
-          ],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 12,
+                  color: AppColors.textMuted,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'BACK',
+                  style: AppTypography.mono.copyWith(
+                    fontSize: 10,
+                    color: AppColors.textMuted,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
-    ),
-  );
+      );
 }

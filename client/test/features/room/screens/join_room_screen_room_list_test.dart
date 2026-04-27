@@ -2,10 +2,10 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:watch_party/features/room/bloc/room_bloc.dart';
 import 'package:watch_party/features/room/bloc/room_event.dart';
+import 'package:watch_party/features/room/bloc/room_list_bloc.dart';
 import 'package:watch_party/features/room/bloc/room_state.dart';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 import 'package:watch_party/features/room/screens/join_room_screen.dart';
@@ -37,19 +37,18 @@ void main() {
         },
       ],
     );
-    await GetIt.instance.reset();
-    GetIt.instance.registerSingleton<RoomRepository>(mockRoomRepository);
-  });
-
-  tearDown(() async {
-    await GetIt.instance.reset();
   });
 
   Widget buildTestWidget() {
     return MaterialApp(
       routes: {'/watch': (_) => const Scaffold(body: Text('WatchScreen'))},
-      home: BlocProvider<RoomBloc>.value(
-        value: mockRoomBloc,
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<RoomBloc>.value(value: mockRoomBloc),
+          BlocProvider<RoomListBloc>(
+            create: (_) => RoomListBloc(repository: mockRoomRepository),
+          ),
+        ],
         child: const JoinRoomScreen(),
       ),
     );

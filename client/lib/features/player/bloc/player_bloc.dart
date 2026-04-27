@@ -46,8 +46,8 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   }
 
   PlayerBloc({required pc.PlayerController playerController})
-    : _playerController = playerController,
-      super(const PlayerStateIdle()) {
+      : _playerController = playerController,
+        super(const PlayerStateIdle()) {
     on<PlayerEventInitialize>(_onInitialize);
     on<PlayerEventPlay>(_onPlay);
     on<PlayerEventPause>(_onPause);

@@ -46,8 +46,8 @@ class RoomListBloc extends Bloc<RoomListEvent, RoomListState> {
   final RoomRepository _repository;
 
   RoomListBloc({required RoomRepository repository})
-    : _repository = repository,
-      super(RoomListInitial()) {
+      : _repository = repository,
+        super(RoomListInitial()) {
     on<RoomListFetch>(_onFetch);
   }
 

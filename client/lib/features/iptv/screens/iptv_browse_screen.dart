@@ -71,59 +71,58 @@ class _IptvBrowseScreenState extends State<IptvBrowseScreen>
 
     Navigator.of(context)
         .push(
-          PageRouteBuilder(
-            pageBuilder: (context, _, __) => BlocProvider(
-              create: (_) =>
-                  IptvBloc(repository: GetIt.instance<IptvRepository>()),
-              child: IptvCategoryContentScreen(
-                contentType: memory.activeTab ?? IptvContentType.live,
-                categoryId: cat.categoryId,
-                categoryName: cat.categoryName,
-                mode: _mode,
-              ),
-            ),
-            transitionDuration: Duration.zero,
-            reverseTransitionDuration: Duration.zero,
+      PageRouteBuilder(
+        pageBuilder: (context, _, __) => BlocProvider(
+          create: (_) => IptvBloc(repository: GetIt.instance<IptvRepository>()),
+          child: IptvCategoryContentScreen(
+            contentType: memory.activeTab ?? IptvContentType.live,
+            categoryId: cat.categoryId,
+            categoryName: cat.categoryName,
+            mode: _mode,
           ),
-        )
+        ),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    )
         .then((result) {
-          if (result is IptvContentSelected) {
-            GetIt.I<IptvNavigationMemory>().isSelectionPop = true;
-            // We do NOT clear category here because we want to preserve it
-            // for the next time the user opens the browser.
-            if (mounted) Navigator.of(context).pop(result);
-            return;
-          }
-          GetIt.I<IptvNavigationMemory>().clearCategory();
-        });
+      if (result is IptvContentSelected) {
+        GetIt.I<IptvNavigationMemory>().isSelectionPop = true;
+        // We do NOT clear category here because we want to preserve it
+        // for the next time the user opens the browser.
+        if (mounted) Navigator.of(context).pop(result);
+        return;
+      }
+      GetIt.I<IptvNavigationMemory>().clearCategory();
+    });
 
     if (memory.activeSeriesId != null && memory.activeSeriesName != null) {
       Navigator.of(context)
           .push(
-            PageRouteBuilder(
-              pageBuilder: (context, _, __) => BlocProvider(
-                create: (_) =>
-                    IptvBloc(repository: GetIt.instance<IptvRepository>()),
-                child: IptvSeriesDetailScreen(
-                  seriesId: int.tryParse(memory.activeSeriesId!) ?? 0,
-                  seriesName: memory.activeSeriesName!,
-                  mode: _mode,
-                ),
-              ),
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
+        PageRouteBuilder(
+          pageBuilder: (context, _, __) => BlocProvider(
+            create: (_) =>
+                IptvBloc(repository: GetIt.instance<IptvRepository>()),
+            child: IptvSeriesDetailScreen(
+              seriesId: int.tryParse(memory.activeSeriesId!) ?? 0,
+              seriesName: memory.activeSeriesName!,
+              mode: _mode,
             ),
-          )
+          ),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
+      )
           .then((result) {
-            if (result is IptvContentSelected) {
-              GetIt.I<IptvNavigationMemory>().isSelectionPop = true;
-              // We do NOT clear series here because we want to preserve it
-              // for the next time the user opens the browser.
-              if (mounted) Navigator.of(context).pop(result);
-              return;
-            }
-            GetIt.I<IptvNavigationMemory>().clearSeries();
-          });
+        if (result is IptvContentSelected) {
+          GetIt.I<IptvNavigationMemory>().isSelectionPop = true;
+          // We do NOT clear series here because we want to preserve it
+          // for the next time the user opens the browser.
+          if (mounted) Navigator.of(context).pop(result);
+          return;
+        }
+        GetIt.I<IptvNavigationMemory>().clearSeries();
+      });
     }
   }
 
@@ -242,9 +241,8 @@ class _IptvBrowseScreenState extends State<IptvBrowseScreen>
   Widget _buildFlagshipSearchBar(bool isDesktop) {
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: isDesktop
-            ? MediaQuery.of(context).size.width * 0.1
-            : AppSpacing.lg,
+        horizontal:
+            isDesktop ? MediaQuery.of(context).size.width * 0.1 : AppSpacing.lg,
         vertical: AppSpacing.md,
       ),
       child: Container(
@@ -456,10 +454,10 @@ class _IptvBrowseScreenState extends State<IptvBrowseScreen>
     final crossAxisCount = sw > 1200
         ? 5
         : sw > 800
-        ? 4
-        : sw > 600
-        ? 3
-        : 2;
+            ? 4
+            : sw > 600
+                ? 3
+                : 2;
 
     return GridView.builder(
       key: PageStorageKey<IptvContentType>(contentType),

@@ -7,28 +7,39 @@ import 'package:watch_party/features/room/screens/join_room_screen.dart';
 import 'package:watch_party/features/room/bloc/room_bloc.dart';
 import 'package:watch_party/features/room/bloc/room_event.dart';
 import 'package:watch_party/features/room/bloc/room_state.dart';
+import 'package:watch_party/features/room/bloc/room_list_bloc.dart';
 
 class MockRoomBloc extends MockBloc<RoomEvent, RoomState> implements RoomBloc {}
 
+class MockRoomListBloc extends MockBloc<RoomListEvent, RoomListState>
+    implements RoomListBloc {}
+
 void main() {
   late MockRoomBloc mockRoomBloc;
+  late MockRoomListBloc mockRoomListBloc;
 
   setUpAll(() {
     // Use a concrete RoomEvent subclass — RoomEvent is sealed and cannot be
     // extended or implemented outside its defining library.
     registerFallbackValue(const RoomEventLeaveRoom());
+    registerFallbackValue(const RoomListFetch());
   });
 
   setUp(() {
     mockRoomBloc = MockRoomBloc();
+    mockRoomListBloc = MockRoomListBloc();
     when(() => mockRoomBloc.state).thenReturn(const RoomStateInitial());
+    when(() => mockRoomListBloc.state).thenReturn(RoomListInitial());
   });
 
   Widget buildTestWidget() {
     return MaterialApp(
       routes: {'/watch': (_) => const Scaffold(body: Text('WatchScreen'))},
-      home: BlocProvider<RoomBloc>.value(
-        value: mockRoomBloc,
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<RoomBloc>.value(value: mockRoomBloc),
+          BlocProvider<RoomListBloc>.value(value: mockRoomListBloc),
+        ],
         child: const JoinRoomScreen(),
       ),
     );

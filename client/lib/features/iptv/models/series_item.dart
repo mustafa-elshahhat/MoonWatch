@@ -119,8 +119,7 @@ class SeriesEpisode extends Equatable {
       plot: json['plot']?.toString(),
       duration: json['duration']?.toString(),
       rating: double.tryParse(json['rating']?.toString() ?? ''),
-      coverBig:
-          json['info']?['movie_image']?.toString() ??
+      coverBig: json['info']?['movie_image']?.toString() ??
           json['info']?['cover_big']?.toString(),
     );
   }

@@ -153,19 +153,19 @@ class WatchScreenContentState extends State<WatchScreenContent> {
 
   /// Extract role from any room state that carries it.
   static String? _roleOf(RoomState s) => switch (s) {
-    RoomStateWaiting(role: final r) => r,
-    RoomStateJoined(role: final r) => r,
-    RoomStateActive(role: final r) => r,
-    _ => null,
-  };
+        RoomStateWaiting(role: final r) => r,
+        RoomStateJoined(role: final r) => r,
+        RoomStateActive(role: final r) => r,
+        _ => null,
+      };
 
   /// Extract room code from any room state that carries it.
   static String? _roomCodeOf(RoomState s) => switch (s) {
-    RoomStateWaiting(roomCode: final c) => c,
-    RoomStateJoined(roomCode: final c) => c,
-    RoomStateActive(roomCode: final c) => c,
-    _ => null,
-  };
+        RoomStateWaiting(roomCode: final c) => c,
+        RoomStateJoined(roomCode: final c) => c,
+        RoomStateActive(roomCode: final c) => c,
+        _ => null,
+      };
 
   static String _contentKeyOf(IptvContentDescriptor descriptor) =>
       descriptor.contentKey;
@@ -178,9 +178,9 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     return roomState.contentKey;
   }
 
-  /// Host: invoke Play via room protocol (Issues 1, 3, 8).
-  /// Applies locally (option B) and sends to server.
-  /// SyncBloc treats returning broadcast as no-op .
+  /// Host: invoke Play via room protocol.
+  /// Applies locally and sends to server.
+  /// SyncBloc treats the returning broadcast event as a no-op.
   void invokePlay(Duration position) {
     final now = DateTime.now().millisecondsSinceEpoch;
     _logger.i('host.play: positionMs=${position.inMilliseconds}');
@@ -192,14 +192,14 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     _roomRepository.invokePlay(position.inMilliseconds, now);
   }
 
-  /// Host: invoke Pause via room protocol (Issue 3).
+  /// Host: invoke Pause via room protocol.
   void invokePauseAction(Duration position) {
     _logger.i('host.pause: positionMs=${position.inMilliseconds}');
     _playerController.pause();
     _roomRepository.invokePause(position.inMilliseconds);
   }
 
-  /// Host: invoke Seek via room protocol (Issue 3).
+  /// Host: invoke Seek via room protocol.
   void invokeSeekAction(Duration targetPosition) {
     _logger.d('host.seek: targetMs=${targetPosition.inMilliseconds}');
     _playerController.seekTo(targetPosition);
@@ -256,15 +256,15 @@ class WatchScreenContentState extends State<WatchScreenContent> {
 
     // Single dispatch point for player init.
     context.read<PlayerBloc>().add(
-      PlayerEventInitialize(
-        localUrl,
-        source: 'room_active',
-        isRoomMode: true,
-        role: state.role,
-        roomCode: state.roomCode,
-        contentKey: contentKey,
-      ),
-    );
+          PlayerEventInitialize(
+            localUrl,
+            source: 'room_active',
+            isRoomMode: true,
+            role: state.role,
+            roomCode: state.roomCode,
+            contentKey: contentKey,
+          ),
+        );
   }
 
   @override
@@ -289,7 +289,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
           },
           listener: (context, state) {
             if (state is RoomStateClosed) {
-              // Issue 7: dispose player on room close
+              // Dispose player on room close.
               context.read<PlayerBloc>().add(const PlayerEventDispose());
               // Disable auto-rejoin by clearing stored reconnect credentials
               context.read<ReconnectBloc>().add(const ReconnectEventReset());
@@ -318,9 +318,9 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                 playerState is PlayerStateLoading ||
                 playerState is PlayerStateError) {
               context.read<SyncBloc>().setPlayerReady(
-                false,
-                contentKey: _activeContentKey(context),
-              );
+                    false,
+                    contentKey: _activeContentKey(context),
+                  );
               // Allow re-initialization with the same URL after a failure.
               if (playerState is PlayerStateError) {
                 _lastContentKey = null;
@@ -329,9 +329,9 @@ class WatchScreenContentState extends State<WatchScreenContent> {
 
             if (playerState is PlayerStateReady) {
               context.read<SyncBloc>().setPlayerReady(
-                true,
-                contentKey: _activeContentKey(context),
-              );
+                    true,
+                    contentKey: _activeContentKey(context),
+                  );
             }
 
             // Handle stall / buffering recovery
@@ -372,8 +372,8 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                   final navCtx = EpisodeNavService().current;
                   final hasNext =
                       descriptor?.contentType == IptvDescriptorType.episode &&
-                      navCtx != null &&
-                      navCtx.hasNext;
+                          navCtx != null &&
+                          navCtx.hasNext;
                   final uiContext = descriptor != null && role != null
                       ? PlayerUIContext.fromRoom(
                           role: role,
@@ -381,14 +381,14 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                           hasNextEpisode: hasNext,
                         )
                       : (role == 'host'
-                            ? PlayerUIContext.roomHost(
-                                contentType: IptvDescriptorType.movie,
-                                title: 'WatchParty',
-                              )
-                            : PlayerUIContext.roomGuest(
-                                contentType: IptvDescriptorType.movie,
-                                title: 'WatchParty',
-                              ));
+                          ? PlayerUIContext.roomHost(
+                              contentType: IptvDescriptorType.movie,
+                              title: 'WatchParty',
+                            )
+                          : PlayerUIContext.roomGuest(
+                              contentType: IptvDescriptorType.movie,
+                              title: 'WatchParty',
+                            ));
 
                   return _buildPlayerStack(
                     context,
@@ -434,9 +434,9 @@ class WatchScreenContentState extends State<WatchScreenContent> {
             BlocBuilder<RoomBloc, RoomState>(
               builder: (context, roomState) =>
                   BlocBuilder<PlayerBloc, PlayerState>(
-                    builder: (context, playerState) =>
-                        _buildStateOverlay(playerState, roomState),
-                  ),
+                builder: (context, playerState) =>
+                    _buildStateOverlay(playerState, roomState),
+              ),
             ),
             // —— Top bar overlay — fades out in fullscreen after idle ————
             Positioned(
@@ -485,8 +485,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
   /// State overlay for loading / error states — matches PlayerStateOverlay style.
   /// Error overlay includes a Retry button that keeps the room active.
   Widget _buildStateOverlay(PlayerState playerState, [RoomState? roomState]) {
-    final isWaitingForPeer =
-        roomState is RoomStateActive &&
+    final isWaitingForPeer = roomState is RoomStateActive &&
         !roomState.bothReady &&
         playerState is PlayerStateReady;
 
@@ -562,17 +561,17 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                       _lastContentKey = null;
                       context.read<PlayerBloc>().clearDedupState();
                       context.read<PlayerBloc>().add(
-                        PlayerEventInitialize(
-                          localUrl,
-                          source: 'retry',
-                          isRoomMode: true,
-                          role: roomState.role,
-                          roomCode: roomState.roomCode,
-                          contentKey: _contentKeyOf(
-                            roomState.contentDescriptor,
-                          ),
-                        ),
-                      );
+                            PlayerEventInitialize(
+                              localUrl,
+                              source: 'retry',
+                              isRoomMode: true,
+                              role: roomState.role,
+                              roomCode: roomState.roomCode,
+                              contentKey: _contentKeyOf(
+                                roomState.contentDescriptor,
+                              ),
+                            ),
+                          );
                     }
                   },
                   icon: const Icon(Icons.refresh_rounded, size: 18),
@@ -600,8 +599,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     PlayerUIContext uiContext,
   ) {
     final roomState = context.read<RoomBloc>().state;
-    final isWaitingForPeer =
-        uiContext.isRoomMode &&
+    final isWaitingForPeer = uiContext.isRoomMode &&
         roomState is RoomStateActive &&
         !roomState.bothReady;
 
@@ -707,10 +705,11 @@ class WatchScreenContentState extends State<WatchScreenContent> {
   }
 
   String _closeReasonMessage(String reason) => switch (reason) {
-    'host_disconnected' => 'Your host has disconnected. The session has ended.',
-    'host_left' => 'The host has left the room.',
-    'room_expired' => 'This room has expired due to inactivity.',
-    'user_left' => 'You have left the room.',
-    _ => 'The session has ended.',
-  };
+        'host_disconnected' =>
+          'Your host has disconnected. The session has ended.',
+        'host_left' => 'The host has left the room.',
+        'room_expired' => 'This room has expired due to inactivity.',
+        'user_left' => 'You have left the room.',
+        _ => 'The session has ended.',
+      };
 }

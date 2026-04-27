@@ -18,8 +18,7 @@ class MockRoomRepository extends Mock implements RoomRepository {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 
-/// : Integration test — guest_reconnect_test.
-/// Simulates: guest connected → SignalR drops → reconnects → rejoin → state_sync.
+/// Integration test — simulates: guest connected → SignalR drops → reconnects → rejoin → state_sync.
 void main() {
   late MockSignalRClient mockSignalRClient;
   late MockRoomRepository mockRoomRepository;
@@ -144,7 +143,7 @@ void main() {
       await Future.delayed(const Duration(milliseconds: 100));
 
       // Server responds with room:error via RoomRepository events
-      // : ReconnectBloc listens and auto-dispatches Failed)
+      // ReconnectBloc listens and dispatches Failed.
       repoEventsController.add(
         const RoomEventError(
           code: 'room_closed',

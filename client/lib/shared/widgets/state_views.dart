@@ -34,73 +34,73 @@ class _LoadingStateState extends State<LoadingState>
 
   @override
   Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(AppSpacing.xxxl),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 72,
-            height: 72,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                AnimatedBuilder(
-                  animation: _a,
-                  builder: (_, __) => Container(
-                    width: 68,
-                    height: 68,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.accentPrimary.withValues(
-                          alpha: (1 - _a.value) * 0.35,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xxxl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 72,
+                height: 72,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    AnimatedBuilder(
+                      animation: _a,
+                      builder: (_, __) => Container(
+                        width: 68,
+                        height: 68,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.accentPrimary.withValues(
+                              alpha: (1 - _a.value) * 0.35,
+                            ),
+                            width: 1.5,
+                          ),
                         ),
-                        width: 1.5,
                       ),
                     ),
-                  ),
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.all(13),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.accentPrimary,
+                          strokeCap: StrokeCap.round,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(13),
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.accentPrimary,
-                      strokeCap: StrokeCap.round,
+              ),
+              if (widget.message != null) ...[
+                const SizedBox(height: AppSpacing.lg),
+                AnimatedBuilder(
+                  animation: _a,
+                  builder: (_, __) => Opacity(
+                    opacity: 0.5 + _a.value * 0.5,
+                    child: Text(
+                      widget.message!,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textMuted,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
               ],
-            ),
+            ],
           ),
-          if (widget.message != null) ...[
-            const SizedBox(height: AppSpacing.lg),
-            AnimatedBuilder(
-              animation: _a,
-              builder: (_, __) => Opacity(
-                opacity: 0.5 + _a.value * 0.5,
-                child: Text(
-                  widget.message!,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textMuted,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 // —— Error State ————————————————————————————————————————————————————
@@ -185,49 +185,49 @@ class _RetryBtnState extends State<_RetryBtn> {
   bool _h = false;
   @override
   Widget build(BuildContext context) => MouseRegion(
-    onEnter: (_) => setState(() => _h = true),
-    onExit: (_) => setState(() => _h = false),
-    child: GestureDetector(
-      onTap: widget.onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-        decoration: BoxDecoration(
-          color: _h ? AppColors.accentPrimary : AppColors.surfaceElevated,
-          borderRadius: BorderRadius.circular(AppRadius.pill),
-          border: Border.all(
-            color: _h ? AppColors.accentPrimary : AppColors.border,
-          ),
-          boxShadow: _h
-              ? [
-                  BoxShadow(
-                    color: AppColors.accentPrimary.withValues(alpha: 0.3),
-                    blurRadius: 14,
-                    offset: const Offset(0, 5),
-                  ),
-                ]
-              : [],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.refresh_rounded,
-              size: 15,
-              color: _h ? Colors.white : AppColors.textSecondary,
-            ),
-            const SizedBox(width: 7),
-            Text(
-              widget.label,
-              style: AppTypography.buttonSmall.copyWith(
-                color: _h ? Colors.white : AppColors.textSecondary,
+        onEnter: (_) => setState(() => _h = true),
+        onExit: (_) => setState(() => _h = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+            decoration: BoxDecoration(
+              color: _h ? AppColors.accentPrimary : AppColors.surfaceElevated,
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+              border: Border.all(
+                color: _h ? AppColors.accentPrimary : AppColors.border,
               ),
+              boxShadow: _h
+                  ? [
+                      BoxShadow(
+                        color: AppColors.accentPrimary.withValues(alpha: 0.3),
+                        blurRadius: 14,
+                        offset: const Offset(0, 5),
+                      ),
+                    ]
+                  : [],
             ),
-          ],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.refresh_rounded,
+                  size: 15,
+                  color: _h ? Colors.white : AppColors.textSecondary,
+                ),
+                const SizedBox(width: 7),
+                Text(
+                  widget.label,
+                  style: AppTypography.buttonSmall.copyWith(
+                    color: _h ? Colors.white : AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
-    ),
-  );
+      );
 }
 
 // —— Empty State ————————————————————————————————————————————————————
@@ -314,46 +314,47 @@ class _ActionBtnState extends State<_ActionBtn> {
   bool _h = false;
   @override
   Widget build(BuildContext context) => MouseRegion(
-    onEnter: (_) => setState(() => _h = true),
-    onExit: (_) => setState(() => _h = false),
-    child: GestureDetector(
-      onTap: widget.onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 13),
-        decoration: BoxDecoration(
-          gradient: _h
-              ? const LinearGradient(
-                  colors: [
-                    AppColors.accentPrimaryHover,
-                    AppColors.accentPrimary,
-                  ],
-                )
-              : null,
-          color: _h ? null : AppColors.accentPrimary.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(AppRadius.pill),
-          border: Border.all(
-            color: _h
-                ? AppColors.accentPrimary
-                : AppColors.accentPrimary.withValues(alpha: 0.3),
+        onEnter: (_) => setState(() => _h = true),
+        onExit: (_) => setState(() => _h = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 13),
+            decoration: BoxDecoration(
+              gradient: _h
+                  ? const LinearGradient(
+                      colors: [
+                        AppColors.accentPrimaryHover,
+                        AppColors.accentPrimary,
+                      ],
+                    )
+                  : null,
+              color:
+                  _h ? null : AppColors.accentPrimary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+              border: Border.all(
+                color: _h
+                    ? AppColors.accentPrimary
+                    : AppColors.accentPrimary.withValues(alpha: 0.3),
+              ),
+              boxShadow: _h
+                  ? [
+                      BoxShadow(
+                        color: AppColors.accentPrimary.withValues(alpha: 0.3),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ]
+                  : [],
+            ),
+            child: Text(
+              widget.label,
+              style: AppTypography.buttonSmall.copyWith(
+                color: _h ? Colors.white : AppColors.accentPrimary,
+              ),
+            ),
           ),
-          boxShadow: _h
-              ? [
-                  BoxShadow(
-                    color: AppColors.accentPrimary.withValues(alpha: 0.3),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ]
-              : [],
         ),
-        child: Text(
-          widget.label,
-          style: AppTypography.buttonSmall.copyWith(
-            color: _h ? Colors.white : AppColors.accentPrimary,
-          ),
-        ),
-      ),
-    ),
-  );
+      );
 }

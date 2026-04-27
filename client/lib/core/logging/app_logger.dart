@@ -62,15 +62,15 @@ class AppLogger {
   final Logger _logger;
 
   AppLogger(this.tag)
-    : _logger = Logger(
-        printer: PrettyPrinter(
-          methodCount: 0,
-          errorMethodCount: 5,
-          lineLength: 100,
-          noBoxingByDefault: true,
-        ),
-        filter: ProductionFilter(),
-      );
+      : _logger = Logger(
+          printer: PrettyPrinter(
+            methodCount: 0,
+            errorMethodCount: 5,
+            lineLength: 100,
+            noBoxingByDefault: true,
+          ),
+          filter: ProductionFilter(),
+        );
 
   // -- Initialization
   // -----------------------------------------------
@@ -110,8 +110,8 @@ class AppLogger {
       const buildMode = kDebugMode
           ? 'debug'
           : kProfileMode
-          ? 'profile'
-          : 'release';
+              ? 'profile'
+              : 'release';
 
       _fileSink!.writeln(
         '================================================================',
@@ -248,9 +248,8 @@ class AppLogger {
     try {
       final ts = _formatTimestamp(DateTime.now());
       final eventStr = event != null ? ' event=$event' : '';
-      final dataStr = data != null && data.isNotEmpty
-          ? ' ${_formatData(data)}'
-          : '';
+      final dataStr =
+          data != null && data.isNotEmpty ? ' ${_formatData(data)}' : '';
 
       _fileSink!.writeln('[$ts] [$level] [$tag]$eventStr $message$dataStr');
 

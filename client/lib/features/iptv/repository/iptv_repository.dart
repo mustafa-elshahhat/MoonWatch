@@ -21,8 +21,8 @@ class IptvRepository {
   final Map<String, SeriesInfo> _seriesInfoCache = {};
 
   IptvRepository({required IptvApiService apiService, AppLogger? logger})
-    : _apiService = apiService,
-      _logger = logger ?? AppLogger('IptvRepository');
+      : _apiService = apiService,
+        _logger = logger ?? AppLogger('IptvRepository');
 
   IptvConfig get config => _apiService.config;
 
@@ -183,18 +183,17 @@ class IptvRepository {
     final String url = switch (descriptor.contentType) {
       IptvDescriptorType.live => config.livePlaybackUrl(descriptor.streamId),
       IptvDescriptorType.movie => config.vodPlaybackUrl(
-        descriptor.streamId,
-        descriptor.containerExtension ?? 'mp4',
-      ),
+          descriptor.streamId,
+          descriptor.containerExtension ?? 'mp4',
+        ),
       IptvDescriptorType.episode => config.episodePlaybackUrl(
-        descriptor.streamId,
-        descriptor.containerExtension ?? 'mp4',
-      ),
+          descriptor.streamId,
+          descriptor.containerExtension ?? 'mp4',
+        ),
     };
 
-    final strategy = url.endsWith('.m3u8')
-        ? 'HLS Playlist'
-        : 'Direct File / Stream';
+    final strategy =
+        url.endsWith('.m3u8') ? 'HLS Playlist' : 'Direct File / Stream';
     _logger.i(
       'VOD Strategy: content_type=${descriptor.contentType.name}, '
       'extension=${descriptor.containerExtension ?? "mp4 (default)"}, '

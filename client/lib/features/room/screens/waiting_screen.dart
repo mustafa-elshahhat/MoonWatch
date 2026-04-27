@@ -71,9 +71,8 @@ class _WaitingScreenState extends State<WaitingScreen>
     return BlocListener<RoomBloc, RoomState>(
       listener: (context, state) {
         if (state is RoomStateJoined || state is RoomStateActive) {
-          final pending =
-              ModalRoute.of(context)?.settings.arguments
-                  as IptvContentDescriptor?;
+          final pending = ModalRoute.of(context)?.settings.arguments
+              as IptvContentDescriptor?;
           if (pending != null) {
             context.read<RoomBloc>().add(RoomEventSetContent(pending));
           }
@@ -106,8 +105,8 @@ class _WaitingScreenState extends State<WaitingScreen>
                         const Spacer(),
                         TextButton.icon(
                           onPressed: () => context.read<RoomBloc>().add(
-                            const RoomEventLeaveRoom(),
-                          ),
+                                const RoomEventLeaveRoom(),
+                              ),
                           icon: const Icon(
                             Icons.arrow_back_ios_new_rounded,
                             size: 12,
@@ -438,17 +437,15 @@ class _WaitingScreenState extends State<WaitingScreen>
                   Icon(
                     _copied ? Icons.check_rounded : Icons.copy_rounded,
                     size: 15,
-                    color: _copied
-                        ? AppColors.success
-                        : AppColors.accentPrimary,
+                    color:
+                        _copied ? AppColors.success : AppColors.accentPrimary,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     _copied ? 'Copied!' : 'Copy Code',
                     style: TextStyle(
-                      color: _copied
-                          ? AppColors.success
-                          : AppColors.accentPrimary,
+                      color:
+                          _copied ? AppColors.success : AppColors.accentPrimary,
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
@@ -471,26 +468,26 @@ class _CodeChar extends StatelessWidget {
   const _CodeChar({required this.char, required this.index});
   @override
   Widget build(BuildContext context) => Container(
-    width: 38,
-    height: 48,
-    decoration: BoxDecoration(
-      color: AppColors.backgroundSecondary,
-      borderRadius: BorderRadius.circular(AppRadius.sm),
-      border: Border.all(color: AppColors.border),
-    ),
-    alignment: Alignment.center,
-    child: Text(
-      char,
-      style: AppTypography.monoLarge.copyWith(
-        color: AppColors.textPrimary,
-        fontSize: 22,
-        shadows: [
-          Shadow(
-            color: AppColors.accentPrimary.withValues(alpha: 0.3),
-            blurRadius: 12,
+        width: 38,
+        height: 48,
+        decoration: BoxDecoration(
+          color: AppColors.backgroundSecondary,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          border: Border.all(color: AppColors.border),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          char,
+          style: AppTypography.monoLarge.copyWith(
+            color: AppColors.textPrimary,
+            fontSize: 22,
+            shadows: [
+              Shadow(
+                color: AppColors.accentPrimary.withValues(alpha: 0.3),
+                blurRadius: 12,
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }

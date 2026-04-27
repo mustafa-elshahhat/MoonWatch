@@ -32,15 +32,15 @@ class PrimaryButton extends StatelessWidget {
             ),
           )
         : icon != null
-        ? Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: AppIconSize.sm),
-              const SizedBox(width: AppSpacing.sm),
-              Text(label),
-            ],
-          )
-        : Text(label);
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, size: AppIconSize.sm),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(label),
+                ],
+              )
+            : Text(label);
 
     return SizedBox(
       width: width,
@@ -78,15 +78,15 @@ class SecondaryButton extends StatelessWidget {
             ),
           )
         : icon != null
-        ? Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: AppIconSize.sm),
-              const SizedBox(width: AppSpacing.sm),
-              Text(label),
-            ],
-          )
-        : Text(label);
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, size: AppIconSize.sm),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(label),
+                ],
+              )
+            : Text(label);
 
     return SizedBox(
       width: width,

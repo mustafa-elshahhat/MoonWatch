@@ -3,7 +3,7 @@ import 'package:watch_party/features/sync/sync_engine.dart';
 import 'package:watch_party/core/player/mock_player_impl.dart';
 import '../mocks/mock_room_repository.dart';
 
-/// : Integration test — host plays, guest player receives seek-and-play
+/// Integration test — host plays, guest player receives seek-and-play
 /// at the correct latency-adjusted position.
 void main() {
   late MockPlayerImpl mockPlayer;
@@ -22,7 +22,8 @@ void main() {
   });
 
   group('host_guest_play integration', () {
-    test('guest receives play and seeks to latency-adjusted position', () async {
+    test('guest receives play and seeks to latency-adjusted position',
+        () async {
       // Setup: guest player at position 0, default RTT = 100ms
       mockPlayer.setPosition(Duration.zero);
 

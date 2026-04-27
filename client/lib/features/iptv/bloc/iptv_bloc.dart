@@ -13,9 +13,9 @@ class IptvBloc extends Bloc<IptvEvent, IptvState> {
   final AppLogger _logger;
 
   IptvBloc({required IptvRepository repository, AppLogger? logger})
-    : _repository = repository,
-      _logger = logger ?? AppLogger('IptvBloc'),
-      super(const IptvInitial()) {
+      : _repository = repository,
+        _logger = logger ?? AppLogger('IptvBloc'),
+        super(const IptvInitial()) {
     on<IptvLoadCategories>(_onLoadCategories);
     on<IptvLoadCategoryContent>(_onLoadCategoryContent);
     on<IptvLoadSeriesInfo>(_onLoadSeriesInfo);

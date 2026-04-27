@@ -220,48 +220,48 @@ class _LiveChipState extends State<_LiveChip>
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-    decoration: BoxDecoration(
-      color: AppColors.error.withValues(alpha: 0.2),
-      borderRadius: BorderRadius.circular(AppRadius.pill),
-      border: Border.all(color: AppColors.error.withValues(alpha: 0.5)),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AnimatedBuilder(
-          animation: _a,
-          builder: (_, __) => Container(
-            width: 5,
-            height: 5,
-            decoration: BoxDecoration(
-              color: AppColors.error,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.error.withValues(
-                    alpha: 0.4 + _a.value * 0.4,
-                  ),
-                  blurRadius: 6,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: AppColors.error.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+          border: Border.all(color: AppColors.error.withValues(alpha: 0.5)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedBuilder(
+              animation: _a,
+              builder: (_, __) => Container(
+                width: 5,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: AppColors.error,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.error.withValues(
+                        alpha: 0.4 + _a.value * 0.4,
+                      ),
+                      blurRadius: 6,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+            const SizedBox(width: 5),
+            const Text(
+              'LIVE',
+              style: TextStyle(
+                color: AppColors.error,
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.2,
+                shadows: [Shadow(color: Colors.black, blurRadius: 6)],
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 5),
-        const Text(
-          'LIVE',
-          style: TextStyle(
-            color: AppColors.error,
-            fontSize: 9,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.2,
-            shadows: [Shadow(color: Colors.black, blurRadius: 6)],
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 }
 
 // —— Content type chip —————————————————————————————————————————————
@@ -272,23 +272,23 @@ class _ContentTypeChip extends StatelessWidget {
   const _ContentTypeChip({required this.label, required this.color});
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.15),
-      borderRadius: BorderRadius.circular(AppRadius.pill),
-      border: Border.all(color: color.withValues(alpha: 0.35)),
-    ),
-    child: Text(
-      label,
-      style: TextStyle(
-        color: color,
-        fontSize: 9,
-        fontWeight: FontWeight.w800,
-        letterSpacing: 1.0,
-        shadows: const [Shadow(color: Colors.black, blurRadius: 6)],
-      ),
-    ),
-  );
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+          border: Border.all(color: color.withValues(alpha: 0.35)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: color,
+            fontSize: 9,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.0,
+            shadows: const [Shadow(color: Colors.black, blurRadius: 6)],
+          ),
+        ),
+      );
 }
 
 // —— Top bar icon button ———————————————————————————————————————————
@@ -310,42 +310,42 @@ class _TopBarBtnState extends State<_TopBarBtn> {
   bool _h = false;
   @override
   Widget build(BuildContext context) => Tooltip(
-    message: widget.tooltip,
-    child: MouseRegion(
-      onEnter: (_) => setState(() => _h = true),
-      onExit: (_) => setState(() => _h = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: _h
-                ? Colors.white.withValues(alpha: 0.18)
-                : Colors.white.withValues(alpha: 0.08),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.white.withValues(alpha: _h ? 0.25 : 0.1),
+        message: widget.tooltip,
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _h = true),
+          onExit: (_) => setState(() => _h = false),
+          child: GestureDetector(
+            onTap: widget.onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: _h
+                    ? Colors.white.withValues(alpha: 0.18)
+                    : Colors.white.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: _h ? 0.25 : 0.1),
+                ),
+                boxShadow: _h
+                    ? [
+                        const BoxShadow(
+                          color: Colors.black38,
+                          blurRadius: 8,
+                          offset: Offset(0, 2),
+                        ),
+                      ]
+                    : [],
+              ),
+              child: Icon(
+                widget.icon,
+                color: Colors.white,
+                size: 17,
+                shadows: const [Shadow(color: Colors.black, blurRadius: 8)],
+              ),
             ),
-            boxShadow: _h
-                ? [
-                    const BoxShadow(
-                      color: Colors.black38,
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ]
-                : [],
-          ),
-          child: Icon(
-            widget.icon,
-            color: Colors.white,
-            size: 17,
-            shadows: const [Shadow(color: Colors.black, blurRadius: 8)],
           ),
         ),
-      ),
-    ),
-  );
+      );
 }

@@ -24,9 +24,8 @@ class MockRoomRepository extends Mock implements RoomRepository {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 
-/// : Integration test — host_disconnect_test.
-/// Host disconnects → guest receives room:closed → RoomBloc → Closed.
-/// ReconnectBloc should NOT attempt reconnection (host disconnect = no grace).
+/// Integration test: host disconnects → guest receives room:closed → RoomBloc → Closed.
+/// ReconnectBloc should NOT attempt reconnection (host disconnect carries no grace period).
 void main() {
   late MockSignalRClient mockSignalRClient;
   late MockRoomRepository mockRoomRepository;
