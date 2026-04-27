@@ -7,7 +7,7 @@ import '../../core/protocol/room_events.dart';
 import '../room/bloc/room_event.dart';
 import '../room/repository/room_repository.dart';
 
-// ── ReconnectEvent ───────────────────────────────────────────────────────────
+// —— ReconnectEvent ———————————————————————————————————————————————————————————
 
 sealed class ReconnectEvent extends Equatable {
   const ReconnectEvent();
@@ -55,7 +55,7 @@ class ReconnectEventReset extends ReconnectEvent {
   const ReconnectEventReset();
 }
 
-// ── ReconnectState ───────────────────────────────────────────────────────────
+// —— ReconnectState ———————————————————————————————————————————————————————————
 
 sealed class ReconnectState extends Equatable {
   const ReconnectState();
@@ -97,9 +97,9 @@ class ReconnectStateFailed extends ReconnectState {
   List<Object?> get props => [reason];
 }
 
-// ── ReconnectBloc ────────────────────────────────────────────────────────────
+// —— ReconnectBloc ————————————————————————————————————————————————————————————
 
-/// ReconnectBloc per RECONNECTION_STRATEGY.md.
+/// Manages automatic reconnection for guests after connection loss.
 ///
 /// State machine:
 ///   Connected(Idle) → Reconnecting(Attempting) → Re-joining → Connected(Success) | Failed

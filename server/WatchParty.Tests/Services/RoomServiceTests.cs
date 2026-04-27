@@ -10,7 +10,7 @@ namespace WatchParty.Tests.Services;
 
 /// <summary>
 /// Unit tests for RoomService per SV-17 and SV-18.
-/// Tests all state transitions from ROOM_LIFECYCLE.md and role authorization.
+/// Tests all state transitions and role authorization.
 /// </summary>
 public class RoomServiceTests
 {

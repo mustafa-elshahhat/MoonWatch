@@ -1,7 +1,7 @@
 namespace WatchParty.Server.Models;
 
 /// <summary>
-/// Room lifecycle states per ROOM_LIFECYCLE.md.
+/// Room lifecycle state machine.
 /// </summary>
 public enum RoomState
 {

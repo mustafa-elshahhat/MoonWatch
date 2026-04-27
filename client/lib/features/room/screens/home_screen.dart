@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ── Atmospheric background ─────────────────────────────────────────
+  // —— Atmospheric background —————————————————————————————————————————
 
   Widget _buildAtmosphere(double w, double h) {
     return Stack(
@@ -184,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ── Desktop layout ─────────────────────────────────────────────────
+  // —— Desktop layout —————————————————————————————————————————————————
 
   Widget _buildDesktopLayout(BuildContext context, double w, bool isWide) {
     final hPad = isWide ? w * 0.12 : w * 0.08;
@@ -213,7 +213,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionEyebrow('A—01 · Watch Solo', color: AppColors.textMuted),
+        const SectionEyebrow(
+          'A—01 Â· Watch Solo',
+          color: AppColors.textMuted,
+        ),
         const SizedBox(height: AppSpacing.lg),
         _WatchSoloCard(
           onTap: () {
@@ -223,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         const SizedBox(height: AppSpacing.xxxl),
         const SectionEyebrow(
-          'A—02 · Watch Together',
+          'A—02 Â· Watch Together',
           color: AppColors.textMuted,
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -252,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ── Mobile layout ──────────────────────────────────────────────────
+  // —— Mobile layout ——————————————————————————————————————————————————
 
   Widget _buildMobileLayout(BuildContext context) {
     return SingleChildScrollView(
@@ -268,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               _buildHero(isDesktop: false),
               const SizedBox(height: 56),
               const SectionEyebrow(
-                'A—01 · Watch Solo',
+                'A—01 Â· Watch Solo',
                 color: AppColors.textMuted,
               ),
               const SizedBox(height: AppSpacing.md),
@@ -281,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               const SizedBox(height: AppSpacing.xxxl),
               const SectionEyebrow(
-                'A—02 · Watch Together',
+                'A—02 Â· Watch Together',
                 color: AppColors.textMuted,
               ),
               const SizedBox(height: AppSpacing.md),
@@ -306,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ── Hero ───────────────────────────────────────────────────────────
+  // —— Hero ———————————————————————————————————————————————————————————
 
   Widget _buildHero({required bool isDesktop}) {
     return Column(
@@ -381,7 +384,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 }
 
-// ── Watch Solo Card ────────────────────────────────────────────────
+// —— Watch Solo Card ————————————————————————————————————————————————
 
 class _WatchSoloCard extends StatefulWidget {
   final VoidCallback onTap;
@@ -481,7 +484,7 @@ class _WatchSoloCardState extends State<_WatchSoloCard> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Live TV · Movies · Series — all in one place',
+                        'Live TV Â· Movies Â· Series — all in one place',
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textMuted,
                         ),
@@ -515,7 +518,7 @@ class _WatchSoloCardState extends State<_WatchSoloCard> {
       );
 }
 
-// ── Room Cards ─────────────────────────────────────────────────────
+// —— Room Cards —————————————————————————————————————————————————————
 
 enum _RoomCardType { create, join }
 
@@ -673,7 +676,7 @@ class _RoomCardState extends State<_RoomCard> {
       );
 }
 
-// ── Shared micro-components ────────────────────────────────────────
+// —— Shared micro-components ————————————————————————————————————————
 
 // _SectionLabel removed in favor of SectionEyebrow
 
@@ -736,7 +739,7 @@ class _MiniTag extends StatelessWidget {
       );
 }
 
-// ── Particle painter for cinematic atmosphere ──────────────────────
+// —— Particle painter for cinematic atmosphere ——————————————————————
 
 class _ParticlePainter extends CustomPainter {
   final double progress;

@@ -221,9 +221,9 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
             return Stack(
               fit: StackFit.expand,
               children: [
-                // ── Video surface — always fills full area ──────────────────
+                // —— Video surface — always fills full area ——————————————————
                 _buildVideoView(_fitMode.boxFit),
-                // ── State overlays (loading / buffering / error / ended) ──
+                // —— State overlays (loading / buffering / error / ended) ——
                 if (overlayType != null)
                   PlayerStateOverlay(
                     type: overlayType,
@@ -237,7 +237,7 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
                         : null,
                     onBack: () => Navigator.pop(context),
                   ),
-                // ── Top bar overlay — fades out in fullscreen after idle ────
+                // —— Top bar overlay — fades out in fullscreen after idle ————
                 Positioned(
                   top: 0,
                   left: 0,
@@ -257,7 +257,7 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
                     ),
                   ),
                 ),
-                // ── Bottom controls overlay — SmartPlaybackControls manages its own visibility ─
+                // —— Bottom controls overlay — SmartPlaybackControls manages its own visibility —
                 Positioned(
                   bottom: 0,
                   left: 0,

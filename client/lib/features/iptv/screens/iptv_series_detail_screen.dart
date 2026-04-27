@@ -382,7 +382,7 @@ class _MetaChip extends StatelessWidget {
       );
 }
 
-// ── Premium Episode Card ──────────────────────────────────────────
+// —— Premium Episode Card ——————————————————————————————————————————
 
 class _EpisodeCard extends StatefulWidget {
   final SeriesEpisode episode;

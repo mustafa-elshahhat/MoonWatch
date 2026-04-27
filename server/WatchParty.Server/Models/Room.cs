@@ -4,7 +4,7 @@ namespace WatchParty.Server.Models;
 
 /// <summary>
 /// Room aggregate. Contains all state for a single watch-party room.
-/// Per ARCHITECTURE.md §3.3 and ROOM_LIFECYCLE.md.
+/// 
 /// </summary>
 public class Room
 {

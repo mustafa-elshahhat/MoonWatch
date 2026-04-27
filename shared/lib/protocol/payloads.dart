@@ -323,16 +323,19 @@ class PlayerReadyPayload {
 }
 
 class BufferingResumePayload {
+  final int episodeId;
   final int serverTimestampMs;
   final int resumePositionMs;
 
   const BufferingResumePayload({
+    required this.episodeId,
     required this.serverTimestampMs,
     required this.resumePositionMs,
   });
 
   factory BufferingResumePayload.fromJson(Map<String, dynamic> json) =>
       BufferingResumePayload(
+        episodeId: (json['episodeId'] as int?) ?? 0,
         serverTimestampMs: json['serverTimestampMs'] as int,
         resumePositionMs: json['resumePositionMs'] as int,
       );

@@ -362,9 +362,7 @@ class _PlaybackControlsState extends State<PlaybackControls> {
     );
     context
         .findAncestorStateOfType<WatchScreenContentState>()
-        ?.invokeSeekAction(
-          target,
-        );
+        ?.invokeSeekAction(target);
   }
 
   void _onKey(KeyEvent event, BuildContext context, PlayerState playerState) {
@@ -412,7 +410,7 @@ class _PlaybackControlsState extends State<PlaybackControls> {
   }
 }
 
-// ── Play/Pause focal button ───────────────────────────────────────────────────
+// —— Play/Pause focal button ———————————————————————————————————————————————————
 
 class _PlayPauseBtn extends StatefulWidget {
   final bool isPlaying;
@@ -468,7 +466,7 @@ class _PlayPauseBtnState extends State<_PlayPauseBtn> {
       );
 }
 
-// ── Chrome button ─────────────────────────────────────────────────────────────
+// —— Chrome button —————————————————————————————————————————————————————————————
 
 class _ChrBtn extends StatefulWidget {
   final IconData icon;

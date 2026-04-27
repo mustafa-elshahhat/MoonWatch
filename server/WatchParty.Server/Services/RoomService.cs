@@ -5,8 +5,8 @@ using WatchParty.Shared.Protocol.Payloads;
 namespace WatchParty.Server.Services;
 
 /// <summary>
-/// Room business logic. All state transitions per ROOM_LIFECYCLE.md.
-/// Per-room SemaphoreSlim serialization per ADR-007.
+/// Room business logic. Room lifecycle business logic.
+/// Uses per-room SemaphoreSlim to serialize concurrent state mutations.
 /// </summary>
 public class RoomService : IRoomService
 {
@@ -541,7 +541,7 @@ public class RoomService : IRoomService
         {
             var (participant, role) = FindParticipant(room, connectionId);
 
-            // Idempotent: if already Stalled, ignore (BUFFERING_COORDINATION.md)
+            // Idempotent: if already Stalled, ignore
             if (participant.BufferingState == BufferingState.Stalled)
             {
                 _logger.LogDebug("Duplicate buffering stall ignored {RoomId} {Role}", room.RoomCode, role);
@@ -575,7 +575,7 @@ public class RoomService : IRoomService
         {
             var (participant, role) = FindParticipant(room, connectionId);
 
-            // SV-41: Guard against out-of-sequence ready
+            // Guard against out-of-sequence ready
             if (participant.BufferingState == BufferingState.Ready)
             {
                 _logger.LogDebug("Out-of-sequence buffering ready ignored {RoomId} {Role}", room.RoomCode, role);

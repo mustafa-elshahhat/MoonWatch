@@ -176,7 +176,7 @@ public class RoomExpiryServiceTests
 
         var expired = await _service.SweepExpiredRoomsAsync();
 
-        // Closed rooms are defensively removed from registry (INV-05) but not counted as expired
+        // Closed rooms are defensively removed from registry  but not counted as expired
         Assert.Equal(0, expired);
         Assert.False(_registry.TryGet("JJJJJJ", out _));
     }

@@ -44,7 +44,7 @@ class PlayerTopBar extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Back button ─────────────────────────────────────────────
+          // —— Back button —————————————————————————————————————————————
           Padding(
             padding: const EdgeInsets.only(top: 2),
             child: _TopBarBtn(
@@ -55,13 +55,13 @@ class PlayerTopBar extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
 
-          // ── Metadata + Title area ──────────────────────────────────────────
+          // —— Metadata + Title area ——————————————————————————————————————————
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // ── Badges (Wrappable) ──────────────────────────────────────
+                // —— Badges (Wrappable) ——————————————————————————————————————
                 if (uiContext.showRoomCode ||
                     uiContext.showRoleBadge ||
                     uiContext.isLive ||
@@ -77,13 +77,17 @@ class PlayerTopBar extends StatelessWidget {
                         if (uiContext.showRoomCode && roomCode != null)
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 11, vertical: 5),
+                              horizontal: 11,
+                              vertical: 5,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.black.withValues(alpha: 0.55),
-                              borderRadius:
-                                  BorderRadius.circular(AppRadius.pill),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.pill,
+                              ),
                               border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.18)),
+                                color: Colors.white.withValues(alpha: 0.18),
+                              ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -96,8 +100,9 @@ class PlayerTopBar extends StatelessWidget {
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppColors.success
-                                            .withValues(alpha: 0.6),
+                                        color: AppColors.success.withValues(
+                                          alpha: 0.6,
+                                        ),
                                         blurRadius: 5,
                                       ),
                                     ],
@@ -135,7 +140,7 @@ class PlayerTopBar extends StatelessWidget {
                     ),
                   ),
 
-                // ── Title ───────────────────────────────────────────────────
+                // —— Title ———————————————————————————————————————————————————
                 Text(
                   uiContext.title,
                   style: const TextStyle(
@@ -166,7 +171,7 @@ class PlayerTopBar extends StatelessWidget {
             ),
           ),
 
-          // ── Right side ──────────────────────────────────────────────
+          // —— Right side ——————————————————————————————————————————————
           if (uiContext.showPeerStatus && peerStatus != null) ...[
             const SizedBox(width: AppSpacing.sm),
             PeerStatusIndicator(status: peerStatus!),
@@ -185,7 +190,7 @@ class PlayerTopBar extends StatelessWidget {
   }
 }
 
-// ── Live chip ─────────────────────────────────────────────────────
+// —— Live chip —————————————————————————————————————————————————————
 
 class _LiveChip extends StatefulWidget {
   const _LiveChip();
@@ -259,7 +264,7 @@ class _LiveChipState extends State<_LiveChip>
       );
 }
 
-// ── Content type chip ─────────────────────────────────────────────
+// —— Content type chip —————————————————————————————————————————————
 
 class _ContentTypeChip extends StatelessWidget {
   final String label;
@@ -286,7 +291,7 @@ class _ContentTypeChip extends StatelessWidget {
       );
 }
 
-// ── Top bar icon button ───────────────────────────────────────────
+// —— Top bar icon button ———————————————————————————————————————————
 
 class _TopBarBtn extends StatefulWidget {
   final IconData icon;

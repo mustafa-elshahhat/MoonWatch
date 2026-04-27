@@ -1,5 +1,6 @@
 import 'dart:async';
 import '../../../core/logging/app_logger.dart';
+import '../../../core/network/http_client.dart';
 import '../../../core/network/signalr_client.dart';
 import '../../../core/protocol/room_events.dart';
 import '../../../core/protocol/payloads.dart';
@@ -16,9 +17,11 @@ typedef PlaybackSeekCallback = void Function(PlaybackSeekPayload payload);
 typedef PlaybackStateSyncCallback = void Function(
     PlaybackStateSyncPayload payload);
 
-/// Translates SignalRClient events into RoomBloc events.
+/// Translates SignalRClient events into RoomBloc events and exposes
+/// REST room-listing for the join screen.
 class RoomRepository {
   final SignalRClient _signalRClient;
+  final HttpClient _httpClient;
   final AppLogger _logger = AppLogger('RoomRepository');
   final _eventController = StreamController<RoomEvent>.broadcast();
 
@@ -36,8 +39,11 @@ class RoomRepository {
 
   Stream<RoomEvent> get events => _eventController.stream;
 
-  RoomRepository({required SignalRClient signalRClient})
-      : _signalRClient = signalRClient;
+  RoomRepository({
+    required SignalRClient signalRClient,
+    required HttpClient httpClient,
+  })  : _signalRClient = signalRClient,
+        _httpClient = httpClient;
 
   void registerHandlers() {
     unregisterHandlers();
@@ -210,6 +216,9 @@ class RoomRepository {
     _logger.d('RoomRepository.invokeSeek: targetPositionMs=$targetPositionMs');
     await _signalRClient.invoke(RoomEvents.hubSeek, args: [targetPositionMs]);
   }
+
+  /// Fetch the list of currently active rooms from the REST API.
+  Future<List<Map<String, dynamic>>> listRooms() => _httpClient.listRooms();
 
   Future<void> dispose() async {
     unregisterHandlers();

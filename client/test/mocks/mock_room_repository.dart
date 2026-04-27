@@ -1,8 +1,8 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 import 'package:watch_party/features/room/bloc/room_event.dart';
 
-/// Test mock for RoomRepository per TESTING_STRATEGY.md.
+/// Manual test double for RoomRepository.
 /// Records outgoing calls for assertions.
 class MockRoomRepository implements RoomRepository {
   final _eventController = StreamController<RoomEvent>.broadcast();
@@ -86,6 +86,9 @@ class MockRoomRepository implements RoomRepository {
   void injectEvent(RoomEvent event) {
     _eventController.add(event);
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> listRooms() async => [];
 
   @override
   Future<void> dispose() async {

@@ -8,7 +8,7 @@ namespace WatchParty.Server.Hubs;
 
 /// <summary>
 /// SignalR hub for room operations. Thin layer — delegates to RoomService.
-/// Per ARCHITECTURE.md §3.1.
+/// 
 /// </summary>
 public class RoomHub : Hub
 {
@@ -79,7 +79,7 @@ public class RoomHub : Hub
                 await Clients.GroupExcept(result.RoomCode, Context.ConnectionId)
                     .SendAsync(RoomEvents.RoomGuestJoined, new RoomGuestJoinedPayload(serverTimestampMs));
 
-                // SV-48 extension: send immediate playback:state_sync to a new guest
+                // send immediate playback:state_sync to a new guest
                 // if the host has already started playing. Without this, the guest would
                 // wait up to 5 seconds for the next periodic state_sync, starting at position 0.
                 if (result.HostPositionMs.HasValue && result.HostIsPlaying.HasValue)
@@ -111,7 +111,7 @@ public class RoomHub : Hub
                 await Clients.GroupExcept(result.RoomCode, Context.ConnectionId)
                     .SendAsync(RoomEvents.RoomGuestReconnected, new RoomGuestReconnectedPayload(serverTimestampMs));
 
-                // SV-48: Send playback:state_sync to the rejoining guest
+                // Send playback:state_sync to the rejoining guest
                 if (result.HostPositionMs.HasValue && result.HostIsPlaying.HasValue)
                 {
                     // Compute estimated host position for reconnecting guest
@@ -224,7 +224,7 @@ public class RoomHub : Hub
                     result.HostRttMs,
                     result.SeqNo));
 
-            // Start periodic state_sync timer (SYNC_ENGINE.md)
+            // Start periodic state_sync timer
             _stateSyncTimer.StartForRoom(result.RoomCode);
         }
         catch (RoleUnauthorizedException ex)
@@ -262,7 +262,7 @@ public class RoomHub : Hub
                     result.ServerTimestampMs,
                     result.SeqNo));
 
-            // Stop periodic state_sync timer while paused (SYNC_ENGINE.md)
+            // Stop periodic state_sync timer while paused
             _stateSyncTimer.StopForRoom(result.RoomCode);
         }
         catch (RoleUnauthorizedException ex)
@@ -380,7 +380,7 @@ public class RoomHub : Hub
         }
     }
 
-    /// <summary>Notify peer that local player is buffering. Per BUFFERING_COORDINATION.md.</summary>
+    /// <summary>Notify peer that local player is buffering</summary>
     public async Task NotifyBufferingStall(long positionMs, int episodeId)
     {
         try
@@ -447,7 +447,7 @@ public class RoomHub : Hub
         }
     }
 
-    /// <summary>Notify that local player is ready after buffering. Per BUFFERING_COORDINATION.md.</summary>
+    /// <summary>Notify that local player is ready after buffering</summary>
     public async Task NotifyBufferingReady(int episodeId)
     {
         try

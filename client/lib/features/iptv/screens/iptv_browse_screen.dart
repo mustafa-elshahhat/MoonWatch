@@ -50,9 +50,10 @@ class _IptvBrowseScreenState extends State<IptvBrowseScreen>
     final initialIndex = _tabs.indexOf(initialTab);
 
     _tabController = TabController(
-        length: _tabs.length,
-        vsync: this,
-        initialIndex: initialIndex != -1 ? initialIndex : 0);
+      length: _tabs.length,
+      vsync: this,
+      initialIndex: initialIndex != -1 ? initialIndex : 0,
+    );
     _tabController.addListener(_onTabChanged);
     _iptvBloc.add(IptvLoadCategories(_tabs[_tabController.index]));
 

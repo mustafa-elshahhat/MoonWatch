@@ -1,4 +1,4 @@
-import 'package:bloc_test/bloc_test.dart';
+﻿import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:watch_party/features/sync/sync_engine.dart';
 import 'package:watch_party/core/player/mock_player_impl.dart';
@@ -258,7 +258,7 @@ void main() {
     );
 
     blocTest<SyncBloc, SyncState>(
-      'player ready while in Buffering stays in Buffering (per SYNC_ENGINE.md)',
+      'player ready while in Buffering stays in Buffering',
       build: () {
         final bloc = SyncBloc(
           playerController: mockPlayer,
@@ -314,7 +314,7 @@ void main() {
     );
   });
 
-  // ── Problem 3: state_sync gating while player not ready ──────────────────
+  // —— Problem 3: state_sync gating while player not ready ——————————————————
 
   group('SyncBloc — state_sync deferred while player not ready', () {
     blocTest<SyncBloc, SyncState>(
@@ -430,7 +430,7 @@ void main() {
       },
     );
   });
-  group('SyncBloc â€” player ready notifications', () {
+  group('SyncBloc Ã¢â‚¬â€ player ready notifications', () {
     blocTest<SyncBloc, SyncState>(
       'notifies ready once per content key and sends again for new content',
       build: () => syncBloc,

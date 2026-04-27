@@ -38,7 +38,9 @@ class IptvBloc extends Bloc<IptvEvent, IptvState> {
     _logger.i('[PROFILER] iptv_categories_load_start');
     final startTime = DateTime.now();
 
-    emit(IptvLoading(message: 'Loading ${event.contentType.name} categories…'));
+    emit(
+      IptvLoading(message: 'Loading ${event.contentType.name} categories...'),
+    );
     try {
       final categories = await _repository.getCategories(event.contentType);
       emit(
@@ -60,7 +62,7 @@ class IptvBloc extends Bloc<IptvEvent, IptvState> {
     IptvLoadCategoryContent event,
     Emitter<IptvState> emit,
   ) async {
-    emit(IptvLoading(message: 'Loading ${event.categoryName}…'));
+    emit(IptvLoading(message: 'Loading ${event.categoryName}...'));
     try {
       switch (event.contentType) {
         case IptvContentType.live:
@@ -98,7 +100,7 @@ class IptvBloc extends Bloc<IptvEvent, IptvState> {
     IptvLoadSeriesInfo event,
     Emitter<IptvState> emit,
   ) async {
-    emit(IptvLoading(message: 'Loading ${event.seriesName}…'));
+    emit(IptvLoading(message: 'Loading ${event.seriesName}...'));
     try {
       final info = await _repository.getSeriesInfo(event.seriesId.toString());
       emit(IptvSeriesInfoLoaded(seriesName: event.seriesName, info: info));

@@ -1,4 +1,4 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:watch_party/core/player/player_controller.dart';
 import 'package:watch_party/features/player/bloc/player_bloc.dart';

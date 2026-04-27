@@ -6,7 +6,7 @@ import '../../../core/protocol/payloads.dart';
 /// (live/movie/episode). The UI reads capabilities from this model
 /// instead of hardcoding per-screen logic.
 class PlayerUIContext {
-  // ── Identity ────────────────────────────────────────────────────
+  // —— Identity ————————————————————————————————————————————————————
   final bool isRoomMode;
   final bool isHost;
   final bool isGuest;
@@ -14,14 +14,14 @@ class PlayerUIContext {
   final bool isMovie;
   final bool isEpisode;
 
-  // ── Capabilities ────────────────────────────────────────────────
+  // —— Capabilities ————————————————————————————————————————————————
   /// Can this user control play/pause authoritatively?
   final bool canControlPlayback;
 
   /// Can this user seek (scrub) through the content?
   final bool canSeek;
 
-  /// Can this user skip ±10s?
+  /// Can this user skip Â±10s?
   final bool canSkip;
 
   /// Can this user change content (browse IPTV)?
@@ -36,7 +36,7 @@ class PlayerUIContext {
   /// Should a "Previous Episode" button be shown?
   final bool canShowPrevEpisode;
 
-  // ── Display flags ───────────────────────────────────────────────
+  // —— Display flags ———————————————————————————————————————————————
   /// Show the room code in the top bar?
   final bool showRoomCode;
 
@@ -61,7 +61,7 @@ class PlayerUIContext {
   /// Content title for top bar.
   final String title;
 
-  /// Optional metadata subtitle (e.g. "S2 E5 · Episode Title").
+  /// Optional metadata subtitle (e.g. "S2 E5 Â· Episode Title").
   final String? subtitle;
 
   const PlayerUIContext._({

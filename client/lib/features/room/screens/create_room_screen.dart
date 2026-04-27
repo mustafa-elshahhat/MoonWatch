@@ -119,11 +119,11 @@ class _CreateRoomScreenState extends State<CreateRoomScreen>
             state is RoomStateCreating ||
             state is RoomStateWaiting;
 
-        String phase = 'Creating your room…';
+        String phase = 'Creating your room...';
         if (state is RoomStateConnecting) {
-          phase = 'Connecting to server…';
+          phase = 'Connecting to server...';
         } else if (state is RoomStateCreating) {
-          phase = 'Initializing session…';
+          phase = 'Initializing session...';
         } else if (state is RoomStateWaiting) {
           phase = 'Room ready!';
         }

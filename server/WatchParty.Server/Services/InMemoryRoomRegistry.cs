@@ -5,7 +5,7 @@ namespace WatchParty.Server.Services;
 
 /// <summary>
 /// In-memory room registry backed by ConcurrentDictionary.
-/// Registered as singleton per ARCHITECTURE.md §3.3.
+/// Registered as singleton 
 /// </summary>
 public class InMemoryRoomRegistry : IRoomRegistry
 {

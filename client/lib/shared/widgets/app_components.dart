@@ -437,8 +437,9 @@ class AppConfirmDialog extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: (confirmColor ?? AppColors.accentPrimary)
-                      .withValues(alpha: 0.12),
+                  color: (confirmColor ?? AppColors.accentPrimary).withValues(
+                    alpha: 0.12,
+                  ),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -451,8 +452,9 @@ class AppConfirmDialog extends StatelessWidget {
             ],
             Text(
               title,
-              style: AppTypography.titleLarge
-                  .copyWith(color: AppColors.textPrimary),
+              style: AppTypography.titleLarge.copyWith(
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 12),
             Text(

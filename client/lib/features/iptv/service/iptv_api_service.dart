@@ -51,16 +51,26 @@ class IptvApiService {
   /// Returns a sanitized URI string safe to write to logs.
   /// Masks credentials in both query parameters and Xtream Codes path segments.
   static String _sanitizeUri(Uri uri) {
-    // Delegate to the canonical sanitization helper so both code paths
-    // apply identical masking rules.
     return AppLogger.sanitizeUrl(uri.toString());
   }
 
   IptvConfig get config => _config;
 
-  // ── Authentication ───────────────────────────────────────────────
+  // —— Credential guard ————————————————————————————————————————————
+
+  void _checkCredentials() {
+    if (!_config.isConfigured) {
+      throw const IptvApiException(
+        'IPTV credentials are not configured. '
+        'Supply --dart-define=IPTV_BASE_URL, IPTV_USERNAME, IPTV_PASSWORD at build time.',
+      );
+    }
+  }
+
+  // —— Authentication ———————————————————————————————————————————————
 
   Future<Map<String, dynamic>> authenticate() async {
+    _checkCredentials();
     try {
       final response = await _dio.getUri(_config.authUrl);
       return response.data as Map<String, dynamic>;
@@ -69,13 +79,15 @@ class IptvApiService {
     }
   }
 
-  // ── Live TV ──────────────────────────────────────────────────────
+  // —— Live TV ——————————————————————————————————————————————————————
 
   Future<List<IptvCategory>> getLiveCategories() async {
+    _checkCredentials();
     return _fetchCategories(_config.liveCategoriesUrl);
   }
 
   Future<List<LiveStream>> getLiveStreams({String? categoryId}) async {
+    _checkCredentials();
     try {
       final response = await _dio.getUri(
         _config.liveStreamsUrl(categoryId: categoryId),
@@ -90,13 +102,15 @@ class IptvApiService {
     }
   }
 
-  // ── Movies / VOD ─────────────────────────────────────────────────
+  // —— Movies / VOD —————————————————————————————————————————————————
 
   Future<List<IptvCategory>> getVodCategories() async {
+    _checkCredentials();
     return _fetchCategories(_config.vodCategoriesUrl);
   }
 
   Future<List<VodStream>> getVodStreams({String? categoryId}) async {
+    _checkCredentials();
     try {
       final response = await _dio.getUri(
         _config.vodStreamsUrl(categoryId: categoryId),
@@ -111,13 +125,15 @@ class IptvApiService {
     }
   }
 
-  // ── Series ───────────────────────────────────────────────────────
+  // —— Series ———————————————————————————————————————————————————————
 
   Future<List<IptvCategory>> getSeriesCategories() async {
+    _checkCredentials();
     return _fetchCategories(_config.seriesCategoriesUrl);
   }
 
   Future<List<SeriesItem>> getSeriesList({String? categoryId}) async {
+    _checkCredentials();
     try {
       final response = await _dio.getUri(
         _config.seriesListUrl(categoryId: categoryId),
@@ -133,6 +149,7 @@ class IptvApiService {
   }
 
   Future<Map<String, dynamic>> getSeriesInfo(String seriesId) async {
+    _checkCredentials();
     try {
       final response = await _dio.getUri(_config.seriesInfoUrl(seriesId));
       return response.data as Map<String, dynamic>;
@@ -141,7 +158,7 @@ class IptvApiService {
     }
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────
+  // —— Helpers ——————————————————————————————————————————————————————
 
   Future<List<IptvCategory>> _fetchCategories(Uri url) async {
     try {
@@ -164,7 +181,7 @@ class IptvApiService {
         e.type == DioExceptionType.receiveTimeout) {
       message = 'IPTV server timeout';
     } else if (statusCode == 403) {
-      message = 'IPTV authentication failed';
+      message = 'IPTV authentication failed — check credentials';
     } else {
       message = e.message ?? 'Unknown IPTV API error';
     }

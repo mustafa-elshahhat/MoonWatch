@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../protocol/payloads.dart';
 
-// ── Episode reference ────────────────────────────────────────────────────────
+// —— Episode reference ————————————————————————————————————————————————————————
 
 /// A lightweight handle to a single series episode used for next/prev
 /// navigation. Carries only the fields needed to build an
@@ -42,7 +42,7 @@ class EpisodeRef {
       );
 }
 
-// ── Episode navigation context ───────────────────────────────────────────────
+// —— Episode navigation context ———————————————————————————————————————————————
 
 /// Holds the flat, ordered episode list for the currently-playing series and
 /// tracks which episode is active. Enables O(n) next/prev lookup.
@@ -81,7 +81,7 @@ class EpisodeNavContext {
       EpisodeNavContext(allEpisodes: allEpisodes, currentEpisodeId: episodeId);
 }
 
-// ── Service ──────────────────────────────────────────────────────────────────
+// —— Service ——————————————————————————————————————————————————————————————————
 
 /// Presentation-layer singleton that carries the current episode navigation
 /// context so that [SoloPlayerScreen] and [WatchScreen] can show a

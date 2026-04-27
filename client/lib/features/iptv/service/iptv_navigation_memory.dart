@@ -1,4 +1,4 @@
-import '../models/iptv_category.dart';
+﻿import '../models/iptv_category.dart';
 
 class IptvNavigationMemory {
   IptvContentType? activeTab;

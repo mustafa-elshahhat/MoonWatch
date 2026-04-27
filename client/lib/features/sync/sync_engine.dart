@@ -6,7 +6,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/player/player_controller.dart';
 import '../../features/room/repository/room_repository.dart';
 
-// â”€â”€ Sync Events â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬ Sync Events Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 sealed class SyncEvent extends Equatable {
   const SyncEvent();
@@ -117,7 +117,7 @@ class SyncEventPlayerReady extends SyncEvent {
   const SyncEventPlayerReady();
 }
 
-/// Peer's player stalled â€” received via buffering:stall (CL-29).
+/// Peer's player stalled — received via buffering:stall (CL-29).
 class SyncEventPeerStalled extends SyncEvent {
   final int positionMs;
   final int episodeId;
@@ -130,7 +130,7 @@ class SyncEventPeerStalled extends SyncEvent {
   List<Object?> get props => [positionMs, episodeId];
 }
 
-/// Server sent buffering:resume â€” both ready (CL-30).
+/// Server sent buffering:resume — both ready (CL-30).
 class SyncEventBufferingResumeReceived extends SyncEvent {
   final int resumePositionMs;
   final int episodeId;
@@ -149,13 +149,13 @@ class SyncEventExcessiveDrift extends SyncEvent {
   const SyncEventExcessiveDrift();
 }
 
-/// Internal event â€” self-dispatched by SyncBloc.setPlayerReady(true) to flush
+/// Internal event — self-dispatched by SyncBloc.setPlayerReady(true) to flush
 /// the deferred command queue on the BLoC event loop (async-safe).
 class _SyncEventFlushDeferred extends SyncEvent {
   const _SyncEventFlushDeferred();
 }
 
-// â”€â”€ Sync States â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬ Sync States Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 sealed class SyncState extends Equatable {
   const SyncState();
@@ -188,9 +188,9 @@ class SyncStateDegraded extends SyncState {
   List<Object?> get props => [correctionCount];
 }
 
-// â”€â”€ SyncBloc â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬ SyncBloc Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
-/// SyncBloc per SYNC_ENGINE.md and BUFFERING_COORDINATION.md.
+/// SyncBloc
 /// Receives playback events from RoomRepository, implements drift detection
 /// and correction seek. Handles buffering coordination (CL-27 through CL-30).
 ///
@@ -246,7 +246,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   /// Covers seek buffering, HLS segment fetching, and player stabilization time.
   static const int _kPostCommandCooldownMs = 3000;
 
-  // ── Buffering episode tracking (prevents infinite stall/ready loop) ──
+  // —— Buffering episode tracking (prevents infinite stall/ready loop) ——
   int _bufferingEpisodeId = 0;
   int? _currentEpisodeId;
   int? _lastStallPositionMs;
@@ -301,7 +301,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       );
     };
 
-    // Wire playback sync callbacks â†’ dispatch sync events into this Bloc.
+    // Wire playback sync callbacks Ã¢â€ â€™ dispatch sync events into this Bloc.
     _roomRepository.onPlaybackPlay = (payload) {
       add(
         SyncEventPlayReceived(
@@ -412,7 +412,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     }
   }
 
-  // â”€â”€ Event handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Event handlers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   Future<void> _onPlayReceived(
     SyncEventPlayReceived event,
@@ -420,7 +420,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   ) async {
     final receivedAtMs = DateTime.now().millisecondsSinceEpoch;
 
-    // INV-12: Host receives its own broadcast back — treat as no-op.
+    // Host receives its own broadcast back — treat as no-op.
     if (_role == 'host') {
       _logger.d(
         'SyncBloc: host ignoring own playback:play broadcast [seqNo=${event.seqNo}]',
@@ -460,7 +460,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     SyncEventPauseReceived event,
     Emitter<SyncState> emit,
   ) async {
-    // INV-12: Host receives its own broadcast back â€” treat as no-op.
+    // Host receives its own broadcast back — treat as no-op.
     if (_role == 'host') {
       _logger.d(
         'SyncBloc: host ignoring own playback:pause broadcast [seqNo=${event.seqNo}]',
@@ -492,7 +492,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     SyncEventSeekReceived event,
     Emitter<SyncState> emit,
   ) async {
-    // INV-12: Host receives its own broadcast back â€” treat as no-op.
+    // Host receives its own broadcast back — treat as no-op.
     if (_role == 'host') {
       _logger.d(
         'SyncBloc: host ignoring own playback:seek broadcast [seqNo=${event.seqNo}]',
@@ -542,7 +542,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     }
 
     // If the state_sync references an older room playback command than we've already
-    // applied, ignore it â€” a more recent play/pause/seek was applied.
+    // applied, ignore it — a more recent play/pause/seek was applied.
     if (event.seqNo > 0 && event.seqNo < _lastAppliedSeqNo) {
       _logger.d(
         'SyncBloc: ignoring stale state_sync '
@@ -683,7 +683,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       _wasPlayingBeforeBuffering = _playerController.isPlaying;
       final positionMs = _playerController.currentPosition.inMilliseconds;
 
-      // Deduplicate: same position ± tolerance as last stall → skip.
+      // Deduplicate: same position Â± tolerance as last stall → skip.
       if (_lastStallPositionMs != null &&
           (positionMs - _lastStallPositionMs!).abs() < _kPositionToleranceMs &&
           _currentEpisodeId != null) {
@@ -726,8 +726,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       if (_currentEpisodeId == null) {
         // Harmless race: The server already resumed playback, clearing _currentEpisodeId,
         // before our local player finished buffering. We don't need to send a ready notification.
-        _logger
-            .d('[BUFFERING_RESOLVED_EXTERNALLY] Skipping ready notification');
+        _logger.d(
+          '[BUFFERING_RESOLVED_EXTERNALLY] Skipping ready notification',
+        );
         return;
       }
 
@@ -839,7 +840,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     emit(SyncStateDegraded(_correctionTimestamps.length));
   }
 
-  // â”€â”€ Private helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Private helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   /// Apply a play command with time-compensated position.
   ///
@@ -890,7 +891,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     if (event.seqNo > 0) _lastAppliedSeqNo = event.seqNo;
 
     _logger.i(
-      'SyncBloc: applying playback:pause â€” '
+      'SyncBloc: applying playback:pause — '
       'positionMs=${event.positionMs}, seqNo=${event.seqNo}',
     );
 
@@ -905,7 +906,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   /// The `isPlaying` field from the payload determines post-seek state.
   /// Fallback: use current SyncBloc state (Syncing = playing, Paused = paused).
   ///
-  /// Explicit pauseâ†’seekâ†’play/pause ensures deterministic state regardless of
+  /// Explicit pauseÃ¢â€ â€™seekÃ¢â€ â€™play/pause ensures deterministic state regardless of
   /// media_kit's auto-resume behavior, which varies across platforms.
   Future<void> _applySeek(
     SyncEventSeekReceived event,
@@ -968,7 +969,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     );
     for (final e in _deferredQueue) {
       _logger.d(
-        'SyncBloc: deferred_item â€” ${e.runtimeType} '
+        'SyncBloc: deferred_item — ${e.runtimeType} '
         '[seqNo=${_seqNoOf(e)}, ts=${_serverTsOf(e)}]',
       );
     }

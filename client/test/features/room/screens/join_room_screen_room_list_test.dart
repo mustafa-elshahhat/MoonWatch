@@ -4,19 +4,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:watch_party/core/network/http_client.dart';
 import 'package:watch_party/features/room/bloc/room_bloc.dart';
 import 'package:watch_party/features/room/bloc/room_event.dart';
 import 'package:watch_party/features/room/bloc/room_state.dart';
+import 'package:watch_party/features/room/repository/room_repository.dart';
 import 'package:watch_party/features/room/screens/join_room_screen.dart';
 
 class MockRoomBloc extends MockBloc<RoomEvent, RoomState> implements RoomBloc {}
 
-class MockHttpClient extends Mock implements HttpClient {}
+class MockRoomRepository extends Mock implements RoomRepository {}
 
 void main() {
   late MockRoomBloc mockRoomBloc;
-  late MockHttpClient mockHttpClient;
+  late MockRoomRepository mockRoomRepository;
 
   setUpAll(() {
     registerFallbackValue(const RoomEventJoinRoom('ABC123'));
@@ -24,9 +24,9 @@ void main() {
 
   setUp(() async {
     mockRoomBloc = MockRoomBloc();
-    mockHttpClient = MockHttpClient();
+    mockRoomRepository = MockRoomRepository();
     when(() => mockRoomBloc.state).thenReturn(const RoomStateInitial());
-    when(() => mockHttpClient.listRooms()).thenAnswer(
+    when(() => mockRoomRepository.listRooms()).thenAnswer(
       (_) async => [
         {
           'roomCode': 'ABC123',
@@ -38,7 +38,7 @@ void main() {
       ],
     );
     await GetIt.instance.reset();
-    GetIt.instance.registerSingleton<HttpClient>(mockHttpClient);
+    GetIt.instance.registerSingleton<RoomRepository>(mockRoomRepository);
   });
 
   tearDown(() async {
@@ -98,7 +98,7 @@ void main() {
   });
 
   testWidgets('shows empty state when no joinable rooms exist', (tester) async {
-    when(() => mockHttpClient.listRooms()).thenAnswer((_) async => []);
+    when(() => mockRoomRepository.listRooms()).thenAnswer((_) async => []);
     await tester.binding.setSurfaceSize(const Size(1200, 1200));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -112,7 +112,7 @@ void main() {
     tester,
   ) async {
     var calls = 0;
-    when(() => mockHttpClient.listRooms()).thenAnswer((_) async {
+    when(() => mockRoomRepository.listRooms()).thenAnswer((_) async {
       calls++;
       if (calls == 1) {
         throw Exception('boom');

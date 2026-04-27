@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 /// Player events emitted by the player abstraction.
@@ -21,7 +21,7 @@ class PlayerEvent {
   const PlayerEvent(this.type, {this.position, this.errorMessage});
 }
 
-/// Abstract player interface per MEDIA_PLAYBACK_RULES.md.
+/// Abstract player interface .
 abstract class PlayerController {
   /// Stream of player events.
   Stream<PlayerEvent> get events;

@@ -180,7 +180,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
 
   /// Host: invoke Play via room protocol (Issues 1, 3, 8).
   /// Applies locally (option B) and sends to server.
-  /// SyncBloc treats returning broadcast as no-op (INV-12).
+  /// SyncBloc treats returning broadcast as no-op .
   void invokePlay(Duration position) {
     final now = DateTime.now().millisecondsSinceEpoch;
     _logger.i('host.play: positionMs=${position.inMilliseconds}');
@@ -217,7 +217,6 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     context.read<RoomBloc>().add(RoomEventSetContent(next.toDescriptor()));
   }
 
-  // ── TASK 3: Single processing path for content_set → player init ──────
   /// Called exactly once per new content descriptor. Resolves the playback
   /// URL and dispatches a single PlayerEventInitialize.
   void _handleNewContent(RoomStateActive state) {
@@ -272,7 +271,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        // ── RoomBloc listener: ONLY reacts to content descriptor changes ──
+        // —— RoomBloc listener: ONLY reacts to content descriptor changes ——
         BlocListener<RoomBloc, RoomState>(
           listenWhen: (previous, current) {
             // Always react to RoomStateClosed.
@@ -290,7 +289,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
           },
           listener: (context, state) {
             if (state is RoomStateClosed) {
-              // Issue 7: dispose player on room close per MEDIA_PLAYBACK_RULES.md
+              // Issue 7: dispose player on room close
               context.read<PlayerBloc>().add(const PlayerEventDispose());
               // Disable auto-rejoin by clearing stored reconnect credentials
               context.read<ReconnectBloc>().add(const ReconnectEventReset());
@@ -427,11 +426,11 @@ class WatchScreenContentState extends State<WatchScreenContent> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // ── Video surface — always fills full area ──────────────────
+            // —— Video surface — always fills full area ——————————————————
             BlocBuilder<PlayerBloc, PlayerState>(
               builder: (context, _) => _buildVideoView(_fitMode.boxFit),
             ),
-            // ── State overlays (loading / error) — centered above video ─
+            // —— State overlays (loading / error) — centered above video —
             BlocBuilder<RoomBloc, RoomState>(
               builder: (context, roomState) =>
                   BlocBuilder<PlayerBloc, PlayerState>(
@@ -439,7 +438,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                     _buildStateOverlay(playerState, roomState),
               ),
             ),
-            // ── Top bar overlay — fades out in fullscreen after idle ────
+            // —— Top bar overlay — fades out in fullscreen after idle ————
             Positioned(
               top: 0,
               left: 0,
@@ -464,7 +463,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                 ),
               ),
             ),
-            // ── Bottom controls overlay — SmartPlaybackControls manages its own visibility ─
+            // —— Bottom controls overlay — SmartPlaybackControls manages its own visibility —
             Positioned(
               bottom: 0,
               left: 0,
@@ -686,8 +685,10 @@ class WatchScreenContentState extends State<WatchScreenContent> {
       SnackBar(
         content: Text(
           message,
-          style:
-              const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         backgroundColor: AppColors.error,
         behavior: SnackBarBehavior.floating,

@@ -460,7 +460,7 @@ class _WaitingScreenState extends State<WaitingScreen>
   }
 }
 
-// ── Code char tile ─────────────────────────────────────────────────
+// —— Code char tile —————————————————————————————————————————————————
 
 class _CodeChar extends StatelessWidget {
   final String char;

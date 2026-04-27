@@ -3,7 +3,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 
-// ── Loading State ──────────────────────────────────────────────────
+// —— Loading State ——————————————————————————————————————————————————
 
 class LoadingState extends StatefulWidget {
   final String? message;
@@ -103,7 +103,7 @@ class _LoadingStateState extends State<LoadingState>
       );
 }
 
-// ── Error State ────────────────────────────────────────────────────
+// —— Error State ————————————————————————————————————————————————————
 
 class ErrorState extends StatelessWidget {
   final String message;
@@ -230,7 +230,7 @@ class _RetryBtnState extends State<_RetryBtn> {
       );
 }
 
-// ── Empty State ────────────────────────────────────────────────────
+// —— Empty State ————————————————————————————————————————————————————
 
 class EmptyState extends StatelessWidget {
   final String message;

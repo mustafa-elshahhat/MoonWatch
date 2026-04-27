@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+﻿import 'package:get_it/get_it.dart';
 import '../network/signalr_client.dart';
 import '../network/http_client.dart';
 import '../player/player_controller.dart';
@@ -25,7 +25,10 @@ void configureDependencies() {
 
   // Singletons — repositories
   getIt.registerLazySingleton<RoomRepository>(
-    () => RoomRepository(signalRClient: getIt<SignalRClient>()),
+    () => RoomRepository(
+      signalRClient: getIt<SignalRClient>(),
+      httpClient: getIt<HttpClient>(),
+    ),
   );
 
   // Singletons — player
@@ -65,7 +68,8 @@ void configureDependencies() {
   // IPTV — config, service, repository, bloc, memory
   getIt.registerLazySingleton<IptvConfig>(() => IptvConfig.defaultProvider);
   getIt.registerLazySingleton<IptvNavigationMemory>(
-      () => IptvNavigationMemory());
+    () => IptvNavigationMemory(),
+  );
   getIt.registerLazySingleton<IptvApiService>(
     () => IptvApiService(config: getIt<IptvConfig>()),
   );

@@ -34,7 +34,6 @@ class MediaKitPlayerImpl implements PlayerController {
   bool _isBuffering = false;
   bool _hasCompleted = false;
 
-  // ── Lifecycle lock flags (TASK 3) ────────────────────────────────────────
   bool _disposed = false;
   bool _disposing = false;
   bool _initialized = false;
@@ -162,7 +161,6 @@ class MediaKitPlayerImpl implements PlayerController {
 
   @override
   Future<void> initialize(String streamUrl) async {
-    // ── Lifecycle lock (TASK 3) ──────────────────────────────────────────
     await _acquireLifecycleLock();
     try {
       _currentStreamUrl = streamUrl;
@@ -644,7 +642,6 @@ class MediaKitPlayerImpl implements PlayerController {
     _logger.d('MediaKitPlayerImpl.dispose');
     _logger.i('MediaKitPlayerImpl.dispose');
 
-    // ── Lifecycle lock (TASK 3) ──────────────────────────────────────────
     await _acquireLifecycleLock();
     try {
       _disposing = true;
@@ -659,7 +656,6 @@ class MediaKitPlayerImpl implements PlayerController {
   }
 
   Future<void> _disposeInternal() async {
-    // ── TASK 4: Snapshot subscriptions before iterating ──────────────────
     final snapshot = List<StreamSubscription>.of(_subscriptions);
     _subscriptions.clear();
     for (final sub in snapshot) {

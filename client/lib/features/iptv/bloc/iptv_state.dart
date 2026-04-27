@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+﻿import 'package:equatable/equatable.dart';
 import '../../../core/protocol/payloads.dart';
 import '../models/iptv_category.dart';
 import '../models/live_stream.dart';

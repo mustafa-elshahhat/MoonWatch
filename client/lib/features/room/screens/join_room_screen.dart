@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import '../../../core/network/http_client.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../bloc/room_bloc.dart';
+import '../repository/room_repository.dart';
 import '../bloc/room_event.dart';
 import '../bloc/room_state.dart';
 
@@ -79,7 +79,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
     if (!mounted || _isRefreshing || _joining) return;
     _isRefreshing = true;
     try {
-      final rooms = await GetIt.instance<HttpClient>().listRooms();
+      final rooms = await GetIt.instance<RoomRepository>().listRooms();
       if (mounted) {
         setState(() {
           _rooms = rooms;
@@ -100,7 +100,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
       _roomsError = null;
     });
     try {
-      final rooms = await GetIt.instance<HttpClient>().listRooms();
+      final rooms = await GetIt.instance<RoomRepository>().listRooms();
       if (mounted) {
         setState(() {
           _rooms = rooms;
@@ -618,7 +618,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
   }
 }
 
-// ── Room Card ──────────────────────────────────────────────────────────────────
+// —— Room Card ——————————————————————————————————————————————————————————————————
 
 class _RoomCard extends StatefulWidget {
   final Map<String, dynamic> room;

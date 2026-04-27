@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:watch_party/core/network/signalr_client.dart';
@@ -16,7 +16,7 @@ const _testDescriptor = IptvContentDescriptor(
   title: 'Test Channel',
 );
 
-// ── Mocks ────────────────────────────────────────────────────────────────────
+// —— Mocks ————————————————————————————————————————————————————————————————————
 
 class MockSignalRClient extends Mock implements SignalRClient {}
 

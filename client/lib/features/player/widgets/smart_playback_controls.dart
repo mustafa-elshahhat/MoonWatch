@@ -143,7 +143,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
 
   void _toggleMute() {
     setState(() => _isMuted = !_isMuted);
-    GetIt.instance<PlayerController>().setVolume(_isMuted ? 0 : 100);
+    GetIt.instance<PlayerController>().setVolume(_isMuted ? 0.0 : 1.0);
   }
 
   void _toggleFullscreen() {
@@ -208,7 +208,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     );
   }
 
-  // ── Guest bar ─────────────────────────────────────────────────────
+  // —— Guest bar —————————————————————————————————————————————————————
 
   Widget _buildGuestBar() {
     return _ChromeContainer(
@@ -264,7 +264,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     );
   }
 
-  // ── Host/Solo bar ─────────────────────────────────────────────────
+  // —— Host/Solo bar —————————————————————————————————————————————————
 
   Widget _buildHostBar() {
     final safe = _safeDuration;
@@ -364,7 +364,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     );
   }
 
-  // ── Premium VOD Timeline ──────────────────────────────────────────
+  // —— Premium VOD Timeline ——————————————————————————————————————————
 
   Widget _buildPremiumTimeline(Duration safe) {
     final maxMs = safe.inMilliseconds.toDouble().clamp(1.0, double.infinity);
@@ -555,7 +555,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
   }
 }
 
-// ── Shared chrome widgets ──────────────────────────────────────────
+// —— Shared chrome widgets ——————————————————————————————————————————
 
 class _ChromeContainer extends StatelessWidget {
   final Widget child;
@@ -760,17 +760,21 @@ class _HostControlsBadge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         margin: const EdgeInsets.only(left: 4), // Tighter margin
         padding: const EdgeInsets.symmetric(
-            horizontal: 6, vertical: 3), // Tighter padding
+          horizontal: 6,
+          vertical: 3,
+        ), // Tighter padding
         decoration: BoxDecoration(
-          color: Colors.white
-              .withValues(alpha: 0.1), // Solid faint bg instead of border
+          color: Colors.white.withValues(
+            alpha: 0.1,
+          ), // Solid faint bg instead of border
           borderRadius: BorderRadius.circular(4),
         ),
         child: Text(
           'HOST CONTROLS',
           style: TextStyle(
-            color: Colors.white
-                .withValues(alpha: 0.6), // Slightly brighter for contrast on bg
+            color: Colors.white.withValues(
+              alpha: 0.6,
+            ), // Slightly brighter for contrast on bg
             fontSize: 9,
             fontWeight: FontWeight.w600, // Slightly less bold
             letterSpacing: 0.5, // Less letter spacing for compactness

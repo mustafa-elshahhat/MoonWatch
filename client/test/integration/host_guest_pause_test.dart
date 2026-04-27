@@ -1,4 +1,4 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:watch_party/features/sync/sync_engine.dart';
 import 'package:watch_party/core/player/mock_player_impl.dart';
 import '../mocks/mock_room_repository.dart';
@@ -21,7 +21,7 @@ void main() {
     await syncBloc.close();
   });
 
-  // ── host_guest_pause_test ──────────────────────────────────────────────
+  // —— host_guest_pause_test ——————————————————————————————————————————————
 
   group('host_guest_pause integration', () {
     test(

@@ -9,7 +9,7 @@ namespace WatchParty.Server.Services;
 
 /// <summary>
 /// Manages per-room periodic playback:state_sync emission.
-/// Per SYNC_ENGINE.md §Server-Side Sync Responsibilities:
+/// 
 /// the server must emit playback:state_sync every kStateSyncIntervalMs (5000ms)
 /// while the room is Active and HostIsPlaying == true.
 ///
@@ -91,31 +91,51 @@ public class StateSyncTimerService : IHostedService, IDisposable
                 return;
             }
 
-            // Only emit if room is Active and host is playing
-            if (room.State != RoomState.Active || !room.HostIsPlaying)
+            long estimatedPositionMs = 0;
+            bool hostIsPlaying = false;
+            long serverTimestampMs = 0;
+            int hostPlaybackSeqNo = 0;
+            long hostPositionMs = 0;
+            bool shouldEmit = false;
+
+            await room.Lock.WaitAsync();
+            try
             {
-                return;
+                // Only emit if room is Active and host is playing
+                if (room.State == RoomState.Active && room.HostIsPlaying)
+                {
+                    shouldEmit = true;
+                    serverTimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    hostIsPlaying = room.HostIsPlaying;
+                    hostPlaybackSeqNo = room.HostPlaybackSeqNo;
+                    hostPositionMs = room.HostPositionMs;
+
+                    estimatedPositionMs = hostPositionMs;
+                    if (room.HostPositionUpdatedAtMs > 0)
+                    {
+                        estimatedPositionMs += serverTimestampMs - room.HostPositionUpdatedAtMs;
+                    }
+                }
+            }
+            finally
+            {
+                room.Lock.Release();
             }
 
-            var serverTimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
-            // Compute estimated host position: advance from last-known anchor
-            // by elapsed playback time since the anchor was set.
-            var estimatedPositionMs = room.HostPositionMs;
-            if (room.HostIsPlaying && room.HostPositionUpdatedAtMs > 0)
+            if (!shouldEmit)
             {
-                estimatedPositionMs += serverTimestampMs - room.HostPositionUpdatedAtMs;
+                return;
             }
 
             await _hubContext.Clients.Group(roomCode)
                 .SendAsync(RoomEvents.PlaybackStateSync, new PlaybackStateSyncPayload(
                     estimatedPositionMs,
-                    room.HostIsPlaying,
+                    hostIsPlaying,
                     serverTimestampMs,
-                    room.HostPlaybackSeqNo));
+                    hostPlaybackSeqNo));
 
             _logger.LogDebug("State sync emitted {Event} {RoomId} {HostPositionMs} {EstimatedPositionMs} {IsPlaying}",
-                "playback.state_sync", roomCode, room.HostPositionMs, estimatedPositionMs, room.HostIsPlaying);
+                "playback.state_sync", roomCode, hostPositionMs, estimatedPositionMs, hostIsPlaying);
         }
         catch (Exception ex)
         {

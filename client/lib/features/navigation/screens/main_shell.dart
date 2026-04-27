@@ -295,7 +295,7 @@ class MainShellState extends State<MainShell> {
   }
 }
 
-// ── Crescent moon icon painter ────────────────────────────────────────────────
+// —— Crescent moon icon painter ————————————————————————————————————————————————
 
 class _CrescentPainter extends CustomPainter {
   final Color color;
@@ -316,10 +316,12 @@ class _CrescentPainter extends CustomPainter {
       ..addOval(Rect.fromCircle(center: Offset(cx, cy), radius: r));
     // Cutout circle (shifted right to create crescent)
     final inner = Path()
-      ..addOval(Rect.fromCircle(
-        center: Offset(cx + r * 0.42, cy - r * 0.08),
-        radius: r * 0.78,
-      ));
+      ..addOval(
+        Rect.fromCircle(
+          center: Offset(cx + r * 0.42, cy - r * 0.08),
+          radius: r * 0.78,
+        ),
+      );
     // Crescent = outer minus inner
     final crescent = Path.combine(PathOperation.difference, outer, inner);
     canvas.drawPath(crescent, paint);

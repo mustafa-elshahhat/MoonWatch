@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class AppSpacing {
   AppSpacing._();
 
-  // ── Spacing scale (4px base) ────────────────────────────────────
+  // —— Spacing scale (4px base) ————————————————————————————————————
   static const double xxs = 2;
   static const double xs = 4;
   static const double sm = 8;
@@ -16,7 +16,7 @@ class AppSpacing {
   static const double huge = 40;
   static const double massive = 48;
 
-  // ── Backward compatibility ──────────────────────────────────────
+  // —— Backward compatibility ——————————————————————————————————————
   static const double xl2 = xxl;
   static const double xl4 = huge;
   static const double radiusSm = AppRadius.sm;
@@ -24,7 +24,7 @@ class AppSpacing {
   static const double radiusLg = AppRadius.lg;
   static const double radiusXl = AppRadius.xl;
 
-  // ── Common padding presets ──────────────────────────────────────
+  // —— Common padding presets ——————————————————————————————————————
   static const screenH = EdgeInsets.symmetric(horizontal: 24);
   static const screenAll = EdgeInsets.all(24);
   static const cardPadding = EdgeInsets.all(16);

@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 namespace WatchParty.Server.Services;
 
 /// <summary>
-/// Generates cryptographically random room codes per ROOM_LIFECYCLE.md §Room Code Format.
+/// Generates cryptographically random room codes 
 /// 6 characters, 32-character set: A-Z (minus I,O) + 2-9.
 /// Uses System.Security.Cryptography.RandomNumberGenerator (CSPRNG).
 /// </summary>

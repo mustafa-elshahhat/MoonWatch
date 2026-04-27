@@ -188,7 +188,7 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
           style: AppTypography.body.copyWith(color: AppColors.textPrimary),
           cursorColor: AppColors.accentPrimary,
           decoration: InputDecoration(
-            hintText: 'Search in ${widget.categoryName}…',
+            hintText: 'Search in ${widget.categoryName}...',
             hintStyle: AppTypography.body.copyWith(color: AppColors.textMuted),
             prefixIcon: const Icon(
               Icons.search_rounded,
@@ -367,7 +367,7 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
   }
 }
 
-// ── Live Channel Card ──────────────────────────────────────────────
+// —— Live Channel Card ——————————————————————————————————————————————
 
 class _LiveChannelCard extends StatefulWidget {
   final LiveStream stream;
@@ -556,7 +556,7 @@ class _LiveChannelCardState extends State<_LiveChannelCard>
       );
 }
 
-// ── Movie Poster Card ──────────────────────────────────────────────
+// —— Movie Poster Card ——————————————————————————————————————————————
 
 class _MovieCard extends StatefulWidget {
   final VodStream stream;
@@ -759,7 +759,7 @@ class _MovieCardState extends State<_MovieCard>
       );
 }
 
-// ── Series Card ────────────────────────────────────────────────────
+// —— Series Card ————————————————————————————————————————————————————
 
 class _SeriesCard extends StatefulWidget {
   final SeriesItem series;
@@ -980,7 +980,7 @@ class _SeriesCardState extends State<_SeriesCard>
       );
 }
 
-// ── Shared components ──────────────────────────────────────────────
+// —— Shared components ——————————————————————————————————————————————
 
 class _BackBtn extends StatefulWidget {
   final VoidCallback onTap;

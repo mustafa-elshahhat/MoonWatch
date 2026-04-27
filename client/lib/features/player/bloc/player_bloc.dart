@@ -21,12 +21,11 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   /// Set via [setRoomMode] before dispatching PlayerEventInitialize.
   bool _isRoomMode = false;
 
-  // ── Single-flight initialize guard ────────────────────────────────────
+  // —— Single-flight initialize guard ————————————————————————————————————
   bool _isInitializing = false;
   String? _activeUrl;
   String? _pendingUrl;
 
-  // ── Global dedup: processed content keys (TASK 2) ─────────────────────
   /// Tracks all URLs that have been successfully initialized or are currently
   /// being initialized. Prevents re-initialization of the same content even
   /// when multiple event sources dispatch PlayerEventInitialize.
@@ -68,7 +67,6 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     final url = event.streamUrl;
     final source = event.source ?? 'unknown';
 
-    // ── TASK 1 & 3: Force room mode from event context ──
     _isRoomMode = event.isRoomMode;
 
     _logger.i(
@@ -88,7 +86,6 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       '[PLAYER_INIT_SOURCE] source=$source, url=${AppLogger.sanitizeUrl(url)}',
     );
 
-    // ── TASK 2: Global dedup — reject if this URL was already processed ──
     if (_processedContentKeys.contains(url)) {
       _logger.i(
         '[PLAYER_INIT_DUPLICATE_GLOBAL_IGNORED] url=${AppLogger.sanitizeUrl(url)}',
@@ -96,7 +93,6 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       return;
     }
 
-    // ── TASK 5: Skip if already ready with same URL ─────────────────────
     if (_readyUrl == url && _isReadyState) {
       _logger.i(
         '[PLAYER_INIT_SKIPPED_ALREADY_READY] url=${AppLogger.sanitizeUrl(url)}',
@@ -104,7 +100,6 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       return;
     }
 
-    // ── TASK 4: Block re-entrant initialization ─────────────────────────
     if (_isInitializing) {
       if (_activeUrl == url) {
         _logger.i(
@@ -187,7 +182,9 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
         emit(PlayerStatePlaying(_playerController.currentPosition));
         _logger.i('player.init: playing started');
       } else {
-        _logger.i('player.init: room mode — waiting for protocol play command');
+        _logger.i(
+          'player.init: room mode — waiting for protocol play command',
+        );
       }
       _logger.i('[PLAYER_INIT_COMPLETED] url=${AppLogger.sanitizeUrl(url)}');
     } catch (e, st) {

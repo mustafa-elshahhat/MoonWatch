@@ -10,7 +10,7 @@ namespace WatchParty.Server.Services;
 
 /// <summary>
 /// Background service that sweeps expired rooms every 60 seconds.
-/// Implements expiry rules from ROOM_LIFECYCLE.md §Room Expiry:
+/// Implements room expiry rules:
 /// - Created, no host connect within CreationExpiryMinutes (5 min) → Closed
 /// - Waiting, no guest joined within WaitingExpiryMinutes (30 min) → Closed
 /// - Active, no playback events within ActiveExpiryHours (2 hr) → Closed
@@ -78,14 +78,14 @@ public class RoomExpiryService : BackgroundService
         {
             if (IsExpired(room, now, roomOptions))
             {
-                // Acquire lock before modifying state
+                List<Task> sendTasks = new List<Task>();
                 await room.Lock.WaitAsync();
                 try
                 {
                     // Check again after lock — room may have been updated
                     if (room.State == RoomState.Closed)
                     {
-                        // Defensive: remove Closed rooms that shouldn't be in registry (INV-05)
+                        // Defensive: remove Closed rooms that shouldn't be in registry 
                         _registry.TryRemove(room.RoomCode, out _);
                         continue;
                     }
@@ -112,13 +112,13 @@ public class RoomExpiryService : BackgroundService
 
                     if (room.Host?.ConnectionId != null)
                     {
-                        _ = _hubContext.Clients.Client(room.Host.ConnectionId)
-                            .SendAsync(RoomEvents.RoomClosed, closedPayload);
+                        sendTasks.Add(_hubContext.Clients.Client(room.Host.ConnectionId)
+                            .SendAsync(RoomEvents.RoomClosed, closedPayload));
                     }
                     if (room.Guest?.ConnectionId != null && !room.GuestAway)
                     {
-                        _ = _hubContext.Clients.Client(room.Guest.ConnectionId)
-                            .SendAsync(RoomEvents.RoomClosed, closedPayload);
+                        sendTasks.Add(_hubContext.Clients.Client(room.Guest.ConnectionId)
+                            .SendAsync(RoomEvents.RoomClosed, closedPayload));
                     }
 
                     room.State = RoomState.Closed;
@@ -131,6 +131,18 @@ public class RoomExpiryService : BackgroundService
                 finally
                 {
                     room.Lock.Release();
+                }
+
+                if (sendTasks.Count > 0)
+                {
+                    try
+                    {
+                        await Task.WhenAll(sendTasks);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to send room closed events for room {RoomId}", room.RoomCode);
+                    }
                 }
             }
         }

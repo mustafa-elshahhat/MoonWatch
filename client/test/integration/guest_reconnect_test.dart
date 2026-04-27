@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:watch_party/core/network/signalr_client.dart';
@@ -10,7 +10,7 @@ import 'package:watch_party/features/room/bloc/room_state.dart';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 import 'package:watch_party/core/network/http_client.dart';
 
-// ── Mocks ────────────────────────────────────────────────────────────────────
+// —— Mocks ————————————————————————————————————————————————————————————————————
 
 class MockSignalRClient extends Mock implements SignalRClient {}
 

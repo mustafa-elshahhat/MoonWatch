@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+﻿import 'package:equatable/equatable.dart';
 
 /// PlayerBloc states per STATE_MANAGEMENT.md.
 sealed class PlayerState extends Equatable {

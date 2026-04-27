@@ -26,7 +26,7 @@ import 'package:path_provider/path_provider.dart';
 /// _log.i('Room created', event: 'room.created');
 /// ```
 class AppLogger {
-  // ── Constants ────────────────────────────────────────────────────────────
+  // —— Constants ————————————————————————————————————————————————————————————
 
   static const String _desktopLogDir = r'D:\projects\WATCH_PARTY\logs';
   static const String _logFolderName = 'Watch Party Logs';
@@ -50,14 +50,14 @@ class AppLogger {
     caseSensitive: false,
   );
 
-  // ── Static state ─────────────────────────────────────────────────────────
+  // —— Static state —————————————————————————————————————————————————————————
 
   static String? _logFilePath;
   static IOSink? _fileSink;
   static bool _initialized = false;
   static String _platform = 'unknown';
 
-  // ── Instance state ───────────────────────────────────────────────────────
+  // —— Instance state ———————————————————————————————————————————————————————
 
   final String tag;
   final Logger _logger;
@@ -73,7 +73,7 @@ class AppLogger {
           filter: ProductionFilter(),
         );
 
-  // ── Initialization ───────────────────────────────────────────────────────
+  // —— Initialization ———————————————————————————————————————————————————————
 
   /// Initialize the file logging system. Must be called once at app startup
   /// before any logging occurs. Deletes any previous log file and starts fresh.
@@ -114,7 +114,7 @@ class AppLogger {
               : 'release';
 
       _fileSink!.writeln(
-        '════════════════════════════════════════════════════════════════',
+        'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•',
       );
       _fileSink!.writeln('  WatchParty Client — session start');
       _fileSink!.writeln('  Platform : ${_platform.toUpperCase()}');
@@ -122,7 +122,7 @@ class AppLogger {
       _fileSink!.writeln('  Log file : $_logFilePath');
       _fileSink!.writeln('  Started  : $now');
       _fileSink!.writeln(
-        '════════════════════════════════════════════════════════════════',
+        'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•',
       );
       _fileSink!.writeln('');
       await _fileSink!.flush();
@@ -140,11 +140,11 @@ class AppLogger {
       final now = _formatTimestamp(DateTime.now());
       _fileSink?.writeln('');
       _fileSink?.writeln(
-        '════════════════════════════════════════════════════════════════',
+        'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•',
       );
       _fileSink?.writeln('  Session end: $now');
       _fileSink?.writeln(
-        '════════════════════════════════════════════════════════════════',
+        'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•',
       );
       await _fileSink?.flush();
       await _fileSink?.close();
@@ -155,7 +155,7 @@ class AppLogger {
     _initialized = false;
   }
 
-  // ── URL sanitization ─────────────────────────────────────────────────────
+  // —— URL sanitization —————————————————————————————————————————————————————
 
   /// Returns a sanitized copy of [url] safe to write to a log file.
   ///
@@ -186,7 +186,7 @@ class AppLogger {
     return result;
   }
 
-  // ── Logging methods ──────────────────────────────────────────────────────
+  // —— Logging methods ——————————————————————————————————————————————————————
 
   /// Debug-level log. For verbose diagnostics (position polls, internal state).
   void d(String message, {String? event, Map<String, dynamic>? data}) {
@@ -230,7 +230,7 @@ class AppLogger {
     );
   }
 
-  // ── File writer ──────────────────────────────────────────────────────────
+  // —— File writer ——————————————————————————————————————————————————————————
 
   void _writeToFile(
     String level,
@@ -261,7 +261,7 @@ class AppLogger {
     }
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
+  // —— Helpers ——————————————————————————————————————————————————————————————
 
   static String _detectPlatform() {
     if (Platform.isAndroid) return 'android';

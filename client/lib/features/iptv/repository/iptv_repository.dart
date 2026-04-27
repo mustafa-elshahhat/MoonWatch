@@ -34,7 +34,7 @@ class IptvRepository {
     _seriesInfoCache.clear();
   }
 
-  // ── Categories ───────────────────────────────────────────────────
+  // —— Categories ———————————————————————————————————————————————————
 
   Future<List<IptvCategory>> getCategories(
     IptvContentType type, {
@@ -59,7 +59,7 @@ class IptvRepository {
     }
   }
 
-  // ── Live Streams ─────────────────────────────────────────────────
+  // —— Live Streams —————————————————————————————————————————————————
 
   Future<List<LiveStream>> getLiveStreams(
     String categoryId, {
@@ -82,7 +82,7 @@ class IptvRepository {
     }
   }
 
-  // ── VOD / Movies ─────────────────────────────────────────────────
+  // —— VOD / Movies —————————————————————————————————————————————————
 
   Future<List<VodStream>> getVodStreams(
     String categoryId, {
@@ -105,7 +105,7 @@ class IptvRepository {
     }
   }
 
-  // ── Series ───────────────────────────────────────────────────────
+  // —— Series ———————————————————————————————————————————————————————
 
   Future<List<SeriesItem>> getSeriesList(
     String categoryId, {
@@ -146,7 +146,7 @@ class IptvRepository {
     }
   }
 
-  // ── Playback URLs ────────────────────────────────────────────────
+  // —— Playback URLs ————————————————————————————————————————————————
 
   String getLivePlaybackUrl(int streamId) =>
       config.livePlaybackUrl(streamId.toString());

@@ -42,9 +42,9 @@ class PlayerStateOverlay extends StatelessWidget {
         PlayerOverlayType.idle => _idle(),
       };
 
-  Widget _loading() => const _SpinnerOverlay(message: 'Loading stream…');
+  Widget _loading() => const _SpinnerOverlay(message: 'Loading stream...');
   Widget _buffering() =>
-      const _SpinnerOverlay(message: 'Buffering…', semi: true);
+      const _SpinnerOverlay(message: 'Buffering...', semi: true);
 
   Widget _error() {
     final msg = _friendlyError(errorMessage ?? '');
@@ -91,7 +91,7 @@ class PlayerStateOverlay extends StatelessWidget {
             ),
         ] else
           Text(
-            'Waiting for host to select new content…',
+            'Waiting for host to select new content...',
             style: AppTypography.caption.copyWith(
               color: Colors.white.withValues(alpha: 0.5),
             ),
@@ -155,7 +155,7 @@ class PlayerStateOverlay extends StatelessWidget {
           Text(
             uiContext.isHost
                 ? 'Choose something to watch'
-                : 'Waiting for host to\nselect content…',
+                : 'Waiting for host to\nselect content...',
             style: AppTypography.body.copyWith(
               color: Colors.white.withValues(alpha: 0.75),
             ),
