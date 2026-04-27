@@ -20,9 +20,9 @@ const _testDescriptor = IptvContentDescriptor(
   title: 'Test Movie',
 );
 
-/// Minimal fake PlayerController for widget tests.
-/// Returns Duration.zero for duration/position so the widget falls back to its
-/// 4-hour live-stream fallback — no platform-specific media engine needed.
+
+
+
 class _FakePlayerController extends Fake implements pc.PlayerController {
   @override
   Stream<pc.PlayerEvent> get events => const Stream<pc.PlayerEvent>.empty();
@@ -114,9 +114,9 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      // Host sees play button (rounded variant used in widget)
+      
       expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
-      // Host sees seek slider
+      
       expect(find.byType(Slider), findsOneWidget);
     });
 
@@ -154,9 +154,9 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      // Guest sees position text
+      
       expect(find.text('02:30'), findsOneWidget);
-      // Guest does not see play/pause button or slider
+      
       expect(find.byIcon(Icons.play_arrow), findsNothing);
       expect(find.byIcon(Icons.pause), findsNothing);
       expect(find.byType(Slider), findsNothing);

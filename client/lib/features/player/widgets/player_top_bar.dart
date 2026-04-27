@@ -7,7 +7,7 @@ import '../../room/bloc/room_state.dart';
 import '../models/player_ui_context.dart';
 import 'peer_status_indicator.dart';
 
-/// Cinematic player top bar overlay — flagship grade.
+
 class PlayerTopBar extends StatelessWidget {
   final PlayerUIContext uiContext;
   final String? roomCode;
@@ -44,7 +44,7 @@ class PlayerTopBar extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // —— Back button —————————————————————————————————————————————
+          
           Padding(
             padding: const EdgeInsets.only(top: 2),
             child: _TopBarBtn(
@@ -55,13 +55,13 @@ class PlayerTopBar extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
 
-          // —— Metadata + Title area ——————————————————————————————————————————
+          
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // —— Badges (Wrappable) ——————————————————————————————————————
+                
                 if (uiContext.showRoomCode ||
                     uiContext.showRoleBadge ||
                     uiContext.isLive ||
@@ -140,7 +140,7 @@ class PlayerTopBar extends StatelessWidget {
                     ),
                   ),
 
-                // —— Title ———————————————————————————————————————————————————
+                
                 Text(
                   uiContext.title,
                   style: const TextStyle(
@@ -171,7 +171,7 @@ class PlayerTopBar extends StatelessWidget {
             ),
           ),
 
-          // —— Right side ——————————————————————————————————————————————
+          
           if (uiContext.showPeerStatus && peerStatus != null) ...[
             const SizedBox(width: AppSpacing.sm),
             PeerStatusIndicator(status: peerStatus!),
@@ -190,7 +190,7 @@ class PlayerTopBar extends StatelessWidget {
   }
 }
 
-// —— Live chip —————————————————————————————————————————————————————
+
 
 class _LiveChip extends StatefulWidget {
   const _LiveChip();
@@ -264,7 +264,7 @@ class _LiveChipState extends State<_LiveChip>
       );
 }
 
-// —— Content type chip —————————————————————————————————————————————
+
 
 class _ContentTypeChip extends StatelessWidget {
   final String label;
@@ -291,7 +291,7 @@ class _ContentTypeChip extends StatelessWidget {
       );
 }
 
-// —— Top bar icon button ———————————————————————————————————————————
+
 
 class _TopBarBtn extends StatefulWidget {
   final IconData icon;

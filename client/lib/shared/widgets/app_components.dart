@@ -4,7 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 
-/// App Wordmark (moon. clone)
+
 class AppLogo extends StatelessWidget {
   final double size;
   final Color? color;
@@ -79,7 +79,7 @@ class _LogoPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// Small capitalized eyebrow text.
+
 class SectionEyebrow extends StatelessWidget {
   final String text;
   final Color? color;
@@ -98,7 +98,7 @@ class SectionEyebrow extends StatelessWidget {
   }
 }
 
-/// Cinematic striped poster placeholder.
+
 class StripedPoster extends StatelessWidget {
   final String? label;
   final double aspectRatio;
@@ -186,7 +186,7 @@ class _StripedPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// Section header with optional trailing action.
+
 class SectionHeader extends StatelessWidget {
   final String title;
   final IconData? icon;
@@ -214,7 +214,7 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
-/// Labeled divider (e.g., "OR", "WATCH TOGETHER").
+
 class LabeledDivider extends StatelessWidget {
   final String label;
 
@@ -238,7 +238,7 @@ class LabeledDivider extends StatelessWidget {
   }
 }
 
-/// Status badge (HOST / GUEST / custom).
+
 class StatusBadge extends StatelessWidget {
   final String label;
   final Color color;
@@ -280,7 +280,7 @@ class StatusBadge extends StatelessWidget {
   }
 }
 
-/// Inline status chip (used for connection / sync status).
+
 class StatusChip extends StatelessWidget {
   final String label;
   final Color color;
@@ -328,7 +328,7 @@ class StatusChip extends StatelessWidget {
   }
 }
 
-/// Room code display card with copy button.
+
 class RoomCodeCard extends StatelessWidget {
   final String roomCode;
   final VoidCallback? onCopy;
@@ -370,7 +370,7 @@ class RoomCodeCard extends StatelessWidget {
   }
 }
 
-/// Confirmation dialog consistent with the design system.
+
 class AppConfirmDialog extends StatelessWidget {
   final String title;
   final String message;
@@ -504,7 +504,7 @@ class AppConfirmDialog extends StatelessWidget {
   }
 }
 
-/// Content tile for media lists (replaces inline _ContentTile).
+
 class MediaTile extends StatelessWidget {
   final String? imageUrl;
   final String title;
@@ -568,7 +568,7 @@ class MediaTile extends StatelessWidget {
   }
 }
 
-/// Circular play icon button for media lists.
+
 class PlayIconButton extends StatelessWidget {
   const PlayIconButton({super.key});
 

@@ -2,15 +2,15 @@ import 'dart:async';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 import 'package:watch_party/features/room/bloc/room_event.dart';
 
-/// Manual test double for RoomRepository.
-/// Records outgoing calls for assertions.
+
+
 class MockRoomRepository implements RoomRepository {
   final _eventController = StreamController<RoomEvent>.broadcast();
 
-  /// Recorded calls to notifyBufferingStall with positionMs.
+  
   final List<int> notifyBufferingStallCalls = [];
 
-  /// Recorded calls to notifyBufferingReady.
+  
   int notifyBufferingReadyCalls = 0;
 
   @override
@@ -50,7 +50,7 @@ class MockRoomRepository implements RoomRepository {
     notifyBufferingReadyCalls++;
   }
 
-  /// Recorded calls to notifyPlayerReady, grouped by content key.
+  
   final List<String> notifyPlayerReadyCalls = [];
 
   @override
@@ -58,13 +58,13 @@ class MockRoomRepository implements RoomRepository {
     notifyPlayerReadyCalls.add(contentKey);
   }
 
-  /// Recorded calls to invokePlay with [positionMs, clientTimestampMs].
+  
   final List<List<int>> invokePlayCalls = [];
 
-  /// Recorded calls to invokePause with positionMs.
+  
   final List<int> invokePauseCalls = [];
 
-  /// Recorded calls to invokeSeek with targetPositionMs.
+  
   final List<int> invokeSeekCalls = [];
 
   @override
@@ -82,7 +82,7 @@ class MockRoomRepository implements RoomRepository {
     invokeSeekCalls.add(targetPositionMs);
   }
 
-  /// Inject a room event for testing.
+  
   void injectEvent(RoomEvent event) {
     _eventController.add(event);
   }

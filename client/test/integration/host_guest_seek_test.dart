@@ -3,7 +3,7 @@ import 'package:watch_party/features/sync/sync_engine.dart';
 import 'package:watch_party/core/player/mock_player_impl.dart';
 import '../mocks/mock_room_repository.dart';
 
-/// Integration tests — host seeks, verify guest behavior.
+
 void main() {
   late MockPlayerImpl mockPlayer;
   late MockRoomRepository mockRepo;
@@ -22,7 +22,7 @@ void main() {
 
   group('host_guest_seek integration', () {
     test('both playing, host seeks to 2:00 — guest seeks to ~2:00', () async {
-      // Start playing
+      
       mockPlayer.setPosition(const Duration(seconds: 30));
       syncBloc.add(
         const SyncEventPlayReceived(
@@ -33,7 +33,7 @@ void main() {
       );
       await Future.delayed(const Duration(milliseconds: 50));
 
-      // Host seeks to 2:00 (120000ms)
+      
       syncBloc.add(const SyncEventSeekReceived(targetPositionMs: 120000));
       await Future.delayed(const Duration(milliseconds: 50));
 
@@ -41,7 +41,7 @@ void main() {
     });
 
     test('seek does not change sync state', () async {
-      // Start playing
+      
       syncBloc.add(
         const SyncEventPlayReceived(
           positionMs: 5000,
@@ -52,7 +52,7 @@ void main() {
       await Future.delayed(const Duration(milliseconds: 50));
       expect(syncBloc.state, const SyncStateSyncing());
 
-      // Host seeks — state should remain Syncing
+      
       syncBloc.add(const SyncEventSeekReceived(targetPositionMs: 60000));
       await Future.delayed(const Duration(milliseconds: 50));
       expect(syncBloc.state, const SyncStateSyncing());
@@ -78,12 +78,12 @@ void main() {
     });
 
     test('seek while paused keeps paused state', () async {
-      // Start paused
+      
       syncBloc.add(const SyncEventPauseReceived(positionMs: 5000));
       await Future.delayed(const Duration(milliseconds: 50));
       expect(syncBloc.state, const SyncStatePaused());
 
-      // Seek while paused
+      
       syncBloc.add(const SyncEventSeekReceived(targetPositionMs: 90000));
       await Future.delayed(const Duration(milliseconds: 50));
       expect(syncBloc.state, const SyncStatePaused());

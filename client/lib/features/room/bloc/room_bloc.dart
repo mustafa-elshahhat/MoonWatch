@@ -220,9 +220,9 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
         ),
       );
     } else if (current is RoomStateWaiting) {
-      // Go directly to Active so WatchScreen can initialize the player with
-      // a single content_set event. RoomStateJoined (without a descriptor) would
-      // require a second content_set to reach Active, which is never guaranteed.
+      
+      
+      
       emit(
         RoomStateActive(
           roomCode: current.roomCode,

@@ -12,12 +12,12 @@ sealed class IptvState extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Initial / idle state.
+
 class IptvInitial extends IptvState {
   const IptvInitial();
 }
 
-/// Loading categories or content.
+
 class IptvLoading extends IptvState {
   final String? message;
   const IptvLoading({this.message});
@@ -26,7 +26,7 @@ class IptvLoading extends IptvState {
   List<Object?> get props => [message];
 }
 
-/// Categories loaded for a content type.
+
 class IptvCategoriesLoaded extends IptvState {
   final IptvContentType contentType;
   final List<IptvCategory> categories;
@@ -40,7 +40,7 @@ class IptvCategoriesLoaded extends IptvState {
   List<Object?> get props => [contentType, categories];
 }
 
-/// Live streams loaded for a category.
+
 class IptvLiveStreamsLoaded extends IptvState {
   final String categoryName;
   final List<LiveStream> streams;
@@ -54,7 +54,7 @@ class IptvLiveStreamsLoaded extends IptvState {
   List<Object?> get props => [categoryName, streams];
 }
 
-/// VOD streams loaded for a category.
+
 class IptvVodStreamsLoaded extends IptvState {
   final String categoryName;
   final List<VodStream> streams;
@@ -68,7 +68,7 @@ class IptvVodStreamsLoaded extends IptvState {
   List<Object?> get props => [categoryName, streams];
 }
 
-/// Series list loaded for a category.
+
 class IptvSeriesListLoaded extends IptvState {
   final String categoryName;
   final List<SeriesItem> seriesList;
@@ -82,7 +82,7 @@ class IptvSeriesListLoaded extends IptvState {
   List<Object?> get props => [categoryName, seriesList];
 }
 
-/// Series detail loaded (seasons + episodes).
+
 class IptvSeriesInfoLoaded extends IptvState {
   final String seriesName;
   final SeriesInfo info;
@@ -93,7 +93,7 @@ class IptvSeriesInfoLoaded extends IptvState {
   List<Object?> get props => [seriesName, info];
 }
 
-/// Content selected — descriptor ready for room broadcast or local resolve.
+
 class IptvContentSelected extends IptvState {
   final IptvContentDescriptor descriptor;
   final String title;
@@ -104,7 +104,7 @@ class IptvContentSelected extends IptvState {
   List<Object?> get props => [descriptor, title];
 }
 
-/// Error state.
+
 class IptvError extends IptvState {
   final String message;
 

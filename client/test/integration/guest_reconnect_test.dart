@@ -10,7 +10,7 @@ import 'package:watch_party/features/room/bloc/room_state.dart';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 import 'package:watch_party/core/network/http_client.dart';
 
-// —— Mocks ————————————————————————————————————————————————————————————————————
+
 
 class MockSignalRClient extends Mock implements SignalRClient {}
 
@@ -18,7 +18,7 @@ class MockRoomRepository extends Mock implements RoomRepository {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 
-/// Integration test — simulates: guest connected → SignalR drops → reconnects → rejoin → state_sync.
+
 void main() {
   late MockSignalRClient mockSignalRClient;
   late MockRoomRepository mockRoomRepository;
@@ -69,11 +69,11 @@ void main() {
     test(
       'SignalR drop → reconnect → rejoin invocation → room:joined → Success',
       () async {
-        // 1. Setup: guest is connected to room
+        
         reconnectBloc.storeRoomCredentials('ABC123', 'guest');
         reconnectBloc.startListening();
 
-        // 2. SignalR connection drops (reconnecting)
+        
         connectionStateController.add(SignalRConnectionState.reconnecting);
         await Future.delayed(const Duration(milliseconds: 50));
 
@@ -82,11 +82,11 @@ void main() {
           const ReconnectStateAttempting(attemptNumber: 1),
         );
 
-        // 3. SignalR auto-reconnects
+        
         connectionStateController.add(SignalRConnectionState.connected);
         await Future.delayed(const Duration(milliseconds: 100));
 
-        // 4. Verify JoinRoom was invoked for rejoin
+        
         verify(
           () => mockSignalRClient.invoke(
             RoomEvents.hubJoinRoom,
@@ -94,8 +94,8 @@ void main() {
           ),
         ).called(1);
 
-        // 5. Server responds with room:joined via RoomRepository events
-        //    : ReconnectBloc listens and auto-dispatches Succeeded)
+        
+        
         repoEventsController.add(
           const RoomEventRoomJoined(
             roomCode: 'ABC123',
@@ -115,7 +115,7 @@ void main() {
         reconnectBloc.storeRoomCredentials('ABC123', 'guest');
         reconnectBloc.startListening();
 
-        // SignalR starts reconnecting
+        
         connectionStateController.add(SignalRConnectionState.reconnecting);
         await Future.delayed(const Duration(milliseconds: 50));
 
@@ -124,7 +124,7 @@ void main() {
           const ReconnectStateAttempting(attemptNumber: 1),
         );
 
-        // SignalR gives up — moves to disconnected
+        
         connectionStateController.add(SignalRConnectionState.disconnected);
         await Future.delayed(const Duration(milliseconds: 50));
 
@@ -136,14 +136,14 @@ void main() {
       reconnectBloc.storeRoomCredentials('ABC123', 'guest');
       reconnectBloc.startListening();
 
-      // SignalR drops and reconnects
+      
       connectionStateController.add(SignalRConnectionState.reconnecting);
       await Future.delayed(const Duration(milliseconds: 50));
       connectionStateController.add(SignalRConnectionState.connected);
       await Future.delayed(const Duration(milliseconds: 100));
 
-      // Server responds with room:error via RoomRepository events
-      // ReconnectBloc listens and dispatches Failed.
+      
+      
       repoEventsController.add(
         const RoomEventError(
           code: 'room_closed',
@@ -156,12 +156,12 @@ void main() {
     });
 
     test('RoomBloc receives room:closed during disconnect', () async {
-      // Subscribe the bloc to the mock repo stream before sending events.
+      
       roomBloc.startListening();
 
-      // Guest is joined to room (add event directly since startListening
-      // routes from repo stream, but RoomEventRoomJoined may also come via
-      // direct dispatch from within _onJoinRoom; use direct add here to set state).
+      
+      
+      
       roomBloc.add(
         const RoomEventRoomJoined(
           roomCode: 'ABC123',
@@ -171,7 +171,7 @@ void main() {
       );
       await Future.delayed(const Duration(milliseconds: 50));
 
-      // Room closes (host left or grace period expired) — arrives via repo stream.
+      
       repoEventsController.add(const RoomEventRoomClosed('host_disconnected'));
       await Future.delayed(const Duration(milliseconds: 100));
 

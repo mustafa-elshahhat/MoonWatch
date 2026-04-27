@@ -4,8 +4,8 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../features/room/bloc/room_state.dart';
 
-/// ErrorOverlay — shows full-screen error message for RoomStateError.
-/// Each error code has specific user-facing text per ERROR_HANDLING.md.
+
+
 class ErrorOverlay extends StatelessWidget {
   final RoomErrorCode code;
   final String message;

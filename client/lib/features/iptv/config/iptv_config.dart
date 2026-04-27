@@ -1,5 +1,5 @@
-/// IPTV provider configuration. Credentials and base URL are injected via
-/// --dart-define at build time. Never hardcode credentials here.
+
+
 class IptvConfig {
   final String username;
   final String password;
@@ -11,10 +11,10 @@ class IptvConfig {
     required this.baseUrl,
   });
 
-  // Supply credentials at build time:
-  //   --dart-define=IPTV_BASE_URL=http://...
-  //   --dart-define=IPTV_USERNAME=your_user
-  //   --dart-define=IPTV_PASSWORD=your_pass
+  
+  
+  
+  
   static const String _kBaseUrl = String.fromEnvironment('IPTV_BASE_URL');
   static const String _kUsername = String.fromEnvironment('IPTV_USERNAME');
   static const String _kPassword = String.fromEnvironment('IPTV_PASSWORD');
@@ -25,12 +25,12 @@ class IptvConfig {
         baseUrl: _kBaseUrl,
       );
 
-  /// True when all required credentials have been supplied via --dart-define.
+  
   bool get isConfigured =>
       username.isNotEmpty && password.isNotEmpty && baseUrl.isNotEmpty;
 
-  /// Throws a clear [StateError] when credentials are missing, so
-  /// developers get an actionable message instead of a silent network failure.
+  
+  
   void ensureConfigured() {
     if (!isConfigured) {
       throw StateError(
@@ -43,7 +43,7 @@ class IptvConfig {
     }
   }
 
-  // —— Xtream Codes API endpoints ———————————————————————————————————
+  
 
   String get _authParams => 'username=$username&password=$password';
 
@@ -51,7 +51,7 @@ class IptvConfig {
 
   Uri get authUrl => Uri.parse('$playerApiBase&action=get_server_info');
 
-  // —— Live TV ——————————————————————————————————————————————————————
+  
 
   Uri get liveCategoriesUrl =>
       Uri.parse('$playerApiBase&action=get_live_categories');
@@ -64,8 +64,8 @@ class IptvConfig {
     return Uri.parse(base);
   }
 
-  /// Live stream playback URL. Credentials appear in the URL per the
-  /// Xtream Codes protocol; never log this URL directly.
+  
+  
   String livePlaybackUrl(String streamId, {String? extension}) {
     if (extension != null && extension.isNotEmpty) {
       return '$baseUrl/$username/$password/$streamId.$extension';
@@ -73,7 +73,7 @@ class IptvConfig {
     return '$baseUrl/$username/$password/$streamId';
   }
 
-  // —— Movies / VOD —————————————————————————————————————————————————
+  
 
   Uri get vodCategoriesUrl =>
       Uri.parse('$playerApiBase&action=get_vod_categories');
@@ -93,7 +93,7 @@ class IptvConfig {
     return '$baseUrl/movie/$username/$password/$streamId.$containerExtension';
   }
 
-  // —— Series ———————————————————————————————————————————————————————
+  
 
   Uri get seriesCategoriesUrl =>
       Uri.parse('$playerApiBase&action=get_series_categories');

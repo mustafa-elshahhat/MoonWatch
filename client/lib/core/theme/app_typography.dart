@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 
-/// Centralized typography tokens for WatchParty.
-/// Three-layer font hierarchy:
-///   - Display: Instrument Serif (cinematic headline serif)
-///   - Body:    Inter (clean sans-serif)
-///   - Meta:    JetBrains Mono / Consolas (monospace for codes & metadata)
+
+
+
+
+
 class AppTypography {
   AppTypography._();
 
@@ -28,13 +28,13 @@ class AppTypography {
     'monospace',
   ];
 
-  // -- Display (hero text) ---------------------------------------------------
+  
   static TextStyle get displayHero => TextStyle(
         fontFamily: _fontFamilySerif,
         fontFamilyFallback: _fallbackSerifFonts,
-        fontSize: 56, // Increased to match editorial feel
+        fontSize: 56, 
         fontWeight:
-            FontWeight.w400, // Instrument Serif is usually regular/italic
+            FontWeight.w400, 
         fontStyle: FontStyle.italic,
         color: AppColors.textPrimary,
         letterSpacing: -1.5,
@@ -51,7 +51,7 @@ class AppTypography {
         height: 1.1,
       );
 
-  // -- Title (screen titles, section headers) ----------------------------------
+  
   static TextStyle get titleLarge => TextStyle(
         fontFamily: _fontFamily,
         fontFamilyFallback: _fallbackFonts,
@@ -82,7 +82,7 @@ class AppTypography {
         height: 1.3,
       );
 
-  // -- Section label (all caps dividers) ---------------------------------------
+  
   static TextStyle get sectionLabel => TextStyle(
         fontFamily: _fontFamily,
         fontFamilyFallback: _fallbackFonts,
@@ -93,7 +93,7 @@ class AppTypography {
         height: 1.4,
       );
 
-  // -- Body --------------------------------------------------------------------
+  
   static TextStyle get bodyLarge => TextStyle(
         fontFamily: _fontFamily,
         fontFamilyFallback: _fallbackFonts,
@@ -121,7 +121,7 @@ class AppTypography {
         height: 1.5,
       );
 
-  // -- Caption -----------------------------------------------------------------
+  
   static TextStyle get caption => TextStyle(
         fontFamily: _fontFamily,
         fontFamilyFallback: _fallbackFonts,
@@ -140,7 +140,7 @@ class AppTypography {
         height: 1.4,
       );
 
-  // -- Button ------------------------------------------------------------------
+  
   static TextStyle get button => TextStyle(
         fontFamily: _fontFamily,
         fontFamilyFallback: _fallbackFonts,
@@ -161,7 +161,7 @@ class AppTypography {
         height: 1.2,
       );
 
-  // -- Chip / Badge ------------------------------------------------------------
+  
   static TextStyle get chip => TextStyle(
         fontFamily: _fontFamily,
         fontFamilyFallback: _fallbackFonts,
@@ -179,7 +179,7 @@ class AppTypography {
         height: 1.2,
       );
 
-  // -- Tab ---------------------------------------------------------------------
+  
   static TextStyle get tab => TextStyle(
         fontFamily: _fontFamily,
         fontFamilyFallback: _fallbackFonts,
@@ -188,7 +188,7 @@ class AppTypography {
         height: 1.2,
       );
 
-  // -- Monospace (JetBrains Mono / Consolas) -----------------------------------
+  
   static TextStyle get mono => TextStyle(
         fontFamily: _fontFamilyMono,
         fontFamilyFallback: _fallbackMonoFonts,

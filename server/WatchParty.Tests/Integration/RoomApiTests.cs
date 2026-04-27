@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace WatchParty.Tests.Integration;
 
-/// <summary>
-/// Integration tests for REST endpoints per , .
-/// Uses WebApplicationFactory to spin up in-memory test server.
-/// Note: POST /rooms/{code}/join is a pre-check endpoint; actual join is via SignalR.
-/// </summary>
+
+
+
+
+
 public class RoomApiTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly HttpClient _client;
@@ -19,7 +19,7 @@ public class RoomApiTests : IClassFixture<WebApplicationFactory<Program>>
         _client = factory.CreateClient();
     }
 
-    // ── : POST /api/v1/rooms ────────────────────────────────────────────
+    
 
     [Fact]
     public async Task CreateRoom_Returns201_WithRoomCode()
@@ -49,7 +49,7 @@ public class RoomApiTests : IClassFixture<WebApplicationFactory<Program>>
             b2.GetProperty("roomCode").GetString());
     }
 
-    // ── : POST /api/v1/rooms/{code}/join ────────────────────────────────
+    
 
     [Fact]
     public async Task JoinPreCheck_NonexistentCode_Returns404()
@@ -76,7 +76,7 @@ public class RoomApiTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal("waiting_for_host_content", joinBody.GetProperty("status").GetString());
     }
 
-    // ── GET /api/v1/rooms/{code}/status ──────────────────────────────────────
+    
 
     [Fact]
     public async Task GetStatus_ExistingRoom_Returns200()

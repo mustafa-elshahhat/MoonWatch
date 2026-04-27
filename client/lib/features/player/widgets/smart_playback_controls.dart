@@ -9,13 +9,13 @@ import '../../../core/theme/app_spacing.dart';
 import '../models/player_ui_context.dart';
 import '../models/video_fit_mode.dart';
 
-/// Callback signatures for host control actions.
+
 typedef PlayCallback = void Function(Duration position);
 typedef PauseCallback = void Function(Duration position);
 typedef SeekCallback = void Function(Duration target);
 
-/// Context-driven playback controls with premium cinematic design.
-/// Adapts to host/guest/solo/live/VOD modes.
+
+
 class SmartPlaybackControls extends StatefulWidget {
   static SmartPlaybackControlsState? of(BuildContext context) =>
       context.findAncestorStateOfType<SmartPlaybackControlsState>();
@@ -56,7 +56,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
   bool _isDragging = false;
   double? _dragValue;
   bool _hoveredTrack = false;
-  final GlobalKey _trackKey = GlobalKey(); // for correct drag width measurement
+  final GlobalKey _trackKey = GlobalKey(); 
 
   Timer? _hideTimer;
   final FocusNode _focusNode = FocusNode();
@@ -82,7 +82,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     );
     _scheduleHide();
     _pc = GetIt.instance<PlayerController>();
-    // Read current values eagerly — the stream may have already emitted before we subscribed
+    
     _currentPosition = _pc.currentPosition;
     _currentDuration = _pc.duration;
     _posSub = _pc.positionStream.listen((p) {
@@ -99,7 +99,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     _durSub = _pc.durationStream.listen((d) {
       if (mounted) setState(() => _currentDuration = d);
     });
-    // If duration wasn't cached yet, check again after first frame
+    
     if (_currentDuration == Duration.zero) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -182,8 +182,8 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
       ? _currentDuration
       : const Duration(hours: 4);
 
-  // Show VOD bar when: context says it's seekable AND not live — no duration requirement
-  // (the bar renders as a 0% empty bar until duration streams in, then fills correctly)
+  
+  
   bool get _isVOD => ctx.showSeekBar && !ctx.isLive;
 
   @override
@@ -209,7 +209,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     );
   }
 
-  // —— Guest bar —————————————————————————————————————————————————————
+  
 
   Widget _buildGuestBar() {
     return _ChromeContainer(
@@ -219,7 +219,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
         spacing: 8,
         runSpacing: 8,
         children: [
-          // Left side
+          
           Wrap(
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,
@@ -231,7 +231,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
               if (ctx.isLive && ctx.showLiveBadge) const _LiveBadge(),
             ],
           ),
-          // Right side
+          
           Wrap(
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 4,
@@ -265,7 +265,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     );
   }
 
-  // —— Host/Solo bar —————————————————————————————————————————————————
+  
 
   Widget _buildHostBar() {
     final safe = _safeDuration;
@@ -273,20 +273,20 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Premium VOD Timeline — only for non-live with known duration
+          
           if (_isVOD && ctx.showSeekBar) _buildPremiumTimeline(safe),
           const SizedBox(height: 8),
-          // Controls row
+          
           Wrap(
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,
             runSpacing: 8,
             children: [
-              // Left: time / live
+              
               _buildTimeArea(),
 
-              // Center: transport
+              
               Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: 4,
@@ -330,7 +330,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
                 ],
               ),
 
-              // Right: utilities
+              
               Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: 4,
@@ -365,7 +365,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     );
   }
 
-  // —— Premium VOD Timeline ——————————————————————————————————————————
+  
 
   Widget _buildPremiumTimeline(Duration safe) {
     final maxMs = safe.inMilliseconds.toDouble().clamp(1.0, double.infinity);
@@ -419,7 +419,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Track background
+                
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   height: (_isDragging || _hoveredTrack) ? 5 : 3,
@@ -428,7 +428,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
-                // Progress fill
+                
                 Align(
                   alignment: Alignment.centerLeft,
                   child: LayoutBuilder(
@@ -464,7 +464,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
                     },
                   ),
                 ),
-                // Thumb — only visible on hover/drag
+                
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 150),
                   opacity: (_isDragging || _hoveredTrack) ? 1.0 : 0.0,
@@ -556,7 +556,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
   }
 }
 
-// —— Shared chrome widgets ——————————————————————————————————————————
+
 
 class _ChromeContainer extends StatelessWidget {
   final Widget child;
@@ -759,15 +759,15 @@ class _HostControlsBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.only(left: 4), // Tighter margin
+        margin: const EdgeInsets.only(left: 4), 
         padding: const EdgeInsets.symmetric(
           horizontal: 6,
           vertical: 3,
-        ), // Tighter padding
+        ), 
         decoration: BoxDecoration(
           color: Colors.white.withValues(
             alpha: 0.1,
-          ), // Solid faint bg instead of border
+          ), 
           borderRadius: BorderRadius.circular(4),
         ),
         child: Text(
@@ -775,10 +775,10 @@ class _HostControlsBadge extends StatelessWidget {
           style: TextStyle(
             color: Colors.white.withValues(
               alpha: 0.6,
-            ), // Slightly brighter for contrast on bg
+            ), 
             fontSize: 9,
-            fontWeight: FontWeight.w600, // Slightly less bold
-            letterSpacing: 0.5, // Less letter spacing for compactness
+            fontWeight: FontWeight.w600, 
+            letterSpacing: 0.5, 
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

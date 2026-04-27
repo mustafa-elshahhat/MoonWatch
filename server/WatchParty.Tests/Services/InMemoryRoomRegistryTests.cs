@@ -3,9 +3,9 @@ using WatchParty.Server.Services;
 
 namespace WatchParty.Tests.Services;
 
-/// <summary>
-/// Unit tests for InMemoryRoomRegistry per .
-/// </summary>
+
+
+
 public class InMemoryRoomRegistryTests
 {
     [Fact]
@@ -121,7 +121,7 @@ public class InMemoryRoomRegistryTests
         var registry = new InMemoryRoomRegistry();
         var tasks = new List<Task>();
 
-        // Add 100 rooms concurrently
+        
         for (int i = 0; i < 100; i++)
         {
             var code = $"R{i:D5}";
@@ -131,7 +131,7 @@ public class InMemoryRoomRegistryTests
         await Task.WhenAll(tasks);
         Assert.Equal(100, registry.GetAll().Count);
 
-        // Remove 50 rooms concurrently
+        
         tasks.Clear();
         for (int i = 0; i < 50; i++)
         {

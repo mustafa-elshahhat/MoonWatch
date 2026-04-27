@@ -8,13 +8,13 @@ using WatchParty.Shared.Protocol.Payloads;
 
 namespace WatchParty.Server.Services;
 
-/// <summary>
-/// Background service that sweeps expired rooms every 60 seconds.
-/// Implements room expiry rules:
-/// - Created, no host connect within CreationExpiryMinutes (5 min) → Closed
-/// - Waiting, no guest joined within WaitingExpiryMinutes (30 min) → Closed
-/// - Active, no playback events within ActiveExpiryHours (2 hr) → Closed
-/// </summary>
+
+
+
+
+
+
+
 public class RoomExpiryService : BackgroundService
 {
     private readonly IRoomRegistry _registry;
@@ -86,10 +86,10 @@ public class RoomExpiryService : BackgroundService
                 await room.Lock.WaitAsync();
                 try
                 {
-                    // Check again after lock — room may have been updated
+                    
                     if (room.State == RoomState.Closed)
                     {
-                        // Defensive: remove Closed rooms that shouldn't be in registry 
+                        
                         _registry.TryRemove(room.RoomCode, out _);
                         continue;
                     }
@@ -99,7 +99,7 @@ public class RoomExpiryService : BackgroundService
 
                     var previousState = room.State;
 
-                    // Cancel guest grace period if active
+                    
                     if (room.GuestGraceCts != null)
                     {
                         room.GuestGraceCts.Cancel();
@@ -107,10 +107,10 @@ public class RoomExpiryService : BackgroundService
                         room.GuestGraceCts = null;
                     }
 
-                    // Stop state sync timer for this room
+                    
                     _stateSyncTimer.StopForRoom(room.RoomCode);
 
-                    // Snapshot connection IDs and payload data for async sending outside the lock
+                    
                     hostId = room.Host?.ConnectionId;
                     guestId = (room.Guest?.ConnectionId != null && !room.GuestAway) ? room.Guest.ConnectionId : null;
                     var serverTimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -128,7 +128,7 @@ public class RoomExpiryService : BackgroundService
                     room.Lock.Release();
                 }
 
-                // Create tasks outside the lock block
+                
                 if (closedPayload != null)
                 {
                     if (hostId != null)
@@ -172,23 +172,23 @@ public class RoomExpiryService : BackgroundService
     {
         return room.State switch
         {
-            // Host created room but never connected via SignalR → 5 minutes
+            
             RoomState.Created =>
                 now - room.CreatedAt > TimeSpan.FromMinutes(options.CreationExpiryMinutes),
 
-            // Room is in Waiting state (no guest ever joined) → 30 minutes from host connection
+            
             RoomState.Waiting =>
                 now - room.LastActivityAt > TimeSpan.FromMinutes(options.WaitingExpiryMinutes),
 
-            // Room is in Active state with no playback events → 2 hours from last activity
+            
             RoomState.Active =>
                 now - room.LastActivityAt > TimeSpan.FromHours(options.ActiveExpiryHours),
 
-            // Joined state: same as Waiting (no guest activity yet beyond joining)
+            
             RoomState.Joined =>
                 now - room.LastActivityAt > TimeSpan.FromMinutes(options.WaitingExpiryMinutes),
 
-            // Closed rooms should already be removed, but handle anyway
+            
             RoomState.Closed => true,
 
             _ => false,

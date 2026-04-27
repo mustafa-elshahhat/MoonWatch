@@ -24,7 +24,7 @@ const _nextDescriptor = IptvContentDescriptor(
   title: 'Episode 2',
 );
 
-// Mocks
+
 class MockHttpClient extends Mock implements HttpClient {}
 
 class MockSignalRClient extends Mock implements SignalRClient {}

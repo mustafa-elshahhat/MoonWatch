@@ -4,40 +4,40 @@ import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// Centralized logging service for the WatchParty client.
-///
-/// Writes all log entries to both the console and a text file.
-///
-/// All platforms: logs to a "Watch Party Logs" folder within the app-specific
-/// documents or support directory:
-///   - Android: /storage/emulated/0/Android/data/`package`/files/Watch Party Logs/log.txt
-///   - iOS: Library/Documents/Watch Party Logs/log.txt (or equivalent)
-///   - Windows/macOS/Linux: Platform-specific app support directory
-///
-/// The log file (log.txt) is deleted and recreated on every app launch so
-/// each session starts with a completely fresh file.
-///
-/// Usage:
-/// ```dart
-/// final _log = AppLogger('RoomBloc');
-/// _log.i('Room created', event: 'room.created');
-/// ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class AppLogger {
-  // -- Constants
-  // --------------------------------------------------------
+  
+  
 
   static const String _logFolderName = 'Watch Party Logs';
   static const String _logFileName = 'log.txt';
 
-  // Regex that matches Xtream Codes URL path credentials.
-  // Matches: scheme://host/(live|movie|series)/USERNAME/PASSWORD/rest
+  
+  
   static final RegExp _pathCredentialsRe = RegExp(
     r'(https?://[^/]+)/(live|movie|series)/([^/?#]+)/([^/?#]+)/(.+)',
     caseSensitive: false,
   );
 
-  // Regex that matches credential query parameters.
-  // Matches: username=VALUE or password=VALUE anywhere in a query string.
+  
+  
   static final RegExp _queryUsernameRe = RegExp(
     r'(username=)[^&]+',
     caseSensitive: false,
@@ -47,16 +47,16 @@ class AppLogger {
     caseSensitive: false,
   );
 
-  // -- Static state
-  // -------------------------------------------------
+  
+  
 
   static String? _logFilePath;
   static IOSink? _fileSink;
   static bool _initialized = false;
   static String _platform = 'unknown';
 
-  // -- Instance state
-  // -----------------------------------------------
+  
+  
 
   final String tag;
   final Logger _logger;
@@ -72,11 +72,11 @@ class AppLogger {
           filter: ProductionFilter(),
         );
 
-  // -- Initialization
-  // -----------------------------------------------
+  
+  
 
-  /// Initialize the file logging system. Must be called once at app startup
-  /// before any logging occurs. Deletes any previous log file and starts fresh.
+  
+  
   static Future<void> init() async {
     if (_initialized) return;
 
@@ -91,21 +91,21 @@ class AppLogger {
 
       _logFilePath = '${dir.path}${Platform.pathSeparator}$_logFileName';
 
-      // Delete previous session log so each launch starts completely fresh.
+      
       final file = File(_logFilePath!);
       if (file.existsSync()) {
         try {
           file.deleteSync();
         } catch (_) {
-          // File locked by a previous instance — open in write/truncate mode
-          // instead; the content will be overwritten on the first write.
+          
+          
         }
       }
 
       _fileSink = file.openWrite(mode: FileMode.write);
       _initialized = true;
 
-      // Write session header.
+      
       final now = _formatTimestamp(DateTime.now());
       const buildMode = kDebugMode
           ? 'debug'
@@ -127,13 +127,13 @@ class AppLogger {
       _fileSink!.writeln('');
       await _fileSink!.flush();
     } catch (e) {
-      // Logging init failure must not crash the app.
-      // Fall back to console-only for this session.
+      
+      
       debugPrint('[AppLogger] Failed to initialize file logging: $e');
     }
   }
 
-  /// Flush and close the file sink. Call on app shutdown.
+  
   static Future<void> shutdown() async {
     if (!_initialized) return;
     try {
@@ -149,60 +149,60 @@ class AppLogger {
       await _fileSink?.flush();
       await _fileSink?.close();
     } catch (_) {
-      // Best-effort shutdown.
+      
     }
     _fileSink = null;
     _initialized = false;
   }
 
-  // -- URL sanitization
-  // -------------------------------------------------
+  
+  
 
-  /// Returns a sanitized copy of [url] safe to write to a log file.
-  ///
-  /// Masks credentials in both Xtream Codes URL path format and in query
-  /// parameters so that no username or password reaches the log file.
-  ///
-  /// Examples:
-  ///   http://host/live/Alice/secret99/123.ts
-  ///     -> http://host/live/****/****/123.ts
-  ///
-  ///   http://host/player_api.php?username=Alice&password=secret99&action=get
-  ///     -> http://host/player_api.php?username=****&password=****&action=get
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   static String sanitizeUrl(String url) {
-    // 1. Mask path-segment credentials (Xtream Codes stream URLs).
+    
     String result = url.replaceFirstMapped(_pathCredentialsRe, (m) {
-      // m.group(1) = scheme://host
-      // m.group(2) = live|movie|series
-      // m.group(3) = username  (masked)
-      // m.group(4) = password  (masked)
-      // m.group(5) = rest of path
+      
+      
+      
+      
+      
       return '${m.group(1)}/${m.group(2)}/****/****/${m.group(5)}';
     });
 
-    // 2. Mask query-string credentials (Xtream Codes player API URLs).
+    
     result = result.replaceAll(_queryUsernameRe, r'username=****');
     result = result.replaceAll(_queryPasswordRe, r'password=****');
 
     return result;
   }
 
-  // -- Logging methods
-  // -------------------------------------------------
+  
+  
 
-  /// Debug-level log. For verbose diagnostics (position polls, internal state).
+  
   void d(String message, {String? event, Map<String, dynamic>? data}) {
     _logger.d('[$tag] $message');
     _writeToFile('DEBUG', message, event: event, data: data);
   }
 
-  /// Info-level log. For normal flow events (room joined, playback started).
+  
   void i(String message, {String? event, Map<String, dynamic>? data}) {
     _logger.i('[$tag] $message');
     _writeToFile('INFO ', message, event: event, data: data);
   }
 
-  /// Warning-level log. For expected failures or suspicious conditions.
+  
   void w(
     String message, {
     String? event,
@@ -213,7 +213,7 @@ class AppLogger {
     _writeToFile('WARN ', message, event: event, error: error, data: data);
   }
 
-  /// Error-level log. For unexpected failures requiring investigation.
+  
   void e(
     String message, {
     String? event,
@@ -232,8 +232,8 @@ class AppLogger {
     );
   }
 
-  // -- File writer
-  // -------------------------------------------------
+  
+  
 
   void _writeToFile(
     String level,
@@ -260,12 +260,12 @@ class AppLogger {
         _fileSink!.writeln('  stackTrace:\n$stackTrace');
       }
     } catch (_) {
-      // Logging must never crash the app.
+      
     }
   }
 
-  // -- Helpers
-  // -------------------------------------------------
+  
+  
 
   static String _detectPlatform() {
     if (Platform.isAndroid) return 'android';
@@ -276,44 +276,44 @@ class AppLogger {
     return 'unknown';
   }
 
-  /// Returns the absolute path for the "Watch Party Logs" directory.
-  ///
-  /// Android: app-specific external storage (user-visible in Files app),
-  /// falling back to app-documents directory if external storage is unavailable.
-  ///
-  /// iOS: app-documents directory (sandboxed).
-  ///
-  /// Desktop (Windows/macOS/Linux): app support directory.
+  
+  
+  
+  
+  
+  
+  
+  
   static Future<String> _resolveLogDir() async {
     if (Platform.isAndroid) {
-      // getExternalStorageDirectory() resolves to:
-      //   /storage/emulated/0/Android/data/<package>/files
-      // No READ_EXTERNAL_STORAGE / WRITE_EXTERNAL_STORAGE permission needed.
+      
+      
+      
       try {
         final extDir = await getExternalStorageDirectory();
         if (extDir != null) {
           return '${extDir.path}${Platform.pathSeparator}$_logFolderName';
         }
       } catch (_) {
-        // External storage unavailable — fall through to internal.
+        
       }
-      // Fallback: internal app-documents directory.
+      
       final appDir = await getApplicationDocumentsDirectory();
       return '${appDir.path}${Platform.pathSeparator}$_logFolderName';
     }
 
     if (Platform.isIOS) {
-      // iOS only has app-sandbox storage; use documents directory.
+      
       final appDir = await getApplicationDocumentsDirectory();
       return '${appDir.path}${Platform.pathSeparator}$_logFolderName';
     }
 
-    // Desktop: Windows, macOS, Linux.
+    
     final appDir = await getApplicationSupportDirectory();
     return '${appDir.path}${Platform.pathSeparator}$_logFolderName';
   }
 
-  /// Format a [DateTime] as `YYYY-MM-DD HH:mm:ss.SSS` (local time).
+  
   static String _formatTimestamp(DateTime dt) {
     final y = dt.year.toString().padLeft(4, '0');
     final mo = dt.month.toString().padLeft(2, '0');

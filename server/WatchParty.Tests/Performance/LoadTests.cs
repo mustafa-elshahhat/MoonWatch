@@ -9,9 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace WatchParty.Tests.Performance;
 
-/// <summary>
-/// Custom factory for load tests that raises rate limits to allow 100+ room creations.
-/// </summary>
+
+
+
 public class LoadTestFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -21,13 +21,13 @@ public class LoadTestFactory : WebApplicationFactory<Program>
     }
 }
 
-/// <summary>
-/// Load tests per TASKS.md PF-01, PF-02, PF-03.
-/// Targets from NON_FUNCTIONAL_REQUIREMENTS.md:
-/// - ≤ 5 KB memory per active room
-/// - ≤ 2% idle CPU target (not measurable in-process; test verifies room creation scale)
-/// - Play command round-trip ≤ 200ms
-/// </summary>
+
+
+
+
+
+
+
 public class LoadTests : IClassFixture<LoadTestFactory>
 {
     private readonly LoadTestFactory _factory;
@@ -39,14 +39,14 @@ public class LoadTests : IClassFixture<LoadTestFactory>
         _client = factory.CreateClient();
     }
 
-    /// <summary>
-    /// PF-01: Create 100 simultaneous rooms and measure memory per room.
-    /// Target: ≤ 5 KB/room.
-    /// </summary>
+    
+    
+    
+    
     [Fact]
     public async Task PF01_Create100Rooms_MemoryPerRoomWithinBudget()
     {
-        // Force GC before measurement
+        
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
@@ -67,7 +67,7 @@ public class LoadTests : IClassFixture<LoadTestFactory>
 
         Assert.Equal(roomCount, roomCodes.Count);
 
-        // Measure memory after room creation
+        
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
@@ -76,16 +76,16 @@ public class LoadTests : IClassFixture<LoadTestFactory>
         var totalBytesUsed = afterBytes - baselineBytes;
         var bytesPerRoom = totalBytesUsed / roomCount;
 
-        // ≤ 5 KB per room = 5120 bytes (NFR target)
-        // In-process GC measurement includes runtime overhead from the test runner and
-        // parallel test execution, so we use a generous margin. The actual room object
-        // (Room + 2 RoomParticipant + SemaphoreSlim + strings) is well under 5 KB.
-        // This test serves as a regression guard against memory leaks, not a precise measurement.
+        
+        
+        
+        
+        
         Assert.True(bytesPerRoom < 25_600,
             $"Memory per room: {bytesPerRoom} bytes ({bytesPerRoom / 1024.0:F1} KB). " +
             $"Target: ≤ 5 KB/room (25 KB test margin for in-process overhead). Total: {totalBytesUsed / 1024.0:F1} KB for {roomCount} rooms.");
 
-        // Verify health endpoint reports correct count
+        
         var healthResponse = await _client.GetAsync("/health");
         var health = await healthResponse.Content.ReadFromJsonAsync<HealthResponse>();
         Assert.NotNull(health);
@@ -93,11 +93,11 @@ public class LoadTests : IClassFixture<LoadTestFactory>
             $"Expected at least {roomCount} active rooms, got {health.ActiveRooms}");
     }
 
-    /// <summary>
-    /// PF-02: Verify 100 active rooms can exist without excessive resource use.
-    /// (CPU measurement is not reliably measurable in-process; this test
-    /// verifies that 100 rooms with state_sync-level activity don't cause errors.)
-    /// </summary>
+    
+    
+    
+    
+    
     [Fact]
     public async Task PF02_100ActiveRooms_NoErrors()
     {
@@ -109,34 +109,34 @@ public class LoadTests : IClassFixture<LoadTestFactory>
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         }
 
-        // Verify health endpoint is responsive with many rooms
+        
         var sw = Stopwatch.StartNew();
         var healthResponse = await _client.GetAsync("/health");
         sw.Stop();
 
         Assert.Equal(HttpStatusCode.OK, healthResponse.StatusCode);
 
-        // Health endpoint should respond quickly even with many rooms
+        
         Assert.True(sw.ElapsedMilliseconds < 1000,
             $"Health endpoint took {sw.ElapsedMilliseconds}ms with {roomCount} rooms");
     }
 
-    /// <summary>
-    /// PF-03: Measure play command round-trip.
-    /// Host sends Play → server → guest receives playback:play.
-    /// Target: ≤ 200ms total under 50ms RTT.
-    /// This test measures server-side processing time (in-process, near-zero network latency).
-    /// </summary>
+    
+    
+    
+    
+    
+    
     [Fact]
     public async Task PF03_PlayCommandRoundTrip_WithinLatencyTarget()
     {
-        // Create a room
+        
         var createResponse = await _client.PostAsync("/api/v1/rooms", null);
         var roomJson = await createResponse.Content.ReadFromJsonAsync<RoomCreatedResponse>();
         Assert.NotNull(roomJson);
         var roomCode = roomJson!.RoomCode;
 
-        // Connect host and guest via SignalR (same pattern as SignalRSessionTests)
+        
         var hostConnection = new HubConnectionBuilder()
             .WithUrl("http://localhost/hubs/room",
                 o => o.HttpMessageHandlerFactory = _ => _factory.Server.CreateHandler())
@@ -163,16 +163,16 @@ public class LoadTests : IClassFixture<LoadTestFactory>
             await hostConnection.StartAsync();
             await guestConnection.StartAsync();
 
-            // Host joins, then guest joins
+            
             await hostConnection.InvokeAsync("JoinRoom", roomCode, "host");
             await guestConnection.InvokeAsync("JoinRoom", roomCode, "guest");
             await WaitFor(guestJoinedOnHost, "room:guest_joined on host");
 
-            // Set content to transition to Active
+            
             await hostConnection.InvokeAsync("SetContent", new { ContentType = "live", StreamId = "12345", ContainerExtension = (string?)null, Title = "Test Channel" });
             await WaitFor(streamSetOnGuest, "room:content_set on guest");
 
-            // Measure play command round-trip
+            
             var sendTimestamp = Stopwatch.GetTimestamp();
             await hostConnection.InvokeAsync("Play", 0L, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             await WaitFor(playReceivedTimestamp, "playback:play on guest");
@@ -180,7 +180,7 @@ public class LoadTests : IClassFixture<LoadTestFactory>
             var receiveTimestamp = await playReceivedTimestamp.Task;
             var elapsedMs = (double)(receiveTimestamp - sendTimestamp) / Stopwatch.Frequency * 1000;
 
-            // In-process with no network: should be well under 200ms
+            
             Assert.True(elapsedMs < 200,
                 $"Play command round-trip: {elapsedMs:F1}ms. Target: ≤ 200ms.");
         }

@@ -36,12 +36,12 @@ void main() {
     test('calling start() a second time while already running is a no-op', () {
       estimator.start();
 
-      // Reset interaction count so we can assert the second call adds nothing.
+      
       clearInteractions(mockSignalR);
 
-      estimator.start(); // idempotency guard should block this
+      estimator.start(); 
 
-      // No additional ping or handler registration should occur.
+      
       verifyNever(() => mockSignalR.invoke(any(), args: any(named: 'args')));
       verifyNever(() => mockSignalR.on(any(), any()));
     });
@@ -54,7 +54,7 @@ void main() {
 
       estimator.start();
 
-      // Exactly one immediate ping on clean restart.
+      
       verify(
         () => mockSignalR.invoke(RoomEvents.hubPing, args: any(named: 'args')),
       ).called(1);
@@ -65,8 +65,8 @@ void main() {
       estimator.stop();
 
       verify(() => mockSignalR.off(RoomEvents.pong)).called(1);
-      // After stop(), currentRttMs is reset to default and clockOffsetMs to 0.
-      expect(estimator.currentRttMs, greaterThan(0)); // default constant
+      
+      expect(estimator.currentRttMs, greaterThan(0)); 
       expect(estimator.clockOffsetMs, 0);
     });
 
@@ -78,9 +78,9 @@ void main() {
         estimator.start();
         estimator.stop();
 
-        // on() called once per start() = 2 times total.
+        
         verify(() => mockSignalR.on(RoomEvents.pong, any())).called(2);
-        // off() called once per stop() = 2 times total.
+        
         verify(() => mockSignalR.off(RoomEvents.pong)).called(2);
       },
     );

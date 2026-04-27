@@ -1,11 +1,11 @@
 namespace WatchParty.Shared.Protocol.Payloads;
 
-// ── Content descriptor ───────────────────────────────────────────────────────
 
-/// Identifies IPTV content without embedding credentials.
-/// Each client resolves the final playback URL locally using its own account.
+
+
+
 public record IptvContentDescriptor(
-    string ContentType,          // "live" | "movie" | "episode"
+    string ContentType,          
     string StreamId,
     string? ContainerExtension,
     string Title)
@@ -13,7 +13,7 @@ public record IptvContentDescriptor(
     public string ContentKey => $"{ContentType}|{StreamId}|{ContainerExtension ?? string.Empty}";
 }
 
-// ── Client → Server payloads ──────────────────────────────────────────────────
+
 
 public record JoinRoomPayload(string RoomCode, string Role);
 
@@ -29,7 +29,7 @@ public record BufferingStallPayload(long PositionMs);
 
 public record PingPayload(long ClientTimestampMs);
 
-// ── Server → Client payloads ──────────────────────────────────────────────────
+
 
 public record RoomJoinedPayload(
     string RoomCode,
@@ -50,17 +50,17 @@ public record RoomContentSetPayload(IptvContentDescriptor Descriptor, long Serve
 
 public record ErrorPayload(string Code, string Message, long ServerTimestampMs);
 
-/// <param name="SeqNo">Monotonically increasing room playback command counter. Clients reject stale commands.</param>
+
 public record PlaybackPlayPayload(long PositionMs, long ServerTimestampMs, int HostRttMs, int SeqNo);
 
-/// <param name="SeqNo">Monotonically increasing room playback command counter.</param>
+
 public record PlaybackPausePayload(long PositionMs, long ServerTimestampMs, int SeqNo);
 
-/// <param name="SeqNo">Monotonically increasing room playback command counter.</param>
-/// <param name="IsPlaying">Whether host was playing immediately before the seek. Guest uses this to decide whether to resume after seek.</param>
+
+
 public record PlaybackSeekPayload(long TargetPositionMs, long ServerTimestampMs, int SeqNo, bool IsPlaying);
 
-/// <param name="SeqNo">Room playback command counter at time of emission. Clients use this to detect stale state_sync.</param>
+
 public record PlaybackStateSyncPayload(long HostPositionMs, bool IsPlaying, long ServerTimestampMs, int SeqNo);
 
 public record BufferingStallBroadcastPayload(string Role, long PositionMs, long ServerTimestampMs, int EpisodeId);

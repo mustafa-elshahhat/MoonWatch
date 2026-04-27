@@ -1,12 +1,12 @@
 import '../../../core/protocol/payloads.dart';
 
-/// Describes the current playback context for driving dynamic UI.
-///
-/// Built from mode (solo/room), role (host/guest), and content type
-/// (live/movie/episode). The UI reads capabilities from this model
-/// instead of hardcoding per-screen logic.
+
+
+
+
+
 class PlayerUIContext {
-  // —— Identity ————————————————————————————————————————————————————
+  
   final bool isRoomMode;
   final bool isHost;
   final bool isGuest;
@@ -14,54 +14,54 @@ class PlayerUIContext {
   final bool isMovie;
   final bool isEpisode;
 
-  // —— Capabilities ————————————————————————————————————————————————
-  /// Can this user control play/pause authoritatively?
+  
+  
   final bool canControlPlayback;
 
-  /// Can this user seek (scrub) through the content?
+  
   final bool canSeek;
 
-  /// Can this user skip +/-10s?
+  
   final bool canSkip;
 
-  /// Can this user change content (browse IPTV)?
+  
   final bool canChangeContent;
 
-  /// Should speed controls be available?
+  
   final bool canUseSpeed;
 
-  /// Should a "Next Episode" button be shown?
+  
   final bool canShowNextEpisode;
 
-  /// Should a "Previous Episode" button be shown?
+  
   final bool canShowPrevEpisode;
 
-  // —— Display flags ———————————————————————————————————————————————
-  /// Show the room code in the top bar?
+  
+  
   final bool showRoomCode;
 
-  /// Show the role badge (HOST / GUEST)?
+  
   final bool showRoleBadge;
 
-  /// Show the peer/sync status indicator?
+  
   final bool showPeerStatus;
 
-  /// Show a "View Only" label (guest mode)?
+  
   final bool showViewOnlyLabel;
 
-  /// Show the seek bar (progress slider)?
+  
   final bool showSeekBar;
 
-  /// Show current time / duration text?
+  
   final bool showTimeDisplay;
 
-  /// Show the LIVE badge instead of seek bar?
+  
   final bool showLiveBadge;
 
-  /// Content title for top bar.
+  
   final String title;
 
-  /// Optional metadata subtitle (e.g. "S2 E5  -  Episode Title").
+  
   final String? subtitle;
 
   const PlayerUIContext._({
@@ -89,7 +89,7 @@ class PlayerUIContext {
     this.subtitle,
   });
 
-  /// Build context for **solo** playback (no room).
+  
   factory PlayerUIContext.solo({
     required IptvDescriptorType contentType,
     required String title,
@@ -128,7 +128,7 @@ class PlayerUIContext {
     );
   }
 
-  /// Build context for **room host** playback.
+  
   factory PlayerUIContext.roomHost({
     required IptvDescriptorType contentType,
     required String title,
@@ -150,7 +150,7 @@ class PlayerUIContext {
       canSeek: isVod,
       canSkip: isVod,
       canChangeContent: true,
-      canUseSpeed: false, // speed control not safe in sync mode
+      canUseSpeed: false, 
       canShowNextEpisode:
           contentType == IptvDescriptorType.episode && hasNextEpisode,
       canShowPrevEpisode: false,
@@ -166,7 +166,7 @@ class PlayerUIContext {
     );
   }
 
-  /// Build context for **room guest** playback.
+  
   factory PlayerUIContext.roomGuest({
     required IptvDescriptorType contentType,
     required String title,
@@ -200,7 +200,7 @@ class PlayerUIContext {
     );
   }
 
-  /// Build from a room state + content descriptor.
+  
   factory PlayerUIContext.fromRoom({
     required String role,
     required IptvContentDescriptor descriptor,

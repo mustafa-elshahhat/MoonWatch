@@ -1,9 +1,9 @@
 namespace WatchParty.Server.Middleware;
 
-/// <summary>
-/// Global error handling middleware per ERROR_HANDLING.md.
-/// Catches unhandled exceptions and returns structured JSON. Never returns stack traces.
-/// </summary>
+
+
+
+
 public class ErrorHandlingMiddleware
 {
     private readonly RequestDelegate _next;

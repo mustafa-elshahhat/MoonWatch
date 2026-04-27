@@ -1,12 +1,12 @@
-// Canonical Dart payload models for the WatchParty SignalR protocol.
-// C# mirror: shared/protocol/payloads/Payloads.cs — keep both in sync.
 
-// ── Content descriptor ───────────────────────────────────────────────────────
+
+
+
 
 enum IptvDescriptorType { live, movie, episode }
 
-/// Identifies IPTV content without embedding credentials.
-/// Each client resolves the final playback URL locally using its own account.
+
+
 class IptvContentDescriptor {
   final IptvDescriptorType contentType;
   final String streamId;
@@ -54,7 +54,7 @@ class IptvContentDescriptor {
       Object.hash(contentType, streamId, containerExtension, title);
 }
 
-// ── Server → Client payloads ──────────────────────────────────────────────────
+
 
 class RoomJoinedPayload {
   final String roomCode;
@@ -175,15 +175,15 @@ class ErrorPayload {
       );
 }
 
-// ── Playback payloads ────────────────────────────────────────────────────────
+
 
 class PlaybackPlayPayload {
   final int positionMs;
   final int serverTimestampMs;
   final int hostRttMs;
 
-  /// Monotonically increasing room playback command counter.
-  /// Used by SyncBloc to reject stale commands.
+  
+  
   final int seqNo;
 
   const PlaybackPlayPayload({
@@ -206,7 +206,7 @@ class PlaybackPausePayload {
   final int positionMs;
   final int serverTimestampMs;
 
-  /// Monotonically increasing room playback command counter.
+  
   final int seqNo;
 
   const PlaybackPausePayload({
@@ -227,11 +227,11 @@ class PlaybackSeekPayload {
   final int targetPositionMs;
   final int serverTimestampMs;
 
-  /// Monotonically increasing room playback command counter.
+  
   final int seqNo;
 
-  /// Whether the host was playing at the time of seek.
-  /// Guest uses this to decide whether to resume playback after seeking.
+  
+  
   final bool isPlaying;
 
   const PlaybackSeekPayload({
@@ -255,8 +255,8 @@ class PlaybackStateSyncPayload {
   final bool isPlaying;
   final int serverTimestampMs;
 
-  /// Room playback command counter at time of emission.
-  /// Clients compare this to their own last-applied seqNo to detect stale state_sync.
+  
+  
   final int seqNo;
 
   const PlaybackStateSyncPayload({
@@ -290,7 +290,7 @@ class PongPayload {
       );
 }
 
-// ── Buffering payloads ───────────────────────────────────────────────────────
+
 
 class BufferingStallBroadcastPayload {
   final int episodeId;

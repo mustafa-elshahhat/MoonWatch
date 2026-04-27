@@ -9,9 +9,9 @@ import 'core/logging/app_logger.dart';
 import 'app.dart';
 
 void main() {
-  // runZonedGuarded must wrap ALL initialization including
-  // WidgetsFlutterBinding.ensureInitialized() so that both the binding
-  // initialization and runApp execute in the same zone.
+  
+  
+  
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +34,7 @@ void main() {
 
       configureDependencies();
 
-      // Capture Flutter framework errors (widget build errors, rendering errors).
+      
       FlutterError.onError = (FlutterErrorDetails details) {
         AppLogger('FlutterError').e(
           'Framework error: ${details.exceptionAsString()}',
@@ -43,8 +43,8 @@ void main() {
         );
       };
 
-      // Capture uncaught platform-dispatcher errors (belt-and-suspenders alongside
-      // the runZonedGuarded error handler below).
+      
+      
       PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
         AppLogger(
           'UncaughtError',

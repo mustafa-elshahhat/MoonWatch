@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-/// Centralized spacing, radius, elevation, icon sizing, and animation tokens.
+
 class AppSpacing {
   AppSpacing._();
 
-  // —— Spacing scale (4px base) ————————————————————————————————————
+  
   static const double xxs = 2;
   static const double xs = 4;
   static const double sm = 8;
@@ -16,7 +16,7 @@ class AppSpacing {
   static const double huge = 40;
   static const double massive = 48;
 
-  // —— Backward compatibility ——————————————————————————————————————
+  
   static const double xl2 = xxl;
   static const double xl4 = huge;
   static const double radiusSm = AppRadius.sm;
@@ -24,7 +24,7 @@ class AppSpacing {
   static const double radiusLg = AppRadius.lg;
   static const double radiusXl = AppRadius.xl;
 
-  // —— Common padding presets ——————————————————————————————————————
+  
   static const screenH = EdgeInsets.symmetric(horizontal: 24);
   static const screenAll = EdgeInsets.all(24);
   static const cardPadding = EdgeInsets.all(16);
@@ -36,7 +36,7 @@ class AppSpacing {
   static const chipPadding = EdgeInsets.symmetric(horizontal: 10, vertical: 4);
 }
 
-/// Border radius tokens.
+
 class AppRadius {
   AppRadius._();
 
@@ -55,7 +55,7 @@ class AppRadius {
   static BorderRadius get pillBorder => BorderRadius.circular(pill);
 }
 
-/// Elevation / shadow presets for dark theme.
+
 class AppElevation {
   AppElevation._();
 
@@ -86,7 +86,7 @@ class AppElevation {
       ];
 }
 
-/// Icon size tokens.
+
 class AppIconSize {
   AppIconSize._();
 
@@ -100,7 +100,7 @@ class AppIconSize {
   static const double display = 56;
 }
 
-/// Animation duration and curve tokens.
+
 class AppAnimation {
   AppAnimation._();
 
@@ -114,7 +114,7 @@ class AppAnimation {
   static const Curve exitCurve = Curves.easeIn;
 }
 
-/// Responsive breakpoints.
+
 class AppBreakpoint {
   AppBreakpoint._();
 
@@ -122,14 +122,14 @@ class AppBreakpoint {
   static const double tablet = 720;
   static const double desktop = 1024;
 
-  /// Desktop-aware constrained width.
+  
   static double contentWidth(double screenWidth) {
     if (screenWidth >= desktop) return 560;
     if (screenWidth >= tablet) return 520;
     return screenWidth * 0.9;
   }
 
-  /// Grid cross-axis count based on screen width.
+  
   static int gridColumns(double screenWidth) {
     if (screenWidth >= desktop) return 4;
     if (screenWidth >= tablet) return 3;

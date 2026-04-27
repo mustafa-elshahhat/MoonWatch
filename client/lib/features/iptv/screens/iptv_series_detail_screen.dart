@@ -17,7 +17,7 @@ import '../repository/iptv_repository.dart';
 import '../service/iptv_navigation_memory.dart';
 import '../../../core/services/episode_nav_service.dart';
 
-/// Flagship series detail screen — cinematic poster hero + rich episode cards.
+
 class IptvSeriesDetailScreen extends StatefulWidget {
   final int seriesId;
   final String seriesName;
@@ -382,7 +382,7 @@ class _MetaChip extends StatelessWidget {
       );
 }
 
-// —— Premium Episode Card ——————————————————————————————————————————
+
 
 class _EpisodeCard extends StatefulWidget {
   final SeriesEpisode episode;
@@ -433,7 +433,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
           ),
           child: Row(
             children: [
-              // Image / Number Block
+              
               SizedBox(
                 width: 120,
                 child: Stack(
@@ -496,7 +496,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                   ],
                 ),
               ),
-              // Info
+              
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
@@ -530,7 +530,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                           ],
                         ],
                       ),
-                      // Episode number label (mono amber metadata)
+                      
                       Padding(
                         padding: const EdgeInsets.only(top: 2),
                         child: Text(

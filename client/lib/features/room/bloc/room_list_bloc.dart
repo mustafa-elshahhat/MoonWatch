@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../repository/room_repository.dart';
 
-// —— Events ——
+
 abstract class RoomListEvent extends Equatable {
   const RoomListEvent();
   @override
@@ -16,7 +16,7 @@ class RoomListFetch extends RoomListEvent {
   List<Object?> get props => [silent];
 }
 
-// —— States ——
+
 abstract class RoomListState extends Equatable {
   const RoomListState();
   @override
@@ -41,7 +41,7 @@ class RoomListError extends RoomListState {
   List<Object?> get props => [message];
 }
 
-// —— Bloc ——
+
 class RoomListBloc extends Bloc<RoomListEvent, RoomListState> {
   final RoomRepository _repository;
 

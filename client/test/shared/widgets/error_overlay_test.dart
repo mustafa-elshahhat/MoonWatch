@@ -117,11 +117,11 @@ void main() {
     });
 
     testWidgets('no error code exposes internal strings', (tester) async {
-      // Verify none of the messages contain raw error codes
+      
       for (final code in RoomErrorCode.values) {
         await tester.pumpWidget(buildTestWidget(code));
 
-        // Internal codes should not appear in the UI
+        
         expect(find.text('room_not_found'), findsNothing);
         expect(find.text('room_full'), findsNothing);
         expect(find.text('role_unauthorized'), findsNothing);

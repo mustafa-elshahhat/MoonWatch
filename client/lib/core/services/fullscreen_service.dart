@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
-/// Platform-aware fullscreen manager.
-/// - Mobile: immersive mode + landscape orientation.
-/// - Desktop: window_manager fullscreen.
+
+
+
 class FullscreenService extends ChangeNotifier {
   bool _isFullscreen = false;
   bool _wasMaximized = false;
@@ -27,9 +27,9 @@ class FullscreenService extends ChangeNotifier {
           DeviceOrientation.landscapeLeft,
           DeviceOrientation.landscapeRight,
         ]);
-        // Remove all padding and overlays for true fullscreen.
-        // systemNavigationBarContrastEnforced: false prevents Android 12+
-        // from adding an automatic scrim behind the navigation bar.
+        
+        
+        
         SystemChrome.setSystemUIOverlayStyle(
           const SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
@@ -43,7 +43,7 @@ class FullscreenService extends ChangeNotifier {
         _wasMaximized = await windowManager.isMaximized();
         if (_wasMaximized) {
           await windowManager.unmaximize();
-          // Small delay to let the OS apply the unmaximize bounds before going fullscreen
+          
           await Future.delayed(const Duration(milliseconds: 50));
         }
         await windowManager.setFullScreen(true);

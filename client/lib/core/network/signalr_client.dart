@@ -10,8 +10,8 @@ enum SignalRConnectionState {
   reconnecting,
 }
 
-/// Wraps signalr_netcore. Exposes connect(), disconnect(), invoke(), on().
-/// Configures reconnect policy from kReconnectDelaysMs.
+
+
 class SignalRClient {
   final AppLogger _logger;
   late HubConnection _hubConnection;
@@ -67,8 +67,8 @@ class SignalRClient {
 
     if (_hubConnection.state == HubConnectionState.Connecting ||
         _hubConnection.state == HubConnectionState.Reconnecting) {
-      // Just wait a generic bit, signalr_netcore doesn't have a straightforward 'waitUntilConnected'
-      // but we update state since we are already connecting.
+      
+      
       _updateState(SignalRConnectionState.connecting);
       _isConnecting = false;
       return;
@@ -83,7 +83,7 @@ class SignalRClient {
       } catch (e) {
         _updateState(SignalRConnectionState.disconnected);
         _logger.e('SignalR connect failed: $e');
-        // Let it throw if calling ensures it throws, but typically we might just return.
+        
         _isConnecting = false;
         rethrow;
       }

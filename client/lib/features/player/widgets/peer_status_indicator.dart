@@ -4,8 +4,8 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../room/bloc/room_state.dart';
 
-/// PeerStatusIndicator — compact chip showing peer connection state.
-/// 3 states: connected (green), buffering (amber spinner), away (grey).
+
+
 class PeerStatusIndicator extends StatelessWidget {
   final PeerStatus status;
 

@@ -4,9 +4,9 @@ using WatchParty.Server.Services;
 
 namespace WatchParty.Server.Controllers;
 
-/// <summary>
-/// REST controller for room operations per API_CONTRACTS.md.
-/// </summary>
+
+
+
 [ApiController]
 [Route("api/v1/rooms")]
 public class RoomsController : ControllerBase
@@ -22,7 +22,7 @@ public class RoomsController : ControllerBase
         _logger = logger;
     }
 
-    /// <summary>POST /rooms — Create a new room.</summary>
+    
     [HttpPost]
     [EnableRateLimiting("room-creation")]
     public IActionResult CreateRoom()
@@ -50,7 +50,7 @@ public class RoomsController : ControllerBase
         }
     }
 
-    /// <summary>POST /rooms/{code}/join — Pre-check that room exists and has space.</summary>
+    
     [HttpPost("{code}/join")]
     [EnableRateLimiting("room-join")]
     public IActionResult JoinRoom(string code)
@@ -92,7 +92,7 @@ public class RoomsController : ControllerBase
         });
     }
 
-    /// <summary>GET /rooms/{code}/status — Room status for diagnostics.</summary>
+    
     [HttpGet("{code}/status")]
     [EnableRateLimiting("room-status")]
     public IActionResult GetStatus(string code)
@@ -120,7 +120,7 @@ public class RoomsController : ControllerBase
         });
     }
 
-    /// <summary>GET /rooms — List active, joinable rooms.</summary>
+    
     [HttpGet]
     public IActionResult ListRooms()
     {

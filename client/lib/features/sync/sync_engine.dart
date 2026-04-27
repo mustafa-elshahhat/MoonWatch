@@ -6,7 +6,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/player/player_controller.dart';
 import '../../features/room/repository/room_repository.dart';
 
-// -- Sync Events --
+
 
 sealed class SyncEvent extends Equatable {
   const SyncEvent();
@@ -20,7 +20,7 @@ class SyncEventPlayReceived extends SyncEvent {
   final int serverTimestampMs;
   final int hostRttMs;
 
-  /// Playback command sequence number. Clients reject commands with seqNo <= lastApplied.
+  
   final int seqNo;
 
   const SyncEventPlayReceived({
@@ -37,10 +37,10 @@ class SyncEventPlayReceived extends SyncEvent {
 class SyncEventPauseReceived extends SyncEvent {
   final int positionMs;
 
-  /// Server timestamp when this command was issued. Used for deferred queue ordering.
+  
   final int serverTimestampMs;
 
-  /// Playback command sequence number.
+  
   final int seqNo;
 
   const SyncEventPauseReceived({
@@ -56,15 +56,15 @@ class SyncEventPauseReceived extends SyncEvent {
 class SyncEventSeekReceived extends SyncEvent {
   final int targetPositionMs;
 
-  /// Server timestamp when this command was issued.
+  
   final int serverTimestampMs;
 
-  /// Playback command sequence number.
+  
   final int seqNo;
 
-  /// Whether the host was playing at the moment of seek.
-  /// Guest uses this to decide whether to resume after seeking.
-  /// null = use current SyncBloc state as fallback (backward compat).
+  
+  
+  
   final bool? isPlaying;
 
   const SyncEventSeekReceived({
@@ -88,7 +88,7 @@ class SyncEventStateSyncReceived extends SyncEvent {
   final bool isPlaying;
   final int serverTimestampMs;
 
-  /// Room playback command counter at time of state_sync emission.
+  
   final int seqNo;
 
   const SyncEventStateSyncReceived({
@@ -107,17 +107,17 @@ class SyncEventStateSyncReceived extends SyncEvent {
       ];
 }
 
-/// Local player stalled .
+
 class SyncEventPlayerStalled extends SyncEvent {
   const SyncEventPlayerStalled();
 }
 
-/// Local player ready after stall .
+
 class SyncEventPlayerReady extends SyncEvent {
   const SyncEventPlayerReady();
 }
 
-/// Peer's player stalled — received via buffering:stall .
+
 class SyncEventPeerStalled extends SyncEvent {
   final int positionMs;
   final int episodeId;
@@ -130,7 +130,7 @@ class SyncEventPeerStalled extends SyncEvent {
   List<Object?> get props => [positionMs, episodeId];
 }
 
-/// Server sent buffering:resume — both ready .
+
 class SyncEventBufferingResumeReceived extends SyncEvent {
   final int resumePositionMs;
   final int episodeId;
@@ -143,19 +143,19 @@ class SyncEventBufferingResumeReceived extends SyncEvent {
   List<Object?> get props => [resumePositionMs, episodeId];
 }
 
-/// Self-dispatched by SyncBloc when kMaxCorrectionSeeksPerWindow is exceeded
-/// within kCorrectionSeekWindowMs. Triggers SyncStateDegraded.
+
+
 class SyncEventExcessiveDrift extends SyncEvent {
   const SyncEventExcessiveDrift();
 }
 
-/// Internal event — self-dispatched by SyncBloc.setPlayerReady(true) to flush
-/// the deferred command queue on the BLoC event loop (async-safe).
+
+
 class _SyncEventFlushDeferred extends SyncEvent {
   const _SyncEventFlushDeferred();
 }
 
-// -- Sync States --
+
 
 sealed class SyncState extends Equatable {
   const SyncState();
@@ -188,65 +188,65 @@ class SyncStateDegraded extends SyncState {
   List<Object?> get props => [correctionCount];
 }
 
-// -- SyncBloc --
 
-/// SyncBloc
-/// Receives playback events from RoomRepository, implements drift detection
-/// and correction seek. Handles buffering coordination  through .
-///
-/// Deferred command queue (RC-FIX):
-/// All incoming playback commands (play/pause/seek/state_sync) are queued while
-/// the local player is initializing. On playerReady, the queue is reconciled into
-/// a "latest-intent" snapshot: the most-recent authoritative position and play/pause
-/// state are applied in one atomic step with time compensation.
-///
-/// Sequence number tracking (RC-FIX):
-/// Each command carries a monotonically increasing seqNo from the server.
-/// Commands with seqNo <= _lastAppliedSeqNo are rejected to prevent stale
-/// replays from overwriting a newer authoritative state.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class SyncBloc extends Bloc<SyncEvent, SyncState> {
   final PlayerController _playerController;
   final RoomRepository _roomRepository;
   final AppLogger _logger = AppLogger('SyncBloc');
 
-  /// Role of the local participant ("host" or "guest").
+  
   String _role = 'guest';
 
   int _guestRttMs = AppConstants.kDefaultRttMs;
   final List<int> _correctionTimestamps = [];
 
-  /// Estimated clock offset (server_clock - client_clock) in milliseconds.
-  /// Positive means server clock is ahead of client. Applied to convert
-  /// client timestamps to server time reference for accurate elapsed-time
-  /// calculations. Updated by LatencyEstimator ping/pong measurements.
+  
+  
+  
+  
   int _clockOffsetMs = 0;
 
   bool _localStallSent = false;
   bool _wasPlayingBeforeBuffering = false;
 
-  /// Whether the player surface is attached and ready to accept commands.
+  
   bool _playerReady = false;
   String? _playerContentKey;
   String? _lastNotifiedReadyContentKey;
 
-  /// Deferred command queue. All play/pause/seek/state_sync events received
-  /// while _playerReady == false are stored here. Flushed on setPlayerReady(true).
+  
+  
   final List<SyncEvent> _deferredQueue = [];
 
-  /// Last applied sequence number. Commands with seqNo <= this value are rejected.
-  /// seqNo == 0 means the server hasn't started numbering yet (old server or first boot).
+  
+  
   int _lastAppliedSeqNo = 0;
 
-  /// Timestamp (epoch ms) of the last authoritative command applied (play/seek/flush).
-  /// Drift checks are suppressed for [_kPostCommandCooldownMs] after this to let
-  /// the player settle into the new position before measuring drift.
+  
+  
+  
   int _lastAuthoritativeCommandAtMs = 0;
 
-  /// Cooldown period after an authoritative command during which drift checks are skipped.
-  /// Covers seek buffering, HLS segment fetching, and player stabilization time.
+  
+  
   static const int _kPostCommandCooldownMs = 3000;
 
-  // —— Buffering episode tracking (prevents infinite stall/ready loop) ——
+  
   int _bufferingEpisodeId = 0;
   int? _currentEpisodeId;
   int? _lastStallPositionMs;
@@ -257,13 +257,13 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   static const int _kPostResumeCooldownMs = 3000;
   static const int _kPositionToleranceMs = 2000;
 
-  /// Number of consecutive state_sync cycles where drift exceeded the threshold.
-  /// A correction seek is only triggered after [_kRequiredDriftHits] consecutive hits
-  /// to avoid unnecessary seeks from momentary jitter or measurement noise.
+  
+  
+  
   int _consecutiveDriftHits = 0;
 
-  /// How many consecutive drift-exceeding state_syncs are required before triggering
-  /// a correction seek. Acts as hysteresis to prevent oscillation.
+  
+  
   static const int _kRequiredDriftHits = 2;
 
   SyncBloc({
@@ -283,7 +283,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     on<SyncEventExcessiveDrift>(_onExcessiveDrift);
     on<_SyncEventFlushDeferred>(_onFlushDeferred);
 
-    // Wire RoomRepository buffering callbacks → dispatch events into this Bloc.
+    
     _roomRepository.onBufferingStall = (payload) {
       add(
         SyncEventPeerStalled(
@@ -301,7 +301,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       );
     };
 
-    // Wire playback sync callbacks -> dispatch sync events into this Bloc.
+    
     _roomRepository.onPlaybackPlay = (payload) {
       add(
         SyncEventPlayReceived(
@@ -343,7 +343,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     };
   }
 
-  /// Set the local participant's role. Must be called after room join.
+  
   void setRole(String role) {
     if (_role == role) {
       _logger.d('[SYNC_ROLE_DUPLICATE_IGNORED] role=$role');
@@ -357,18 +357,18 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     _guestRttMs = rttMs;
   }
 
-  /// Update estimated clock offset between client and server.
-  /// Called from LatencyEstimator whenever a new pong measurement arrives.
+  
+  
   void updateClockOffset(int offsetMs) {
     _clockOffsetMs = offsetMs;
   }
 
-  /// Mark the player as ready/not-ready for sync commands.
-  /// Called from WatchScreen's BlocListener on PlayerStateReady (true) and
-  /// PlayerStateIdle/PlayerStateError (false).
-  ///
-  /// On ready: flushes the deferred command queue with latest-intent reconciliation.
-  /// On not-ready: clears the queue (stale commands for the old player instance).
+  
+  
+  
+  
+  
+  
   void setPlayerReady(bool ready, {String? contentKey}) {
     final nextContentKey = contentKey ?? (ready ? _playerContentKey : null);
     final contentChanged = nextContentKey != _playerContentKey;
@@ -387,8 +387,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         _lastNotifiedReadyContentKey = readyContentKey;
         _roomRepository.notifyPlayerReady(readyContentKey);
       }
-      // Flush is async; schedule on the event loop to avoid calling async code
-      // directly in this sync method. The BLoC event queue processes it next.
+      
+      
       if (_deferredQueue.isNotEmpty) {
         _logger.i(
           'SyncBloc: scheduling deferred queue flush [queue_size=${_deferredQueue.length}]',
@@ -399,10 +399,10 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       if (contentChanged) {
         _lastNotifiedReadyContentKey = null;
       }
-      // Reset hysteresis counter so drift hits from the previous content do not
-      // bleed into the new content's correction window.
+      
+      
       _consecutiveDriftHits = 0;
-      // Player was reset — discard all deferred commands for the previous player.
+      
       if (_deferredQueue.isNotEmpty) {
         _logger.d(
           'SyncBloc: player not ready — clearing ${_deferredQueue.length} deferred commands',
@@ -412,7 +412,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     }
   }
 
-  // -- Event handlers --
+  
 
   Future<void> _onPlayReceived(
     SyncEventPlayReceived event,
@@ -420,7 +420,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   ) async {
     final receivedAtMs = DateTime.now().millisecondsSinceEpoch;
 
-    // Host receives its own broadcast back — treat as no-op.
+    
     if (_role == 'host') {
       _logger.d(
         'SyncBloc: host ignoring own playback:play broadcast [seqNo=${event.seqNo}]',
@@ -434,7 +434,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       'serverTs=${event.serverTimestampMs}, playerReady=$_playerReady]',
     );
 
-    // Stale command guard: reject if we've already applied a newer command.
+    
     if (event.seqNo > 0 && event.seqNo <= _lastAppliedSeqNo) {
       _logger.w(
         'SyncBloc: ignoring stale playback:play '
@@ -460,7 +460,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     SyncEventPauseReceived event,
     Emitter<SyncState> emit,
   ) async {
-    // Host receives its own broadcast back — treat as no-op.
+    
     if (_role == 'host') {
       _logger.d(
         'SyncBloc: host ignoring own playback:pause broadcast [seqNo=${event.seqNo}]',
@@ -492,7 +492,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     SyncEventSeekReceived event,
     Emitter<SyncState> emit,
   ) async {
-    // Host receives its own broadcast back — treat as no-op.
+    
     if (_role == 'host') {
       _logger.d(
         'SyncBloc: host ignoring own playback:seek broadcast [seqNo=${event.seqNo}]',
@@ -524,7 +524,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     SyncEventStateSyncReceived event,
     Emitter<SyncState> emit,
   ) async {
-    // Drift correction applies only to guests.
+    
     if (_role == 'host') {
       return;
     }
@@ -535,14 +535,14 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         '[seqNo=${event.seqNo}, hostPositionMs=${event.hostPositionMs}, '
         'isPlaying=${event.isPlaying}]',
       );
-      // Only keep the latest state_sync in the queue (older ones are superseded).
+      
       _deferredQueue.removeWhere((e) => e is SyncEventStateSyncReceived);
       _deferredQueue.add(event);
       return;
     }
 
-    // If the state_sync references an older room playback command than we've already
-    // applied, ignore it — a more recent play/pause/seek was applied.
+    
+    
     if (event.seqNo > 0 && event.seqNo < _lastAppliedSeqNo) {
       _logger.d(
         'SyncBloc: ignoring stale state_sync '
@@ -553,8 +553,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
 
     final now = DateTime.now().millisecondsSinceEpoch;
 
-    // Post-command cooldown: skip drift enforcement while the player is still settling
-    // after a recent authoritative command (play/seek/deferred flush/correction seek).
+    
+    
     final msSinceLastCommand = now - _lastAuthoritativeCommandAtMs;
     if (_lastAuthoritativeCommandAtMs > 0 &&
         msSinceLastCommand < _kPostCommandCooldownMs) {
@@ -565,9 +565,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       return;
     }
 
-    // ageMs = transit time from server to client (clock-offset-adjusted).
-    // Clock offset converts client time to server time reference, eliminating
-    // systematic skew from the elapsed-time estimate.
+    
+    
+    
     final adjustedNow = now + _clockOffsetMs;
     final rawAgeMs = adjustedNow - event.serverTimestampMs;
     final ageMs = rawAgeMs.clamp(0, 30000);
@@ -592,8 +592,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         '[consecutiveHits=$_consecutiveDriftHits / $_kRequiredDriftHits]',
       );
 
-      // Hysteresis: require multiple consecutive breaches before correcting.
-      // This prevents single-cycle jitter from triggering unnecessary seeks.
+      
+      
       if (_consecutiveDriftHits < _kRequiredDriftHits) {
         return;
       }
@@ -623,7 +623,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         Duration(milliseconds: adjustedHostPositionMs),
       );
 
-      // Mark as authoritative to prevent immediate re-correction on next state_sync.
+      
       _lastAuthoritativeCommandAtMs = DateTime.now().millisecondsSinceEpoch;
 
       if (event.isPlaying) {
@@ -635,13 +635,13 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         emit(const SyncStatePaused());
       }
     } else {
-      // Drift within acceptable range — reset consecutive counter.
+      
       _consecutiveDriftHits = 0;
     }
   }
 
-  /// Internal: flush the deferred command queue using latest-intent reconciliation.
-  /// Dispatched by setPlayerReady(true) via _SyncEventFlushDeferred.
+  
+  
   Future<void> _onFlushDeferred(
     _SyncEventFlushDeferred event,
     Emitter<SyncState> emit,
@@ -649,10 +649,10 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     await _flushDeferredQueue(emit);
   }
 
-  /// Whether we are in a post-seek or post-resume cooldown for buffering.
+  
   bool _isInBufferingCooldown() {
     final now = DateTime.now().millisecondsSinceEpoch;
-    // Post-seek cooldown
+    
     if (_lastSeekAppliedAtMs > 0 &&
         now - _lastSeekAppliedAtMs < _kPostSeekCooldownMs) {
       final posMs = _playerController.currentPosition.inMilliseconds;
@@ -660,7 +660,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         return true;
       }
     }
-    // Post-resume cooldown
+    
     if (_lastBufferingResumeAtMs > 0 &&
         now - _lastBufferingResumeAtMs < _kPostResumeCooldownMs) {
       return true;
@@ -672,7 +672,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     SyncEventPlayerStalled event,
     Emitter<SyncState> emit,
   ) async {
-    // Suppress stalls during post-seek / post-resume cooldown.
+    
     if (_isInBufferingCooldown()) {
       _logger.d('[BUFFERING_STALL_IGNORED_COOLDOWN]');
       return;
@@ -683,7 +683,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       _wasPlayingBeforeBuffering = _playerController.isPlaying;
       final positionMs = _playerController.currentPosition.inMilliseconds;
 
-      // Deduplicate: same position +/- tolerance as last stall → skip.
+      
       if (_lastStallPositionMs != null &&
           (positionMs - _lastStallPositionMs!).abs() < _kPositionToleranceMs &&
           _currentEpisodeId != null) {
@@ -724,8 +724,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       _localStallSent = false;
 
       if (_currentEpisodeId == null) {
-        // Harmless race: The server already resumed playback, clearing _currentEpisodeId,
-        // before our local player finished buffering. We don't need to send a ready notification.
+        
+        
         _logger.d(
           '[BUFFERING_RESOLVED_EXTERNALLY] Skipping ready notification',
         );
@@ -740,8 +740,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       }
     }
 
-    // If we're in SyncStateBuffering because of PEER stall (not local),
-    // stay in buffering — the server will send buffering:resume.
+    
+    
     if (state is SyncStateBuffering) {
       return;
     }
@@ -758,12 +758,12 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     SyncEventPeerStalled event,
     Emitter<SyncState> emit,
   ) async {
-    // Ignore peer stall during cooldown (we just resumed, peer may echo stale stall).
+    
     if (_isInBufferingCooldown()) {
       _logger.d('[PEER_STALL_IGNORED_COOLDOWN] pos=${event.positionMs}');
       return;
     }
-    // Ignore if already buffering.
+    
     if (state is SyncStateBuffering) {
       _logger.d(
         '[PEER_STALL_IGNORED_ALREADY_BUFFERING] pos=${event.positionMs}',
@@ -786,7 +786,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     Emitter<SyncState> emit,
   ) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    // Deduplicate: ignore resume if we just applied one.
+    
     if (_lastBufferingResumeAtMs > 0 &&
         now - _lastBufferingResumeAtMs < _kPostResumeCooldownMs) {
       _logger.d(
@@ -796,9 +796,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     }
 
     if (_currentEpisodeId == null) {
-      // Harmless race: We received a resume from the server, but our local state wasn't
-      // tracking a buffering episode. This can happen if the stall was very brief or we
-      // joined mid-buffering.
+      
+      
+      
       _logger.d('[BUFFERING_RESUME_WITHOUT_STALL] Ignoring resume');
       return;
     }
@@ -818,7 +818,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       Duration(milliseconds: event.resumePositionMs),
     );
 
-    // Mark as authoritative to suppress immediate drift corrections.
+    
     _lastAuthoritativeCommandAtMs = now;
 
     if (_wasPlayingBeforeBuffering) {
@@ -840,27 +840,27 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     emit(SyncStateDegraded(_correctionTimestamps.length));
   }
 
-  // -- Private helpers --
+  
 
-  /// Apply a play command with time-compensated position.
-  ///
-  /// Time compensation ensures that even if the command is applied seconds after
-  /// it was sent (e.g. player was still initializing), the guest seeks to the
-  /// position the host is actually at NOW, not where it was when play was broadcast.
+  
+  
+  
+  
+  
   Future<void> _applyPlay(
     SyncEventPlayReceived event,
     Emitter<SyncState> emit,
   ) async {
     if (event.seqNo > 0) _lastAppliedSeqNo = event.seqNo;
 
-    // Compute how long ago this command was issued (clock-offset-adjusted).
+    
     final now = DateTime.now().millisecondsSinceEpoch + _clockOffsetMs;
     final elapsedMs = (now - event.serverTimestampMs).clamp(0, 30000);
 
-    // Time-compensated target: host's position + time elapsed since broadcast
-    // + host's one-way delay (hostRttMs/2).
-    // Note: guestRttMs/2 is NOT added because elapsedMs (which uses clock
-    // offset correction) already captures the server-to-guest transit time.
+    
+    
+    
+    
     final adjustedPositionMs =
         event.positionMs + elapsedMs + (event.hostRttMs ~/ 2);
 
@@ -883,7 +883,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     emit(const SyncStateSyncing());
   }
 
-  /// Apply a pause command: pause player and seek to host's authoritative position.
+  
   Future<void> _applyPause(
     SyncEventPauseReceived event,
     Emitter<SyncState> emit,
@@ -901,20 +901,20 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     emit(const SyncStatePaused());
   }
 
-  /// Apply a seek command: seek to target, then explicitly play or pause.
-  ///
-  /// The `isPlaying` field from the payload determines post-seek state.
-  /// Fallback: use current SyncBloc state (Syncing = playing, Paused = paused).
-  ///
-  /// Explicit pause -> seek -> play/pause ensures deterministic state regardless of
-  /// media_kit's auto-resume behavior, which varies across platforms.
+  
+  
+  
+  
+  
+  
+  
   Future<void> _applySeek(
     SyncEventSeekReceived event,
     Emitter<SyncState> emit,
   ) async {
     if (event.seqNo > 0) _lastAppliedSeqNo = event.seqNo;
 
-    // Determine post-seek play state from payload, falling back to current SyncBloc state.
+    
     final shouldPlay = event.isPlaying ?? (state is SyncStateSyncing);
 
     _logger.i(
@@ -923,15 +923,15 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       'shouldPlay=$shouldPlay, seqNo=${event.seqNo}',
     );
 
-    // Record seek target for post-seek buffering cooldown.
+    
     _lastSeekTargetMs = event.targetPositionMs;
     _lastSeekAppliedAtMs = DateTime.now().millisecondsSinceEpoch;
-    // Reset buffering episode state so post-seek buffering is suppressed.
+    
     _localStallSent = false;
     _currentEpisodeId = null;
     _lastStallPositionMs = null;
 
-    // Pause first to ensure deterministic state before seek completes.
+    
     await _playerController.pause();
     await _playerController.seekTo(
       Duration(milliseconds: event.targetPositionMs),
@@ -955,12 +955,12 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     }
   }
 
-  /// Flush the deferred command queue using latest-intent reconciliation.
-  ///
-  /// Scans all queued events and extracts the authoritative "latest state":
-  /// - Latest position (from the highest-seqNo play/pause/seek, or latest state_sync)
-  /// - Latest shouldPlay flag
-  /// Then seeks to the time-compensated position and plays or pauses.
+  
+  
+  
+  
+  
+  
   Future<void> _flushDeferredQueue(Emitter<SyncState> emit) async {
     if (_deferredQueue.isEmpty) return;
 
@@ -985,12 +985,12 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       final seqNo = _seqNoOf(event);
       final ts = _serverTsOf(event);
 
-      // Ordering: prefer higher seqNo; for equal seqNo prefer state_sync (it has
-      // current position from the timer, not the stale position from the original command).
+      
+      
       final existingScore = bestSeqNo * 2 + (_isStateSyncEvent(event) ? 0 : 1);
       final candidateScore = seqNo * 2 + (_isStateSyncEvent(event) ? 1 : 0);
 
-      // Fallback to timestamp ordering when seqNo == 0 (old server).
+      
       final isNewer =
           seqNo > 0 ? candidateScore > existingScore : ts > serverTimestampMs;
 
@@ -1031,7 +1031,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       return;
     }
 
-    // Skip if we already applied a newer command.
+    
     if (bestSeqNo > 0 && bestSeqNo <= _lastAppliedSeqNo) {
       _logger.d(
         'SyncBloc: deferred queue result already applied '
@@ -1040,7 +1040,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       return;
     }
 
-    // Time-compensate if the authoritative state was "playing" at serverTimestampMs.
+    
     final now = DateTime.now().millisecondsSinceEpoch + _clockOffsetMs;
     final elapsedMs = (shouldPlay && serverTimestampMs > 0)
         ? (now - serverTimestampMs).clamp(0, 30000)

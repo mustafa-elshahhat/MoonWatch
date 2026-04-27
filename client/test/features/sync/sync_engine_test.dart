@@ -13,7 +13,7 @@ void main() {
     mockPlayer = MockPlayerImpl();
     mockRepo = MockRoomRepository();
     syncBloc = SyncBloc(playerController: mockPlayer, roomRepository: mockRepo);
-    // Tests exercise guest sync behavior — mark player as ready.
+    
     syncBloc.setPlayerReady(true);
   });
 
@@ -32,7 +32,7 @@ void main() {
         final now = DateTime.now().millisecondsSinceEpoch;
         bloc.add(
           SyncEventStateSyncReceived(
-            hostPositionMs: 10200, // 200ms drift, below 500ms threshold
+            hostPositionMs: 10200, 
             isPlaying: true,
             serverTimestampMs: now,
           ),
@@ -51,13 +51,13 @@ void main() {
         return syncBloc;
       },
       act: (bloc) async {
-        // Hysteresis requires 2 consecutive drift hits before correction.
+        
         for (var i = 0; i < 2; i++) {
           mockPlayer.setPosition(const Duration(milliseconds: 10000));
           final now = DateTime.now().millisecondsSinceEpoch;
           bloc.add(
             SyncEventStateSyncReceived(
-              hostPositionMs: 10800, // 800ms drift, above 500ms threshold
+              hostPositionMs: 10800, 
               isPlaying: true,
               serverTimestampMs: now,
             ),
@@ -81,13 +81,13 @@ void main() {
         return syncBloc;
       },
       act: (bloc) async {
-        // Hysteresis requires 2 consecutive drift hits before correction.
+        
         for (var i = 0; i < 2; i++) {
           mockPlayer.setPosition(const Duration(milliseconds: 5000));
           final now = DateTime.now().millisecondsSinceEpoch;
           bloc.add(
             SyncEventStateSyncReceived(
-              hostPositionMs: 8000, // 3000ms ahead of guest
+              hostPositionMs: 8000, 
               isPlaying: true,
               serverTimestampMs: now,
             ),
@@ -112,14 +112,14 @@ void main() {
         return syncBloc;
       },
       act: (bloc) async {
-        // Hysteresis requires 2 consecutive drift hits before correction.
+        
         for (var i = 0; i < 2; i++) {
           mockPlayer.setPosition(const Duration(milliseconds: 10000));
           final now = DateTime.now().millisecondsSinceEpoch;
           bloc.add(
             SyncEventStateSyncReceived(
               hostPositionMs: 11000,
-              isPlaying: false, // host is paused
+              isPlaying: false, 
               serverTimestampMs: now,
             ),
           );
@@ -143,8 +143,8 @@ void main() {
         return syncBloc;
       },
       act: (bloc) async {
-        // First 2 events satisfy hysteresis, triggering 1 correction.
-        // Subsequent events are blocked by the 6s post-command cooldown.
+        
+        
         for (var i = 0; i < 6; i++) {
           mockPlayer.setPosition(const Duration(milliseconds: 10000));
           final now = DateTime.now().millisecondsSinceEpoch;
@@ -159,10 +159,10 @@ void main() {
         }
       },
       wait: const Duration(milliseconds: 200),
-      // Only 1 correction fires (after hysteresis on event #2);
-      // events #3-#6 are blocked by cooldown.
+      
+      
       expect: () => [
-        const SyncStateSyncing(), // single correction
+        const SyncStateSyncing(), 
       ],
     );
   });
@@ -184,7 +184,7 @@ void main() {
       expect: () => [const SyncStateSyncing()],
       verify: (_) {
         expect(mockPlayer.seekHistory, isNotEmpty);
-        // adjusted = 5000 + ~0 elapsed + 100/2 + 100/2 = ~5100 (default guest RTT = 100)
+        
         expect(mockPlayer.seekHistory.last.inMilliseconds, closeTo(5100, 50));
         expect(mockPlayer.actionHistory, contains('play'));
       },
@@ -208,8 +208,8 @@ void main() {
       },
       expect: () => [const SyncStateSyncing()],
       verify: (_) {
-        // adjusted = 5000 + ~0 elapsed + 100/2 = ~5050
-        // (guestRttMs/2 no longer added — clock offset handles server→guest delay)
+        
+        
         expect(mockPlayer.seekHistory.last.inMilliseconds, closeTo(5050, 50));
       },
     );
@@ -269,7 +269,7 @@ void main() {
       },
       seed: () => const SyncStateBuffering(),
       act: (bloc) async {
-        await mockPlayer.play(); // set isPlaying = true
+        await mockPlayer.play(); 
         bloc.add(const SyncEventPlayerReady());
       },
       expect: () => [],
@@ -287,10 +287,10 @@ void main() {
       },
       seed: () => const SyncStateSyncing(),
       act: (bloc) async {
-        await mockPlayer.play(); // set isPlaying = true
+        await mockPlayer.play(); 
         bloc.add(const SyncEventPlayerReady());
       },
-      // Bloc deduplicates: current state is already SyncStateSyncing.
+      
       expect: () => <SyncState>[],
     );
 
@@ -306,46 +306,46 @@ void main() {
       },
       seed: () => const SyncStatePaused(),
       act: (bloc) {
-        // mockPlayer.isPlaying is false by default
+        
         bloc.add(const SyncEventPlayerReady());
       },
-      // Bloc deduplicates: current state is already SyncStatePaused.
+      
       expect: () => <SyncState>[],
     );
   });
 
-  // —— Problem 3: state_sync gating while player not ready ——————————————————
+  
 
   group('SyncBloc — state_sync deferred while player not ready', () {
     blocTest<SyncBloc, SyncState>(
       'state_sync is deferred (not applied) while playerReady=false',
       build: () {
-        // Guest role, player explicitly NOT ready.
+        
         final bloc = SyncBloc(
           playerController: mockPlayer,
           roomRepository: mockRepo,
         );
         bloc.setRole('guest');
-        // Do NOT call setPlayerReady(true) — player is loading.
+        
         return bloc;
       },
       act: (bloc) {
         mockPlayer.setPosition(
           Duration.zero,
-        ); // guest at 0 — new content loading
+        ); 
         final now = DateTime.now().millisecondsSinceEpoch;
         bloc.add(
           SyncEventStateSyncReceived(
-            hostPositionMs: 10136, // host is 10 s ahead
+            hostPositionMs: 10136, 
             isPlaying: true,
             serverTimestampMs: now,
           ),
         );
       },
       wait: const Duration(milliseconds: 100),
-      expect: () => <SyncState>[], // no state change — no correction
+      expect: () => <SyncState>[], 
       verify: (_) {
-        expect(mockPlayer.seekHistory, isEmpty); // no correction seek
+        expect(mockPlayer.seekHistory, isEmpty); 
       },
     );
 
@@ -361,13 +361,13 @@ void main() {
         return bloc;
       },
       act: (bloc) async {
-        // Two hits to satisfy hysteresis threshold of 2.
+        
         for (var i = 0; i < 2; i++) {
           mockPlayer.setPosition(const Duration(milliseconds: 10000));
           final now = DateTime.now().millisecondsSinceEpoch;
           bloc.add(
             SyncEventStateSyncReceived(
-              hostPositionMs: 11000, // 1000ms drift, above threshold
+              hostPositionMs: 11000, 
               isPlaying: true,
               serverTimestampMs: now,
             ),
@@ -376,7 +376,7 @@ void main() {
         }
       },
       wait: const Duration(milliseconds: 100),
-      expect: () => [const SyncStateSyncing()], // correction fired
+      expect: () => [const SyncStateSyncing()], 
       verify: (_) {
         expect(mockPlayer.seekHistory, isNotEmpty);
       },
@@ -394,7 +394,7 @@ void main() {
         return bloc;
       },
       act: (bloc) async {
-        // First drift hit — below hysteresis threshold of 2.
+        
         mockPlayer.setPosition(const Duration(milliseconds: 10000));
         bloc.add(
           SyncEventStateSyncReceived(
@@ -405,13 +405,13 @@ void main() {
         );
         await Future.delayed(const Duration(milliseconds: 10));
 
-        // New content starts loading → playerReady goes false then true.
-        // This must reset _consecutiveDriftHits to 0.
+        
+        
         bloc.setPlayerReady(false);
         bloc.setPlayerReady(true);
 
-        // Second drift hit after reset — should NOT trigger correction because
-        // the hysteresis counter was reset (only 1 hit in new window, need 2).
+        
+        
         mockPlayer.setPosition(const Duration(milliseconds: 10000));
         bloc.add(
           SyncEventStateSyncReceived(
@@ -423,7 +423,7 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 10));
       },
       wait: const Duration(milliseconds: 100),
-      // No correction — only 1 consecutive hit in the second window (need 2).
+      
       expect: () => <SyncState>[],
       verify: (_) {
         expect(mockPlayer.seekHistory, isEmpty);

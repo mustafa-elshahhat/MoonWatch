@@ -70,7 +70,7 @@ class MainShellState extends State<MainShell> {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth > 800) {
-          // Desktop / Large Tablet Layout
+          
           return Scaffold(
             body: Row(
               children: [
@@ -80,9 +80,9 @@ class MainShellState extends State<MainShell> {
             ),
           );
         } else {
-          // Mobile Layout
+          
           return Scaffold(
-            extendBody: true, // Content flows behind bottom nav
+            extendBody: true, 
             body: _buildScreen(_currentIndex),
             bottomNavigationBar: _buildPremiumBottomNav(),
           );
@@ -136,7 +136,7 @@ class MainShellState extends State<MainShell> {
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.xl),
-          // Moon wordmark — just the crescent icon on desktop
+          
           const CustomPaint(
             size: Size(24, 24),
             painter: _CrescentPainter(color: AppColors.textPrimary),
@@ -146,7 +146,7 @@ class MainShellState extends State<MainShell> {
           _buildSideNavItem(1, Icons.explore_rounded, 'Browse'),
           _buildSideNavItem(2, Icons.meeting_room_rounded, 'Rooms'),
           const Spacer(),
-          // Version footnote
+          
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.lg),
             child: Text(
@@ -233,7 +233,7 @@ class MainShellState extends State<MainShell> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Left accent indicator
+            
             Positioned(
               left: 0,
               child: AnimatedContainer(
@@ -250,7 +250,7 @@ class MainShellState extends State<MainShell> {
                 ),
               ),
             ),
-            // Item content
+            
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -295,7 +295,7 @@ class MainShellState extends State<MainShell> {
   }
 }
 
-// —— Crescent moon icon painter ————————————————————————————————————————————————
+
 
 class _CrescentPainter extends CustomPainter {
   final Color color;
@@ -311,10 +311,10 @@ class _CrescentPainter extends CustomPainter {
     final cy = size.height / 2;
     final r = size.width * 0.46;
 
-    // Full circle path
+    
     final outer = Path()
       ..addOval(Rect.fromCircle(center: Offset(cx, cy), radius: r));
-    // Cutout circle (shifted right to create crescent)
+    
     final inner = Path()
       ..addOval(
         Rect.fromCircle(
@@ -322,7 +322,7 @@ class _CrescentPainter extends CustomPainter {
           radius: r * 0.78,
         ),
       );
-    // Crescent = outer minus inner
+    
     final crescent = Path.combine(PathOperation.difference, outer, inner);
     canvas.drawPath(crescent, paint);
   }

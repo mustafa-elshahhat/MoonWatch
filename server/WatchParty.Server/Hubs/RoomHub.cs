@@ -6,10 +6,10 @@ using WatchParty.Shared.Protocol.Payloads;
 
 namespace WatchParty.Server.Hubs;
 
-/// <summary>
-/// SignalR hub for room operations. Thin layer — delegates to RoomService.
-/// 
-/// </summary>
+
+
+
+
 public class RoomHub : Hub
 {
     private readonly IRoomService _roomService;
@@ -23,7 +23,7 @@ public class RoomHub : Hub
         _logger = logger;
     }
 
-    /// <summary>Create a room and associate connection with it as host.</summary>
+    
     public async Task CreateRoom()
     {
         try
@@ -51,7 +51,7 @@ public class RoomHub : Hub
         }
     }
 
-    /// <summary>Associate connection with a room.</summary>
+    
     public async Task JoinRoom(string roomCode, string role)
     {
         try
@@ -65,7 +65,7 @@ public class RoomHub : Hub
 
             var serverTimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-            // Send room:joined to caller
+            
             await Clients.Caller.SendAsync(RoomEvents.RoomJoined, new RoomJoinedPayload(
                 result.RoomCode,
                 result.Role,
@@ -73,19 +73,19 @@ public class RoomHub : Hub
                 result.ContentDescriptor,
                 serverTimestampMs));
 
-            // If caller is guest, notify host
+            
             if (result.Role == "guest" && result.IsNewGuest)
             {
                 await Clients.GroupExcept(result.RoomCode, Context.ConnectionId)
                     .SendAsync(RoomEvents.RoomGuestJoined, new RoomGuestJoinedPayload(serverTimestampMs));
 
-                // send immediate playback:state_sync to a new guest
-                // if the host has already started playing. Without this, the guest would
-                // wait up to 5 seconds for the next periodic state_sync, starting at position 0.
+                
+                
+                
                 if (result.HostPositionMs.HasValue && result.HostIsPlaying.HasValue)
                 {
-                    // Compute estimated host position: advance from last-known anchor
-                    // by elapsed playback time since the anchor was set.
+                    
+                    
                     var estimatedPositionMs = result.HostPositionMs.Value;
                     if (result.HostIsPlaying.Value && result.HostPositionUpdatedAtMs.HasValue && result.HostPositionUpdatedAtMs.Value > 0)
                     {
@@ -107,14 +107,14 @@ public class RoomHub : Hub
             }
             else if (result.Role == "guest" && !result.IsNewGuest)
             {
-                // Reconnection: send guest_reconnected to host
+                
                 await Clients.GroupExcept(result.RoomCode, Context.ConnectionId)
                     .SendAsync(RoomEvents.RoomGuestReconnected, new RoomGuestReconnectedPayload(serverTimestampMs));
 
-                // Send playback:state_sync to the rejoining guest
+                
                 if (result.HostPositionMs.HasValue && result.HostIsPlaying.HasValue)
                 {
-                    // Compute estimated host position for reconnecting guest
+                    
                     var estimatedPositionMs = result.HostPositionMs.Value;
                     if (result.HostIsPlaying.Value && result.HostPositionUpdatedAtMs.HasValue && result.HostPositionUpdatedAtMs.Value > 0)
                     {
@@ -161,7 +161,7 @@ public class RoomHub : Hub
         }
     }
 
-    /// <summary>Graceful disconnect.</summary>
+    
     public async Task LeaveRoom()
     {
         try
@@ -172,7 +172,7 @@ public class RoomHub : Hub
 
             if (result.Role == "host" || result.Reason == "host_left")
             {
-                // Host left → stop state sync timer, send room:closed to guest
+                
                 _stateSyncTimer.StopForRoom(result.RoomCode);
 
                 if (result.PeerConnectionId != null)
@@ -186,7 +186,7 @@ public class RoomHub : Hub
             }
             else
             {
-                // Guest left → send room:guest_left to host
+                
                 if (result.PeerConnectionId != null)
                 {
                     await Clients.Client(result.PeerConnectionId)
@@ -208,7 +208,7 @@ public class RoomHub : Hub
         }
     }
 
-    /// <summary>Broadcast play command. Host only.</summary>
+    
     public async Task Play(long positionMs, long clientTimestampMs)
     {
         try
@@ -224,7 +224,7 @@ public class RoomHub : Hub
                     result.HostRttMs,
                     result.SeqNo));
 
-            // Start periodic state_sync timer
+            
             _stateSyncTimer.StartForRoom(result.RoomCode);
         }
         catch (RoleUnauthorizedException ex)
@@ -247,7 +247,7 @@ public class RoomHub : Hub
         }
     }
 
-    /// <summary>Broadcast pause command. Host only.</summary>
+    
     public async Task Pause(long positionMs)
     {
         try
@@ -262,7 +262,7 @@ public class RoomHub : Hub
                     result.ServerTimestampMs,
                     result.SeqNo));
 
-            // Stop periodic state_sync timer while paused
+            
             _stateSyncTimer.StopForRoom(result.RoomCode);
         }
         catch (RoleUnauthorizedException ex)
@@ -285,7 +285,7 @@ public class RoomHub : Hub
         }
     }
 
-    /// <summary>Broadcast seek command. Host only.</summary>
+    
     public async Task Seek(long targetPositionMs)
     {
         try
@@ -321,7 +321,7 @@ public class RoomHub : Hub
         }
     }
 
-    /// <summary>Set content descriptor. Host only.</summary>
+    
     public async Task SetContent(IptvContentDescriptor descriptor)
     {
         try
@@ -332,7 +332,7 @@ public class RoomHub : Hub
             var result = await _roomService.HandleSetContent(Context.ConnectionId, descriptor);
             _stateSyncTimer.StopForRoom(result.RoomCode);
 
-            // Send room:content_set to guest if connected
+            
             if (result.GuestConnectionId != null)
             {
                 var serverTimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -358,7 +358,7 @@ public class RoomHub : Hub
         }
     }
 
-    /// <summary>Latency probe.</summary>
+    
     public async Task Ping(long clientTimestampMs, int clientMeasuredRttMs = 0)
     {
         try
@@ -380,7 +380,7 @@ public class RoomHub : Hub
         }
     }
 
-    /// <summary>Notify peer that local player is buffering</summary>
+    
     public async Task NotifyBufferingStall(long positionMs, int episodeId)
     {
         try
@@ -390,7 +390,7 @@ public class RoomHub : Hub
 
             var result = await _roomService.HandleNotifyBufferingStall(Context.ConnectionId, positionMs, episodeId);
 
-            // Broadcast buffering:stall to peer only (not caller)
+            
             if (result.PeerConnectionId != null)
             {
                 var serverTimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -413,7 +413,7 @@ public class RoomHub : Hub
         }
     }
 
-    /// <summary>Notify that local player is initialized and ready to sync.</summary>
+    
     public async Task NotifyPlayerReady(string contentKey)
     {
         try
@@ -447,7 +447,7 @@ public class RoomHub : Hub
         }
     }
 
-    /// <summary>Notify that local player is ready after buffering</summary>
+    
     public async Task NotifyBufferingReady(int episodeId)
     {
         try
@@ -458,7 +458,7 @@ public class RoomHub : Hub
 
             if (result.GateOpened)
             {
-                // Both participants are Ready — broadcast buffering:resume to both
+                
                 var serverTimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 await Clients.Group(result.RoomCode)
                     .SendAsync(RoomEvents.BufferingResume, new BufferingResumePayload(
@@ -478,7 +478,7 @@ public class RoomHub : Hub
         }
     }
 
-    /// <summary>Handle disconnection. Identifies role and calls appropriate service handler.</summary>
+    
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         try
@@ -491,7 +491,7 @@ public class RoomHub : Hub
             {
                 if (result.Role == "host")
                 {
-                    // Host disconnected → stop state sync timer, room:closed to guest
+                    
                     _stateSyncTimer.StopForRoom(result.RoomCode);
 
                     if (result.PeerConnectionId != null)
@@ -504,7 +504,7 @@ public class RoomHub : Hub
                 }
                 else if (result.Role == "guest")
                 {
-                    // Guest disconnected → room:guest_left to host
+                    
                     if (result.PeerConnectionId != null)
                     {
                         await Clients.Client(result.PeerConnectionId)

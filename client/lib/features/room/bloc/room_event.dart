@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../../core/protocol/payloads.dart';
 
-/// RoomBloc events per STATE_MANAGEMENT.md.
+
 sealed class RoomEvent extends Equatable {
   const RoomEvent();
 

@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'app_colors.dart';
 import 'app_spacing.dart';
 
-/// Centralized app theme for WatchParty.
-/// Premium dark, media-focused design with deep purple accent.
+
+
 class AppTheme {
   AppTheme._();
 

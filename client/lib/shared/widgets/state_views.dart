@@ -3,7 +3,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 
-// —— Loading State ——————————————————————————————————————————————————
+
 
 class LoadingState extends StatefulWidget {
   final String? message;
@@ -103,7 +103,7 @@ class _LoadingStateState extends State<LoadingState>
       );
 }
 
-// —— Error State ————————————————————————————————————————————————————
+
 
 class ErrorState extends StatelessWidget {
   final String message;
@@ -127,7 +127,7 @@ class ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Icon with subtle glow
+            
             Container(
               width: 72,
               height: 72,
@@ -230,7 +230,7 @@ class _RetryBtnState extends State<_RetryBtn> {
       );
 }
 
-// —— Empty State ————————————————————————————————————————————————————
+
 
 class EmptyState extends StatelessWidget {
   final String message;
@@ -256,7 +256,7 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Icon with dashed border feel
+            
             Container(
               width: 80,
               height: 80,

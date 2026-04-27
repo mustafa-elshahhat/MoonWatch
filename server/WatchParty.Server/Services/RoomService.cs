@@ -4,10 +4,10 @@ using WatchParty.Shared.Protocol.Payloads;
 
 namespace WatchParty.Server.Services;
 
-/// <summary>
-/// Room business logic. Room lifecycle business logic.
-/// Uses per-room SemaphoreSlim to serialize concurrent state mutations.
-/// </summary>
+
+
+
+
 public class RoomService : IRoomService
 {
     private readonly IRoomRegistry _registry;
@@ -21,7 +21,7 @@ public class RoomService : IRoomService
         _configuration = configuration;
     }
 
-    /// <inheritdoc />
+    
     public string CreateRoom()
     {
         var code = RoomCodeGenerator.Generate(c => _registry.TryGet(c, out _));
@@ -35,7 +35,7 @@ public class RoomService : IRoomService
         return code;
     }
 
-    /// <inheritdoc />
+    
     public async Task<JoinResult> HandleJoinRoom(string connectionId, string roomCode, string role)
     {
         roomCode = roomCode.ToUpperInvariant();
@@ -43,7 +43,7 @@ public class RoomService : IRoomService
         if (role != "host" && role != "guest")
             throw new InvalidRoleException(roomCode, role);
 
-        // Check if connection is already in a room before anything else
+        
         var existing = _registry.FindByConnectionId(connectionId);
         if (existing != null)
             throw new AlreadyJoinedException(connectionId, existing.RoomCode);
@@ -98,7 +98,7 @@ public class RoomService : IRoomService
         if (room.State == RoomState.Created)
             throw new RoomNotFoundException(room.RoomCode, connectionId);
 
-        // Cancel guest grace period if active (reconnection)
+        
         bool isGraceRejoin = false;
         if (room.GuestGraceCts != null)
         {
@@ -106,7 +106,7 @@ public class RoomService : IRoomService
             room.GuestGraceCts.Dispose();
             room.GuestGraceCts = null;
             isGraceRejoin = true;
-            // GuestAway is reset below when new guest is assigned
+            
         }
 
         if (room.Guest != null && !room.GuestAway)
@@ -122,16 +122,16 @@ public class RoomService : IRoomService
 
         _registry.RegisterConnection(connectionId, room.RoomCode);
 
-        // Only a grace-period rejoin is a reconnection;
-        // a new guest joining an Active room after grace expiry is a first join.
+        
+        
         bool isReconnect = false;
 
-        // Expose host playback state to any guest if host has started playing.
-        // This allows a new guest (not just reconnects) to immediately seek into the right
-        // position after their local player initializes, without waiting for the next state_sync.
+        
+        
+        
         bool hostHasPlaybackState = room.HostIsPlaying || room.HostPositionMs > 0;
 
-        // Transition state based on current state and stream URL
+        
         if (room.State == RoomState.Waiting || room.State == RoomState.Joined)
         {
             room.State = room.ContentDescriptor != null ? RoomState.Active : RoomState.Joined;
@@ -164,7 +164,7 @@ public class RoomService : IRoomService
             HostPositionUpdatedAtMs: (isReconnect || hostHasPlaybackState) ? room.HostPositionUpdatedAtMs : null);
     }
 
-    /// <inheritdoc />
+    
     public async Task<LeaveResult> HandleLeaveRoom(string connectionId)
     {
         var room = _registry.FindByConnectionId(connectionId)
@@ -188,7 +188,7 @@ public class RoomService : IRoomService
         }
     }
 
-    /// <inheritdoc />
+    
     public async Task<DisconnectResult?> HandleDisconnected(string connectionId)
     {
         var room = _registry.FindByConnectionId(connectionId);
@@ -203,7 +203,7 @@ public class RoomService : IRoomService
 
             if (room.Host?.ConnectionId == connectionId)
             {
-                // Host disconnect → close room immediately 
+                
                 var leave = CloseRoom(room, "host_disconnected", "host");
                 _logger.LogInformation("Host disconnected, room closed {Event} {RoomId} {ConnectionId}",
                     "room.closed", room.RoomCode, connectionId);
@@ -211,7 +211,7 @@ public class RoomService : IRoomService
             }
             else if (room.Guest?.ConnectionId == connectionId)
             {
-                // Guest disconnect → start grace period
+                
                 return HandleGuestDisconnect(room, connectionId);
             }
 
@@ -223,9 +223,9 @@ public class RoomService : IRoomService
         }
     }
 
-    /// Shared grace period logic for guest disconnect/leave.
-    /// Sets GuestAway, transitions state, starts cancellable timer.
-    /// Returns the configured grace period in seconds.
+    
+    
+    
     private int StartGuestGracePeriod(Room room)
     {
         var gracePeriodSeconds = _configuration.GetValue("WatchParty:Room:GuestGracePeriodSeconds", 30);
@@ -271,7 +271,7 @@ public class RoomService : IRoomService
             }
             catch (TaskCanceledException)
             {
-                // Guest reconnected before grace period expired
+                
             }
         });
 
@@ -280,7 +280,7 @@ public class RoomService : IRoomService
 
     private DisconnectResult HandleGuestDisconnect(Room room, string connectionId)
     {
-        // Unregister immediately — the physical connection is gone.
+        
         _registry.UnregisterConnection(connectionId);
         var gracePeriodSeconds = StartGuestGracePeriod(room);
 
@@ -303,7 +303,7 @@ public class RoomService : IRoomService
 
         room.State = RoomState.Closed;
 
-        // Cancel guest grace period if active
+        
         if (room.GuestGraceCts != null)
         {
             room.GuestGraceCts.Cancel();
@@ -311,7 +311,7 @@ public class RoomService : IRoomService
             room.GuestGraceCts = null;
         }
 
-        // Unregister all participant connections from reverse index
+        
         if (room.Host?.ConnectionId != null)
             _registry.UnregisterConnection(room.Host.ConnectionId);
         if (room.Guest?.ConnectionId != null)
@@ -329,10 +329,10 @@ public class RoomService : IRoomService
     {
         var hostConnectionId = room.Host?.ConnectionId;
 
-        // Unregister immediately
+        
         _registry.UnregisterConnection(connectionId);
 
-        // Fully remove the guest immediately for an explicit leave
+        
         room.Guest = null;
         room.GuestAway = false;
 
@@ -343,7 +343,7 @@ public class RoomService : IRoomService
             room.GuestGraceCts = null;
         }
 
-        // Room becomes Waiting if it was Active or Joined
+        
         if (room.State == RoomState.Active || room.State == RoomState.Joined)
         {
             room.State = RoomState.Waiting;
@@ -354,10 +354,10 @@ public class RoomService : IRoomService
         _logger.LogInformation("Guest explicitly left {Event} {RoomId} {ConnectionId}",
             "room.guest_left", room.RoomCode, connectionId);
 
-        return new LeaveResult(room.RoomCode, "guest", reason, hostConnectionId, 0); // Grace period 0 means permanent
+        return new LeaveResult(room.RoomCode, "guest", reason, hostConnectionId, 0); 
     }
 
-    /// <inheritdoc />
+    
     public async Task<PlayBroadcast> HandlePlay(string connectionId, long positionMs, long clientTimestampMs)
     {
         var room = FindRoom(connectionId);
@@ -386,7 +386,7 @@ public class RoomService : IRoomService
         }
     }
 
-    /// <inheritdoc />
+    
     public async Task<PauseBroadcast> HandlePause(string connectionId, long positionMs)
     {
         var room = FindRoom(connectionId);
@@ -415,7 +415,7 @@ public class RoomService : IRoomService
         }
     }
 
-    /// <inheritdoc />
+    
     public async Task<SeekBroadcast> HandleSeek(string connectionId, long targetPositionMs)
     {
         var room = FindRoom(connectionId);
@@ -443,7 +443,7 @@ public class RoomService : IRoomService
         }
     }
 
-    /// <inheritdoc />
+    
     public async Task<SetContentResult> HandleSetContent(string connectionId, IptvContentDescriptor descriptor)
     {
         var room = FindRoom(connectionId);
@@ -456,7 +456,7 @@ public class RoomService : IRoomService
             room.ContentDescriptor = descriptor;
             room.LastActivityAt = DateTimeOffset.UtcNow;
 
-            // Reset player readiness for the new content
+            
             if (room.Host != null)
             {
                 room.Host.IsPlayerReady = false;
@@ -496,7 +496,7 @@ public class RoomService : IRoomService
         }
     }
 
-    /// <inheritdoc />
+    
     public async Task<PingResult> HandlePing(string connectionId, long clientTimestampMs, int clientMeasuredRttMs = 0)
     {
         var room = _registry.FindByConnectionId(connectionId)
@@ -507,18 +507,18 @@ public class RoomService : IRoomService
         {
             var serverTimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-            // Store host RTT from client-measured round-trip time (measured by
-            // LatencyEstimator on the client, not estimated from clock difference).
+            
+            
             if (room.Host?.ConnectionId == connectionId && clientMeasuredRttMs > 0 && clientMeasuredRttMs < 10000)
             {
                 if (room.HostRttMs <= 0)
                 {
-                    // Seed first measurement directly.
+                    
                     room.HostRttMs = clientMeasuredRttMs;
                 }
                 else
                 {
-                    // EMA smoothing (α = 0.3) to prevent single-spike corruption.
+                    
                     room.HostRttMs = (int)(0.3 * clientMeasuredRttMs + 0.7 * room.HostRttMs);
                 }
             }
@@ -531,7 +531,7 @@ public class RoomService : IRoomService
         }
     }
 
-    /// <inheritdoc />
+    
     public async Task<BufferingStallResult> HandleNotifyBufferingStall(string connectionId, long positionMs, int episodeId)
     {
         var room = FindRoom(connectionId);
@@ -541,7 +541,7 @@ public class RoomService : IRoomService
         {
             var (participant, role) = FindParticipant(room, connectionId);
 
-            // Idempotent: if already Stalled, ignore
+            
             if (participant.BufferingState == BufferingState.Stalled)
             {
                 _logger.LogDebug("Duplicate buffering stall ignored {RoomId} {Role}", room.RoomCode, role);
@@ -565,7 +565,7 @@ public class RoomService : IRoomService
         }
     }
 
-    /// <inheritdoc />
+    
     public async Task<BufferingReadyResult> HandleNotifyBufferingReady(string connectionId, int episodeId)
     {
         var room = FindRoom(connectionId);
@@ -575,7 +575,7 @@ public class RoomService : IRoomService
         {
             var (participant, role) = FindParticipant(room, connectionId);
 
-            // Guard against out-of-sequence ready
+            
             if (participant.BufferingState == BufferingState.Ready)
             {
                 _logger.LogDebug("Out-of-sequence buffering ready ignored {RoomId} {Role}", room.RoomCode, role);
@@ -585,7 +585,7 @@ public class RoomService : IRoomService
             participant.BufferingState = BufferingState.Ready;
             room.LastActivityAt = DateTimeOffset.UtcNow;
 
-            // Check if both participants are now Ready (gate opens)
+            
             var hostReady = room.Host?.BufferingState == BufferingState.Ready;
             var guestReady = room.Guest?.BufferingState == BufferingState.Ready;
             var gateOpened = hostReady && guestReady && room.Guest != null && !room.GuestAway;
@@ -609,7 +609,7 @@ public class RoomService : IRoomService
         }
     }
 
-    /// <inheritdoc />
+    
     public async Task<PlayerReadyResult> HandleNotifyPlayerReady(string connectionId, string contentKey)
     {
         var room = FindRoom(connectionId);
@@ -683,7 +683,7 @@ public class RoomService : IRoomService
             ?? throw new ConnectionNotInRoomException(connectionId);
     }
 
-    /// <summary>Validates host action preconditions. Must be called while holding room.Lock.</summary>
+    
     private static void ValidateHostAction(Room room, string connectionId, params RoomState[] allowedStates)
     {
         if (room.State == RoomState.Closed)

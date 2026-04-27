@@ -3,7 +3,7 @@ import '../../../core/protocol/payloads.dart';
 
 enum PeerStatus { connected, buffering, away }
 
-/// Error code categories per ERROR_HANDLING.md.
+
 enum RoomErrorCode {
   roomNotFound,
   roomFull,
@@ -43,7 +43,7 @@ extension RoomErrorCodeX on RoomErrorCode {
   }
 }
 
-/// RoomBloc states per STATE_MANAGEMENT.md.
+
 sealed class RoomState extends Equatable {
   const RoomState();
 

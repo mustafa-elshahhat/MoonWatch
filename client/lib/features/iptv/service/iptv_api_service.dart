@@ -16,7 +16,7 @@ class IptvApiException implements Exception {
   String toString() => 'IptvApiException($statusCode): $message';
 }
 
-/// Low-level HTTP service for Xtream Codes IPTV API.
+
 class IptvApiService {
   final Dio _dio;
   final IptvConfig _config;
@@ -48,15 +48,15 @@ class IptvApiService {
     );
   }
 
-  /// Returns a sanitized URI string safe to write to logs.
-  /// Masks credentials in both query parameters and Xtream Codes path segments.
+  
+  
   static String _sanitizeUri(Uri uri) {
     return AppLogger.sanitizeUrl(uri.toString());
   }
 
   IptvConfig get config => _config;
 
-  // —— Credential guard ————————————————————————————————————————————
+  
 
   void _checkCredentials() {
     if (!_config.isConfigured) {
@@ -67,7 +67,7 @@ class IptvApiService {
     }
   }
 
-  // —— Authentication ———————————————————————————————————————————————
+  
 
   Future<Map<String, dynamic>> authenticate() async {
     _checkCredentials();
@@ -79,7 +79,7 @@ class IptvApiService {
     }
   }
 
-  // —— Live TV ——————————————————————————————————————————————————————
+  
 
   Future<List<IptvCategory>> getLiveCategories() async {
     _checkCredentials();
@@ -102,7 +102,7 @@ class IptvApiService {
     }
   }
 
-  // —— Movies / VOD —————————————————————————————————————————————————
+  
 
   Future<List<IptvCategory>> getVodCategories() async {
     _checkCredentials();
@@ -125,7 +125,7 @@ class IptvApiService {
     }
   }
 
-  // —— Series ———————————————————————————————————————————————————————
+  
 
   Future<List<IptvCategory>> getSeriesCategories() async {
     _checkCredentials();
@@ -158,7 +158,7 @@ class IptvApiService {
     }
   }
 
-  // —— Helpers ——————————————————————————————————————————————————————
+  
 
   Future<List<IptvCategory>> _fetchCategories(Uri url) async {
     try {

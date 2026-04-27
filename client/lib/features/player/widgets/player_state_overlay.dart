@@ -4,7 +4,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../models/player_ui_context.dart';
 
-/// Cinematic state overlays for the player area.
+
 class PlayerStateOverlay extends StatelessWidget {
   final PlayerUIContext uiContext;
   final PlayerOverlayType type;
@@ -310,5 +310,5 @@ class _PlayerActionBtnState extends State<_PlayerActionBtn> {
       );
 }
 
-/// Overlay types for state-dependent display.
+
 enum PlayerOverlayType { loading, buffering, error, ended, idle }

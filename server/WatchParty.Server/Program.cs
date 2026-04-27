@@ -9,7 +9,7 @@ using WatchParty.Server.Hubs;
 using WatchParty.Server.Middleware;
 using WatchParty.Server.Services;
 
-// ── Log file setup ────────────────────────────────────────────────────────────
+
 var LogDir = Path.Combine(AppContext.BaseDirectory, "logs");
 var ServerLogPath = Path.Combine(LogDir, "server.log");
 try
@@ -17,10 +17,10 @@ try
     Directory.CreateDirectory(LogDir);
     if (File.Exists(ServerLogPath)) File.Delete(ServerLogPath);
 }
-catch { /* Non-fatal — file logging may append instead of starting fresh */ }
+catch {  }
 
-// ── Shared Serilog sink configuration ────────────────────────────────────────
-// Single definition used for both the bootstrap logger and the hosted logger.
+
+
 static LoggerConfiguration ConfigureSinks(LoggerConfiguration cfg, string logPath) =>
     cfg.MinimumLevel.Information()
        .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
@@ -33,7 +33,7 @@ static LoggerConfiguration ConfigureSinks(LoggerConfiguration cfg, string logPat
            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
            flushToDiskInterval: TimeSpan.FromSeconds(1));
 
-// ── Serilog bootstrap (active until host starts) ──────────────────────────────
+
 Log.Logger = ConfigureSinks(new LoggerConfiguration(), ServerLogPath).CreateLogger();
 
 Log.Information("════════════════════════════════════════════════════════════════");
@@ -46,17 +46,17 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    // ── Serilog from config ──────────────────────────────────────────────────
+    
     builder.Host.UseSerilog((context, services, configuration) =>
         ConfigureSinks(
             configuration.ReadFrom.Configuration(context.Configuration).ReadFrom.Services(services),
             ServerLogPath));
 
-    // ── Configuration binding ────────────────────────────────────────────────
+    
     var wpOptions = builder.Configuration.GetSection("WatchParty").Get<WatchPartyOptions>() ?? new WatchPartyOptions();
     builder.Services.Configure<WatchPartyOptions>(builder.Configuration.GetSection("WatchParty"));
 
-    // ── Production CORS guard  ──────────────────────────────────
+    
     if (builder.Environment.IsProduction() &&
         (wpOptions.Cors.AllowedOrigins == null || wpOptions.Cors.AllowedOrigins.Length == 0))
     {
@@ -65,12 +65,12 @@ try
             "Configure explicit origins in appsettings.Production.json.");
     }
 
-    // ── Services ─────────────────────────────────────────────────────────────
+    
     builder.Services.AddControllers();
     builder.Services.AddSingleton<IRoomRegistry, InMemoryRoomRegistry>();
     builder.Services.AddSingleton<IRoomService, RoomService>();
 
-    // ── SignalR  ───────────────────────────────────────────
+    
     builder.Services.AddSignalR(options =>
     {
         options.KeepAliveInterval = TimeSpan.FromSeconds(wpOptions.SignalR.KeepAliveIntervalSeconds);
@@ -78,7 +78,7 @@ try
         options.MaximumParallelInvocationsPerClient = wpOptions.SignalR.MaximumParallelInvocationsPerClient;
     });
 
-    // ── CORS ─────────────────────────────────────────────────────────────────
+    
     builder.Services.AddCors(options =>
     {
         options.AddDefaultPolicy(policy =>
@@ -92,7 +92,7 @@ try
             }
             else
             {
-                // Development only: allow all origins
+                
                 policy.SetIsOriginAllowed(_ => true)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
@@ -101,7 +101,7 @@ try
         });
     });
 
-    // ── Rate Limiting  ──────────────────────────────────────────
+    
     builder.Services.AddRateLimiter(options =>
     {
         options.RejectionStatusCode = 429;
@@ -139,7 +139,7 @@ try
         options.OnRejected = async (context, _) =>
         {
             context.HttpContext.Response.ContentType = "application/json";
-            // Determine the correct retry-after window based on the endpoint path
+            
             var path = context.HttpContext.Request.Path.Value ?? "";
             int retryAfter;
             if (path.EndsWith("/join", StringComparison.OrdinalIgnoreCase))
@@ -159,20 +159,20 @@ try
         };
     });
 
-    // ── Health checks ────────────────────────────────────────────────────────
+    
     builder.Services.AddHealthChecks()
         .AddCheck<RoomHealthCheck>("rooms");
 
-    // ── Room expiry background service ,  §Room Expiry) ──
+    
     builder.Services.AddHostedService<RoomExpiryService>();
 
-    // ── State sync timer  §Server-Side Sync Responsibilities) ──
+    
     builder.Services.AddSingleton<StateSyncTimerService>();
     builder.Services.AddHostedService(sp => sp.GetRequiredService<StateSyncTimerService>());
 
     var app = builder.Build();
 
-    // ── Middleware pipeline ──────────────────────────────────────────────────
+    
     app.UseMiddleware<ErrorHandlingMiddleware>();
     app.UseSerilogRequestLogging();
     app.UseCors();
@@ -181,7 +181,7 @@ try
     app.MapControllers();
     app.MapHub<RoomHub>("/hubs/room", options =>
     {
-        // Shared hosting (MonsterASP): allow all transports for compatibility
+        
         options.Transports = HttpTransportType.WebSockets |
                              HttpTransportType.ServerSentEvents |
                              HttpTransportType.LongPolling;
@@ -214,5 +214,5 @@ finally
     Log.CloseAndFlush();
 }
 
-// Required for WebApplicationFactory in integration tests
+
 public partial class Program { }

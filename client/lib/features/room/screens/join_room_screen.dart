@@ -13,7 +13,7 @@ import '../bloc/room_list_bloc.dart';
 import '../widgets/room_card.dart';
 import '../widgets/premium_error_state.dart';
 
-/// Premium Rooms tab: active rooms list + manual code entry.
+
 class JoinRoomScreen extends StatefulWidget {
   const JoinRoomScreen({super.key});
 
@@ -45,7 +45,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
     _fadeAnim = CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut);
     _entryCtrl.forward();
 
-    // Initial fetch
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<RoomListBloc>().add(const RoomListFetch());
     });
@@ -106,7 +106,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
         body: Stack(
           fit: StackFit.expand,
           children: [
-            // Atmospheric glow
+            
             Positioned(
               top: -150,
               left: -100,
@@ -138,7 +138,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
 
   Widget _buildLayout(double sw, bool isDesktop, bool isTablet) {
     if (isDesktop) {
-      // Desktop: two-column layout
+      
       return Row(
         children: [
           Expanded(flex: 6, child: _buildScrollContent(sw, isDesktop)),
@@ -162,7 +162,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
     final hPad = isDesktop ? sw * 0.04 : AppSpacing.lg;
     return CustomScrollView(
       slivers: [
-        // Header
+        
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.fromLTRB(
@@ -230,12 +230,12 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
             ),
           ),
         ),
-        // Room list section
+        
         SliverPadding(
           padding: EdgeInsets.symmetric(horizontal: hPad),
           sliver: SliverToBoxAdapter(child: _buildRoomsSection()),
         ),
-        // Divider + code entry (mobile/tablet only)
+        
         if (sw <= AppBreakpoint.desktop)
           SliverPadding(
             padding: EdgeInsets.symmetric(

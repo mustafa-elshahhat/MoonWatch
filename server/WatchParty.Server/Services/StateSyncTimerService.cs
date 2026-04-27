@@ -7,14 +7,14 @@ using WatchParty.Shared.Protocol.Payloads;
 
 namespace WatchParty.Server.Services;
 
-/// <summary>
-/// Manages per-room periodic playback:state_sync emission.
-/// 
-/// the server must emit playback:state_sync every kStateSyncIntervalMs (5000ms)
-/// while the room is Active and HostIsPlaying == true.
-///
-/// Registered as a singleton IHostedService for clean lifecycle management.
-/// </summary>
+
+
+
+
+
+
+
+
 public class StateSyncTimerService : IHostedService, IDisposable
 {
     private readonly IHubContext<RoomHub> _hubContext;
@@ -44,10 +44,10 @@ public class StateSyncTimerService : IHostedService, IDisposable
         return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// Start periodic state_sync for a room. Idempotent — stops existing timer if any.
-    /// Called when the host sends a Play command.
-    /// </summary>
+    
+    
+    
+    
     public void StartForRoom(string roomCode)
     {
         StopForRoom(roomCode);
@@ -67,10 +67,10 @@ public class StateSyncTimerService : IHostedService, IDisposable
             roomCode, intervalSeconds);
     }
 
-    /// <summary>
-    /// Stop periodic state_sync for a room. Idempotent.
-    /// Called when the host sends a Pause command, or when the room is closed/removed.
-    /// </summary>
+    
+    
+    
+    
     public void StopForRoom(string roomCode)
     {
         if (_timers.TryRemove(roomCode, out var timer))
@@ -86,7 +86,7 @@ public class StateSyncTimerService : IHostedService, IDisposable
         {
             if (!_roomRegistry.TryGet(roomCode, out var room) || room == null)
             {
-                // Room was removed — stop the timer
+                
                 StopForRoom(roomCode);
                 return;
             }
@@ -101,7 +101,7 @@ public class StateSyncTimerService : IHostedService, IDisposable
             await room.Lock.WaitAsync();
             try
             {
-                // Only emit if room is Active and host is playing
+                
                 if (room.State == RoomState.Active && room.HostIsPlaying)
                 {
                     shouldEmit = true;

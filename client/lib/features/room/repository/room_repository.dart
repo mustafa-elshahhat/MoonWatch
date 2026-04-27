@@ -6,7 +6,7 @@ import '../../../core/protocol/room_events.dart';
 import '../../../core/protocol/payloads.dart';
 import '../bloc/room_event.dart';
 
-/// Callback types for sync-related events handled outside RoomBloc.
+
 typedef PlaybackEventCallback = void Function(Map<String, dynamic> json);
 typedef BufferingStallCallback = void Function(
     BufferingStallBroadcastPayload payload);
@@ -17,21 +17,21 @@ typedef PlaybackSeekCallback = void Function(PlaybackSeekPayload payload);
 typedef PlaybackStateSyncCallback = void Function(
     PlaybackStateSyncPayload payload);
 
-/// Translates SignalRClient events into RoomBloc events and exposes
-/// REST room-listing for the join screen.
+
+
 class RoomRepository {
   final SignalRClient _signalRClient;
   final HttpClient _httpClient;
   final AppLogger _logger = AppLogger('RoomRepository');
   final _eventController = StreamController<RoomEvent>.broadcast();
 
-  /// Callback for buffering:stall events from peer.
+  
   BufferingStallCallback? onBufferingStall;
 
-  /// Callback for buffering:resume events.
+  
   BufferingResumeCallback? onBufferingResume;
 
-  /// Callbacks for playback sync events.
+  
   PlaybackPlayCallback? onPlaybackPlay;
   PlaybackPauseCallback? onPlaybackPause;
   PlaybackSeekCallback? onPlaybackSeek;
@@ -171,7 +171,7 @@ class RoomRepository {
     _signalRClient.off(RoomEvents.playbackStateSync);
   }
 
-  /// Notify server that local player is buffering.
+  
   Future<void> notifyBufferingStall(int positionMs, int episodeId) async {
     await _signalRClient.invoke(
       RoomEvents.hubNotifyBufferingStall,
@@ -179,7 +179,7 @@ class RoomRepository {
     );
   }
 
-  /// Notify server that local player is ready after buffering.
+  
   Future<void> notifyBufferingReady(int episodeId) async {
     await _signalRClient.invoke(
       RoomEvents.hubNotifyBufferingReady,
@@ -195,8 +195,8 @@ class RoomRepository {
     _eventController.add(RoomEventLocalReady(contentKey));
   }
 
-  /// Host: invoke Play via SignalR hub method.
-  /// Host controls flow through the room protocol.
+  
+  
   Future<void> invokePlay(int positionMs, int clientTimestampMs) async {
     _logger.i('RoomRepository.invokePlay: positionMs=$positionMs');
     await _signalRClient.invoke(
@@ -205,19 +205,19 @@ class RoomRepository {
     );
   }
 
-  /// Host: invoke Pause via SignalR hub method.
+  
   Future<void> invokePause(int positionMs) async {
     _logger.i('RoomRepository.invokePause: positionMs=$positionMs');
     await _signalRClient.invoke(RoomEvents.hubPause, args: [positionMs]);
   }
 
-  /// Host: invoke Seek via SignalR hub method.
+  
   Future<void> invokeSeek(int targetPositionMs) async {
     _logger.d('RoomRepository.invokeSeek: targetPositionMs=$targetPositionMs');
     await _signalRClient.invoke(RoomEvents.hubSeek, args: [targetPositionMs]);
   }
 
-  /// Fetch the list of currently active rooms from the REST API.
+  
   Future<List<Map<String, dynamic>>> listRooms() => _httpClient.listRooms();
 
   Future<void> dispose() async {

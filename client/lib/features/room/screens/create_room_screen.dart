@@ -9,7 +9,7 @@ import '../bloc/room_bloc.dart';
 import '../bloc/room_event.dart';
 import '../bloc/room_state.dart';
 
-/// Premium create room screen — auto-creates room and shows cinematic loading.
+
 class CreateRoomScreen extends StatefulWidget {
   const CreateRoomScreen({super.key});
 
@@ -51,7 +51,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen>
       begin: 0.6,
       end: 1.0,
     ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
-    _roomBloc = context.read<RoomBloc>(); // cache before any async/dispose risk
+    _roomBloc = context.read<RoomBloc>(); 
     _entryCtrl.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => _startCreation());
@@ -83,7 +83,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen>
     _timeoutTimer?.cancel();
     _entryCtrl.dispose();
     _pulseCtrl.dispose();
-    // Use cached _roomBloc — never call context.read in dispose()
+    
     final state = _roomBloc.state;
     if (state is RoomStateConnecting || state is RoomStateCreating) {
       _logger.i('[$_correlationId] User backed out. Canceling.');
@@ -133,7 +133,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen>
           body: Stack(
             fit: StackFit.expand,
             children: [
-              // Glows
+              
               Positioned(
                 top: -200,
                 right: -100,
@@ -171,7 +171,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen>
               SafeArea(
                 child: Column(
                   children: [
-                    // Back button bar
+                    
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.lg,
@@ -215,7 +215,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Animated icon
+        
         SizedBox(
           width: 120,
           height: 120,
@@ -289,7 +289,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen>
           ),
         ),
         const SizedBox(height: AppSpacing.xxl),
-        // Steps
+        
         _buildStep('Establishing connection', true),
         const SizedBox(height: AppSpacing.sm),
         _buildStep('Creating your room', _creating),

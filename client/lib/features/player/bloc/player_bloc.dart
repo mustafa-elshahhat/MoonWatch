@@ -5,40 +5,40 @@ import '../../../core/player/player_controller.dart' as pc;
 import 'player_event.dart';
 import 'player_state.dart';
 
-/// PlayerBloc per STATE_MANAGEMENT.md.
-///
-/// SINGLE source of truth for player initialization.
-/// All initialization MUST go through PlayerEventInitialize.
-/// No other component may call PlayerController.initialize() directly.
+
+
+
+
+
 class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   final pc.PlayerController _playerController;
   final AppLogger _logger = AppLogger('PlayerBloc');
   StreamSubscription? _playerSubscription;
   Timer? _bufferingTimer;
 
-  /// When true, _onInitialize does NOT auto-play.
-  /// In room mode, playback is initiated by the host via the room protocol.
-  /// Set via [setRoomMode] before dispatching PlayerEventInitialize.
+  
+  
+  
   bool _isRoomMode = false;
 
-  // —— Single-flight initialize guard ————————————————————————————————————
+  
   bool _isInitializing = false;
   String? _activeUrl;
   String? _pendingUrl;
 
-  /// Tracks all URLs that have been successfully initialized or are currently
-  /// being initialized. Prevents re-initialization of the same content even
-  /// when multiple event sources dispatch PlayerEventInitialize.
+  
+  
+  
   final Set<String> _processedContentKeys = {};
 
-  /// The URL of the currently ready player. Used to skip re-initialization
-  /// when the player is already in a ready/playing/paused state for this URL.
+  
+  
   String? _readyUrl;
 
-  /// Configure room mode before initializing the player.
+  
   void setRoomMode(bool value) => _isRoomMode = value;
 
-  /// Clear dedup state — called when user requests explicit retry.
+  
   void clearDedupState() {
     _processedContentKeys.clear();
     _readyUrl = null;
@@ -107,7 +107,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
         );
         return;
       }
-      // Different URL — queue it and run after the current init completes.
+      
       _pendingUrl = url;
       _logger.i(
         '[PLAYER_INIT_QUEUED_PENDING_URL] url=${AppLogger.sanitizeUrl(url)}',
@@ -119,12 +119,12 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     _activeUrl = url;
     _pendingUrl = null;
 
-    // Mark as in-progress immediately to block duplicates.
+    
     _processedContentKeys.add(url);
 
     await _doInitialize(url, emit);
 
-    // After completion, check if a pending URL was queued.
+    
     while (_pendingUrl != null) {
       final nextUrl = _pendingUrl!;
       _pendingUrl = null;
@@ -146,15 +146,15 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     _activeUrl = null;
   }
 
-  /// Whether the current state is "ready" (player can be used).
+  
   bool get _isReadyState =>
       state is PlayerStateReady ||
       state is PlayerStatePlaying ||
       state is PlayerStatePaused;
 
   Future<void> _doInitialize(String url, Emitter<PlayerState> emit) async {
-    // Cancel any pending buffering timer from a previous media load to prevent
-    // stale buffering confirmations showing up for the new content.
+    
+    
     _bufferingTimer?.cancel();
     _bufferingTimer = null;
     _logger.i('[PLAYER_INIT_EXECUTED] url=${AppLogger.sanitizeUrl(url)}');
@@ -173,9 +173,9 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
         'player.init: PlayerStateReady emitted [total_elapsed=${DateTime.now().millisecondsSinceEpoch - initStartMs}ms]',
       );
 
-      // Auto-play only in solo mode.
-      // In room mode, the host sends Play via the room protocol,
-      // which comes back as playback:play and SyncBloc handles it.
+      
+      
+      
       if (!_isRoomMode) {
         _logger.i('player.init: auto-playing (solo mode)');
         await _playerController.play();
@@ -189,19 +189,19 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       _logger.e(
         '[PLAYER_INIT_FAILED] url=${AppLogger.sanitizeUrl(url)} — $e\n$st',
       );
-      // Remove from processed set so retry is possible.
+      
       _processedContentKeys.remove(url);
       _readyUrl = null;
 
       var msg = e.toString();
-      // Strip Dart's "Exception: " prefix for user-facing display.
+      
       const prefix = 'Exception: ';
       if (msg.startsWith(prefix)) {
         msg = msg.substring(prefix.length);
       }
-      // Translate known technical errors into user-friendly messages.
+      
       msg = _humanizeError(msg);
-      // Emit error only — do NOT reset room state or call LeaveRoom.
+      
       emit(PlayerStateError(msg));
     }
   }
@@ -273,14 +273,14 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       'pos=$pos, dur=$dur, isPlaying=$isPlaying, state=${state.runtimeType}',
     );
 
-    // Guard: impossible negative position — HLS timestamp artifact.
+    
     if (pos < Duration.zero) {
       _logger.w('player.buffering: ignored — negative position ($pos)');
       return;
     }
 
-    // Guard: position exceeds duration by more than 10 s — HLS segment timestamp
-    // offset artifact (e.g. live-origin VOD where timestamps don't start at 0).
+    
+    
     if (dur > Duration.zero && pos > dur + const Duration(seconds: 10)) {
       _logger.w(
         'player.buffering: ignored — position exceeds duration '
@@ -289,7 +289,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       return;
     }
 
-    // Never show buffering overlay while paused or during initial load.
+    
     if (state is PlayerStatePaused ||
         state is PlayerStateIdle ||
         state is PlayerStateLoading) {
@@ -297,8 +297,8 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       return;
     }
 
-    // Debounce: wait 400 ms before confirming — filters transient HLS segment
-    // switches that self-resolve without user-visible stall.
+    
+    
     _bufferingTimer?.cancel();
     _bufferingTimer = Timer(const Duration(milliseconds: 400), () {
       if (!isClosed) add(const PlayerEventBufferingConfirmed());
@@ -341,13 +341,13 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     PlayerEventDispose event,
     Emitter<PlayerState> emit,
   ) async {
-    // Guard: if already idle, a previous dispose already ran (e.g. double-dispatch
-    // from _confirmLeave race). Avoid re-disposing the singleton PlayerController.
+    
+    
     if (state is PlayerStateIdle) return;
     _bufferingTimer?.cancel();
     await _playerSubscription?.cancel();
     await _playerController.dispose();
-    // Reset all single-flight and dedup state so next session starts clean.
+    
     _isInitializing = false;
     _activeUrl = null;
     _pendingUrl = null;
@@ -363,7 +363,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     return super.close();
   }
 
-  /// Translate technical player/network errors into user-facing messages.
+  
   static String _humanizeError(String raw) {
     if (RegExp(
       r'HTTP error 403|403 Forbidden',

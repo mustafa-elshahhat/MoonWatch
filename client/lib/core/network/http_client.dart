@@ -13,8 +13,8 @@ class NetworkException implements Exception {
   String toString() => 'NetworkException($statusCode): $message';
 }
 
-/// Dio wrapper. Base URL from AppConstants. Logging interceptor at DEBUG.
-/// Wraps Dio errors into typed NetworkException.
+
+
 class HttpClient {
   final Dio _dio;
   final AppLogger _logger;

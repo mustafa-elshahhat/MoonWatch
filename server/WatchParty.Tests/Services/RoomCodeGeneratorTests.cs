@@ -2,9 +2,9 @@ using WatchParty.Server.Services;
 
 namespace WatchParty.Tests.Services;
 
-/// <summary>
-/// Unit tests for RoomCodeGenerator per .
-/// </summary>
+
+
+
 public class RoomCodeGeneratorTests
 {
     [Fact]
@@ -24,7 +24,7 @@ public class RoomCodeGeneratorTests
     [Fact]
     public void Generate_ReturnsCode_NeverContainsAmbiguousCharacters()
     {
-        // I, O, 0, 1 are excluded from character set
+        
         var forbidden = new[] { 'I', 'O', '0', '1' };
 
         for (int i = 0; i < 100; i++)
@@ -55,14 +55,14 @@ public class RoomCodeGeneratorTests
     [Fact]
     public void Generate_ReturnsStatisticallyRandomCodes()
     {
-        // Generate many codes and verify no fixed prefix
+        
         var codes = new HashSet<string>();
         for (int i = 0; i < 50; i++)
         {
             codes.Add(RoomCodeGenerator.Generate(_ => false));
         }
 
-        // With true randomness, 50 codes should be mostly unique
+        
         Assert.True(codes.Count > 40, $"Expected >40 unique codes from 50 generations, got {codes.Count}");
     }
 
@@ -73,7 +73,7 @@ public class RoomCodeGeneratorTests
         var code = RoomCodeGenerator.Generate(c =>
         {
             callCount++;
-            return callCount <= 1; // First code "collides"
+            return callCount <= 1; 
         });
 
         Assert.Equal(6, code.Length);
@@ -84,6 +84,6 @@ public class RoomCodeGeneratorTests
     public void Generate_ThrowsAfterMaxRetries()
     {
         Assert.Throws<InvalidOperationException>(() =>
-            RoomCodeGenerator.Generate(_ => true)); // All codes "exist"
+            RoomCodeGenerator.Generate(_ => true)); 
     }
 }

@@ -8,7 +8,7 @@ sealed class IptvEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Load categories for a content type tab.
+
 class IptvLoadCategories extends IptvEvent {
   final IptvContentType contentType;
   const IptvLoadCategories(this.contentType);
@@ -17,7 +17,7 @@ class IptvLoadCategories extends IptvEvent {
   List<Object?> get props => [contentType];
 }
 
-/// Load streams/items for a specific category.
+
 class IptvLoadCategoryContent extends IptvEvent {
   final IptvContentType contentType;
   final String categoryId;
@@ -33,7 +33,7 @@ class IptvLoadCategoryContent extends IptvEvent {
   List<Object?> get props => [contentType, categoryId, categoryName];
 }
 
-/// Load detailed info for a series (seasons + episodes).
+
 class IptvLoadSeriesInfo extends IptvEvent {
   final int seriesId;
   final String seriesName;
@@ -44,7 +44,7 @@ class IptvLoadSeriesInfo extends IptvEvent {
   List<Object?> get props => [seriesId, seriesName];
 }
 
-/// User selected content to play — resolve playback URL.
+
 class IptvSelectContent extends IptvEvent {
   final IptvContentType contentType;
   final int streamId;
@@ -62,7 +62,7 @@ class IptvSelectContent extends IptvEvent {
   List<Object?> get props => [contentType, streamId, title];
 }
 
-/// User selected an episode to play.
+
 class IptvSelectEpisode extends IptvEvent {
   final String episodeId;
   final String containerExtension;
@@ -78,7 +78,7 @@ class IptvSelectEpisode extends IptvEvent {
   List<Object?> get props => [episodeId, title];
 }
 
-/// Reset to initial state (e.g. navigate back to browse root).
+
 class IptvReset extends IptvEvent {
   const IptvReset();
 }

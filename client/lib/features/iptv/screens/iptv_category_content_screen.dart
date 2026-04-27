@@ -75,7 +75,7 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Atmospheric glow
+          
           Positioned(
             top: -150,
             right: -100,
@@ -96,11 +96,11 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
           SafeArea(
             child: Column(
               children: [
-                // Header
+                
                 _buildHeader(hPad),
-                // Search
+                
                 _buildSearchBar(hPad),
-                // Content
+                
                 Expanded(
                   child: BlocBuilder<IptvBloc, IptvState>(
                     builder: (context, state) {
@@ -228,7 +228,7 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
     }
 
     final sw = MediaQuery.of(context).size.width;
-    // Determine grid columns based on content type and screen size
+    
     final cols = switch (widget.contentType) {
       IptvContentType.live => sw > 1200
           ? 5
@@ -255,11 +255,11 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
                   : 2,
     };
 
-    // Aspect ratio per content type
+    
     final aspect = switch (widget.contentType) {
-      IptvContentType.live => 1.4, // widescreen channel card
-      IptvContentType.movie => 0.68, // poster portrait
-      IptvContentType.series => 0.68, // poster portrait
+      IptvContentType.live => 1.4, 
+      IptvContentType.movie => 0.68, 
+      IptvContentType.series => 0.68, 
     };
 
     return GridView.builder(
@@ -367,7 +367,7 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
   }
 }
 
-// —— Live Channel Card ——————————————————————————————————————————————
+
 
 class _LiveChannelCard extends StatefulWidget {
   final LiveStream stream;
@@ -440,7 +440,7 @@ class _LiveChannelCardState extends State<_LiveChannelCard>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Channel logo area
+                
                 Expanded(
                   child: Stack(
                     fit: StackFit.expand,
@@ -458,7 +458,7 @@ class _LiveChannelCardState extends State<_LiveChannelCard>
                               )
                             : _channelPlaceholder(),
                       ),
-                      // LIVE badge
+                      
                       Positioned(
                         top: 8,
                         left: 8,
@@ -497,7 +497,7 @@ class _LiveChannelCardState extends State<_LiveChannelCard>
                           ),
                         ),
                       ),
-                      // Hover overlay
+                      
                       AnimatedOpacity(
                         duration: const Duration(milliseconds: 200),
                         opacity: _h ? 1.0 : 0.0,
@@ -522,7 +522,7 @@ class _LiveChannelCardState extends State<_LiveChannelCard>
                     ],
                   ),
                 ),
-                // Name
+                
                 Padding(
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   child: Text(
@@ -556,7 +556,7 @@ class _LiveChannelCardState extends State<_LiveChannelCard>
       );
 }
 
-// —— Movie Poster Card ——————————————————————————————————————————————
+
 
 class _MovieCard extends StatefulWidget {
   final VodStream stream;
@@ -632,7 +632,7 @@ class _MovieCardState extends State<_MovieCard>
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Poster image
+                  
                   s.streamIcon != null && s.streamIcon!.isNotEmpty
                       ? Image.network(
                           s.streamIcon!,
@@ -640,7 +640,7 @@ class _MovieCardState extends State<_MovieCard>
                           errorBuilder: (_, __, ___) => _posterPlaceholder(),
                         )
                       : _posterPlaceholder(),
-                  // Bottom gradient + metadata
+                  
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -696,7 +696,7 @@ class _MovieCardState extends State<_MovieCard>
                       ),
                     ),
                   ),
-                  // Hover play overlay
+                  
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 200),
                     opacity: _h ? 1.0 : 0.0,
@@ -711,7 +711,7 @@ class _MovieCardState extends State<_MovieCard>
                       ),
                     ),
                   ),
-                  // Border glow on hover
+                  
                   if (_h)
                     Container(
                       decoration: BoxDecoration(
@@ -759,7 +759,7 @@ class _MovieCardState extends State<_MovieCard>
       );
 }
 
-// —— Series Card ————————————————————————————————————————————————————
+
 
 class _SeriesCard extends StatefulWidget {
   final SeriesItem series;
@@ -835,7 +835,7 @@ class _SeriesCardState extends State<_SeriesCard>
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Cover image
+                  
                   s.cover != null && s.cover!.isNotEmpty
                       ? Image.network(
                           s.cover!,
@@ -843,7 +843,7 @@ class _SeriesCardState extends State<_SeriesCard>
                           errorBuilder: (_, __, ___) => _seriesPlaceholder(),
                         )
                       : _seriesPlaceholder(),
-                  // Bottom gradient
+                  
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -918,7 +918,7 @@ class _SeriesCardState extends State<_SeriesCard>
                       ),
                     ),
                   ),
-                  // Hover overlay
+                  
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 200),
                     opacity: _h ? 1.0 : 0.0,
@@ -980,7 +980,7 @@ class _SeriesCardState extends State<_SeriesCard>
       );
 }
 
-// —— Shared components ——————————————————————————————————————————————
+
 
 class _BackBtn extends StatefulWidget {
   final VoidCallback onTap;

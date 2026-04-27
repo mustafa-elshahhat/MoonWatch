@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-/// A series item from the IPTV provider.
+
 class SeriesItem extends Equatable {
   final int seriesId;
   final String name;
@@ -45,7 +45,7 @@ class SeriesItem extends Equatable {
   List<Object?> get props => [seriesId, name, categoryId];
 }
 
-/// Detailed info about a series including seasons and episodes.
+
 class SeriesInfo extends Equatable {
   final Map<String, dynamic> info;
   final Map<String, List<SeriesEpisode>> seasons;
@@ -88,7 +88,7 @@ class SeriesInfo extends Equatable {
   List<Object?> get props => [info, seasons];
 }
 
-/// A single episode within a series season.
+
 class SeriesEpisode extends Equatable {
   final String id;
   final int episodeNum;

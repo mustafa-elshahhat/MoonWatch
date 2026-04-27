@@ -8,7 +8,7 @@ import 'package:watch_party/features/reconnect/reconnect_bloc.dart';
 import 'package:watch_party/features/room/bloc/room_event.dart';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 
-// —— Mocks ————————————————————————————————————————————————————————————————————
+
 
 class MockSignalRClient extends Mock implements SignalRClient {}
 
@@ -48,7 +48,7 @@ void main() {
         roomRepository: mockRoomRepository,
       );
 
-  // —— Initial state ——————————————————————————————————————————————————————
+  
 
   group('ReconnectBloc — initial state', () {
     test('initial state is ReconnectStateIdle', () {
@@ -58,7 +58,7 @@ void main() {
     });
   });
 
-  // —— Disconnected event —————————————————————————————————————————————————
+  
 
   group('ReconnectBloc — Disconnected', () {
     blocTest<ReconnectBloc, ReconnectState>(
@@ -85,7 +85,7 @@ void main() {
     );
   });
 
-  // —— AttemptRejoin event ————————————————————————————————————————————————
+  
 
   group('ReconnectBloc — AttemptRejoin', () {
     blocTest<ReconnectBloc, ReconnectState>(
@@ -129,7 +129,7 @@ void main() {
     );
   });
 
-  // —— Succeeded event ————————————————————————————————————————————————————
+  
 
   group('ReconnectBloc — Succeeded', () {
     blocTest<ReconnectBloc, ReconnectState>(
@@ -141,7 +141,7 @@ void main() {
     );
   });
 
-  // —— Failed event ———————————————————————————————————————————————————————
+  
 
   group('ReconnectBloc — Failed', () {
     blocTest<ReconnectBloc, ReconnectState>(
@@ -161,7 +161,7 @@ void main() {
     );
   });
 
-  // —— NetworkLost / NetworkRestored ——————————————————————————————————————
+  
 
   group('ReconnectBloc — Network events', () {
     blocTest<ReconnectBloc, ReconnectState>(
@@ -187,7 +187,7 @@ void main() {
     );
   });
 
-  // —— Reset event ————————————————————————————————————————————————————————
+  
 
   group('ReconnectBloc — Reset', () {
     blocTest<ReconnectBloc, ReconnectState>(
@@ -221,7 +221,7 @@ void main() {
     );
   });
 
-  // —— startListening — SignalR connection state integration ——————————————
+  
 
   group('ReconnectBloc — startListening', () {
     blocTest<ReconnectBloc, ReconnectState>(
@@ -282,13 +282,13 @@ void main() {
     );
   });
 
-  // —— storeRoomCredentials ———————————————————————————————————————————————
+  
 
   group('ReconnectBloc — storeRoomCredentials', () {
     test('stores room code and role for rejoin', () async {
       final bloc = buildBloc();
       bloc.storeRoomCredentials('ROOM42', 'host');
-      // Trigger rejoin; it should use stored credentials
+      
       bloc.add(const ReconnectEventAttemptRejoin());
       await Future.delayed(const Duration(milliseconds: 50));
       verify(
@@ -301,7 +301,7 @@ void main() {
     });
   });
 
-  // —— /: Room event listening after rejoin ————————————————————
+  
 
   group('ReconnectBloc — room event listening /', () {
     blocTest<ReconnectBloc, ReconnectState>(

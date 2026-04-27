@@ -88,8 +88,8 @@ class _IptvBrowseScreenState extends State<IptvBrowseScreen>
         .then((result) {
       if (result is IptvContentSelected) {
         GetIt.I<IptvNavigationMemory>().isSelectionPop = true;
-        // We do NOT clear category here because we want to preserve it
-        // for the next time the user opens the browser.
+        
+        
         if (mounted) Navigator.of(context).pop(result);
         return;
       }
@@ -116,8 +116,8 @@ class _IptvBrowseScreenState extends State<IptvBrowseScreen>
           .then((result) {
         if (result is IptvContentSelected) {
           GetIt.I<IptvNavigationMemory>().isSelectionPop = true;
-          // We do NOT clear series here because we want to preserve it
-          // for the next time the user opens the browser.
+          
+          
           if (mounted) Navigator.of(context).pop(result);
           return;
         }
@@ -533,7 +533,7 @@ class _PremiumCategoryCardState extends State<_PremiumCategoryCard>
   late final Animation<double> _fade;
   late final Animation<double> _scale;
 
-  // Per-type visual identity
+  
   static const _typeData = {
     IptvContentType.live: (
       icon: Icons.satellite_alt_rounded,
@@ -624,7 +624,7 @@ class _PremiumCategoryCardState extends State<_PremiumCategoryCard>
                 borderRadius: BorderRadius.circular(AppRadius.lg),
                 child: Stack(
                   children: [
-                    // Background watermark icon
+                    
                     Positioned(
                       right: -18,
                       bottom: -18,
@@ -634,7 +634,7 @@ class _PremiumCategoryCardState extends State<_PremiumCategoryCard>
                         child: Icon(icon, size: 90, color: accent),
                       ),
                     ),
-                    // Hover accent shimmer at bottom
+                    
                     Positioned(
                       left: 0,
                       right: 0,
@@ -653,14 +653,14 @@ class _PremiumCategoryCardState extends State<_PremiumCategoryCard>
                         ),
                       ),
                     ),
-                    // Content
+                    
                     Padding(
                       padding: const EdgeInsets.all(AppSpacing.md),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Icon badge
+                          
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 220),
                             padding: const EdgeInsets.all(7),
@@ -681,7 +681,7 @@ class _PremiumCategoryCardState extends State<_PremiumCategoryCard>
                               color: accent,
                             ),
                           ),
-                          // Name
+                          
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,

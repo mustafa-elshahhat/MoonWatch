@@ -19,16 +19,16 @@ import '../../features/room/bloc/room_list_bloc.dart';
 
 final getIt = GetIt.instance;
 
-/// Registers all singletons and factories for DI.
+
 void configureDependencies() {
-  // Validate required configuration
+  
   AppConstants.requireServerBaseUrl();
 
-  // Singletons — network
+  
   getIt.registerLazySingleton<SignalRClient>(() => SignalRClient());
   getIt.registerLazySingleton<HttpClient>(() => HttpClient());
 
-  // Singletons — repositories
+  
   getIt.registerLazySingleton<RoomRepository>(
     () => RoomRepository(
       signalRClient: getIt<SignalRClient>(),
@@ -36,15 +36,15 @@ void configureDependencies() {
     ),
   );
 
-  // Singletons — player
+  
   getIt.registerLazySingleton<PlayerController>(() => MediaKitPlayerImpl());
 
-  // Singletons — sync
+  
   getIt.registerLazySingleton<LatencyEstimator>(
     () => LatencyEstimator(signalRClient: getIt<SignalRClient>()),
   );
 
-  // Factories — BLoCs
+  
   getIt.registerFactory<RoomBloc>(
     () => RoomBloc(
       roomRepository: getIt<RoomRepository>(),
@@ -73,7 +73,7 @@ void configureDependencies() {
     ),
   );
 
-  // IPTV — config, service, repository, bloc, memory
+  
   getIt.registerLazySingleton<IptvConfig>(() => IptvConfig.defaultProvider);
   getIt.registerLazySingleton<IptvNavigationMemory>(
     () => IptvNavigationMemory(),

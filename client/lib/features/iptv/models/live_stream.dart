@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-/// A live TV channel/stream from the IPTV provider.
+
 class LiveStream extends Equatable {
   final int streamId;
   final String name;

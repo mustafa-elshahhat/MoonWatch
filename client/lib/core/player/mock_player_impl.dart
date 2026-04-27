@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'player_controller.dart';
 
-/// Test mock for the player controller.
-/// Exposes seekHistory, simulateBufferingStall(), and other helpers for testing.
+
+
 class MockPlayerImpl implements PlayerController {
   final _eventController = StreamController<PlayerEvent>.broadcast();
   final _positionStreamController = StreamController<Duration>.broadcast();
@@ -14,10 +14,10 @@ class MockPlayerImpl implements PlayerController {
   bool _isPlaying = false;
   bool _isBuffering = false;
 
-  /// History of all seek operations for test assertions.
+  
   final List<Duration> seekHistory = [];
 
-  /// History of all play/pause operations.
+  
   final List<String> actionHistory = [];
 
   @override
@@ -89,19 +89,19 @@ class MockPlayerImpl implements PlayerController {
     actionHistory.add('setVolume:$volume');
   }
 
-  /// Set position directly without triggering a seek event.
+  
   void setPosition(Duration position) {
     _position = position;
     _positionStreamController.add(position);
   }
 
-  /// Set total duration.
+  
   void setDuration(Duration d) {
     _duration = d;
     _durationStreamController.add(d);
   }
 
-  /// Simulate a buffering stall.
+  
   void simulateBufferingStall() {
     _isBuffering = true;
     _eventController.add(
@@ -109,7 +109,7 @@ class MockPlayerImpl implements PlayerController {
     );
   }
 
-  /// Simulate buffering end.
+  
   void simulateBufferingEnd() {
     _isBuffering = false;
     _eventController.add(
@@ -117,7 +117,7 @@ class MockPlayerImpl implements PlayerController {
     );
   }
 
-  /// Simulate a player error.
+  
   void simulateError(String message) {
     _eventController.add(
       PlayerEvent(PlayerEventType.error, errorMessage: message),

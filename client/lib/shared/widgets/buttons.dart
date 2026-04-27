@@ -3,7 +3,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 
-/// Standard full-width primary filled button.
+
 class PrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -49,7 +49,7 @@ class PrimaryButton extends StatelessWidget {
   }
 }
 
-/// Standard outlined secondary button.
+
 class SecondaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -98,7 +98,7 @@ class SecondaryButton extends StatelessWidget {
   }
 }
 
-/// Compact chip-style button for inline actions.
+
 class CompactButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;

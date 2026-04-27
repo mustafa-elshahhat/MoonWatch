@@ -7,7 +7,7 @@ import '../../core/protocol/room_events.dart';
 import '../room/bloc/room_event.dart';
 import '../room/repository/room_repository.dart';
 
-// —— ReconnectEvent ———————————————————————————————————————————————————————————
+
 
 sealed class ReconnectEvent extends Equatable {
   const ReconnectEvent();
@@ -16,32 +16,32 @@ sealed class ReconnectEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// SignalR connection dropped.
+
 class ReconnectEventDisconnected extends ReconnectEvent {
   const ReconnectEventDisconnected();
 }
 
-/// SignalR reconnect succeeded — attempt app-layer rejoin.
+
 class ReconnectEventAttemptRejoin extends ReconnectEvent {
   const ReconnectEventAttemptRejoin();
 }
 
-/// Network lost entirely (connectivity_plus).
+
 class ReconnectEventNetworkLost extends ReconnectEvent {
   const ReconnectEventNetworkLost();
 }
 
-/// Network restored.
+
 class ReconnectEventNetworkRestored extends ReconnectEvent {
   const ReconnectEventNetworkRestored();
 }
 
-/// App-layer rejoin succeeded (room:joined received).
+
 class ReconnectEventSucceeded extends ReconnectEvent {
   const ReconnectEventSucceeded();
 }
 
-/// App-layer rejoin failed (room:error received).
+
 class ReconnectEventFailed extends ReconnectEvent {
   final String reason;
   const ReconnectEventFailed(this.reason);
@@ -50,12 +50,12 @@ class ReconnectEventFailed extends ReconnectEvent {
   List<Object?> get props => [reason];
 }
 
-/// Reset to idle (e.g., after user leaves room).
+
 class ReconnectEventReset extends ReconnectEvent {
   const ReconnectEventReset();
 }
 
-// —— ReconnectState ———————————————————————————————————————————————————————————
+
 
 sealed class ReconnectState extends Equatable {
   const ReconnectState();
@@ -64,12 +64,12 @@ sealed class ReconnectState extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Normal state — SignalR connected.
+
 class ReconnectStateIdle extends ReconnectState {
   const ReconnectStateIdle();
 }
 
-/// SignalR automatic retry in progress.
+
 class ReconnectStateAttempting extends ReconnectState {
   final int attemptNumber;
   const ReconnectStateAttempting({this.attemptNumber = 1});
@@ -78,17 +78,17 @@ class ReconnectStateAttempting extends ReconnectState {
   List<Object?> get props => [attemptNumber];
 }
 
-/// Network is offline.
+
 class ReconnectStateOffline extends ReconnectState {
   const ReconnectStateOffline();
 }
 
-/// Reconnect and rejoin succeeded.
+
 class ReconnectStateSuccess extends ReconnectState {
   const ReconnectStateSuccess();
 }
 
-/// Reconnect failed permanently.
+
 class ReconnectStateFailed extends ReconnectState {
   final String reason;
   const ReconnectStateFailed(this.reason);
@@ -97,13 +97,13 @@ class ReconnectStateFailed extends ReconnectState {
   List<Object?> get props => [reason];
 }
 
-// —— ReconnectBloc ————————————————————————————————————————————————————————————
 
-/// Manages automatic reconnection for guests after connection loss.
-///
-/// State machine:
-///   Connected(Idle) → Reconnecting(Attempting) → Re-joining → Connected(Success) | Failed
-///
+
+
+
+
+
+
 class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
   final SignalRClient _signalRClient;
   final RoomRepository _roomRepository;
@@ -112,11 +112,11 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
   StreamSubscription<SignalRConnectionState>? _connectionSubscription;
   StreamSubscription<RoomEvent>? _roomEventSubscription;
 
-  /// Stored room code and role for rejoin after reconnect.
+  
   String? _storedRoomCode;
   String? _storedRole;
 
-  /// Guard to prevent duplicate JoinRoom calls.
+  
   bool _rejoinInFlight = false;
 
   ReconnectBloc({
@@ -134,13 +134,13 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
     on<ReconnectEventReset>(_onReset);
   }
 
-  /// Call after joining a room to store credentials for potential rejoin.
+  
   void storeRoomCredentials(String roomCode, String role) {
     _storedRoomCode = roomCode;
     _storedRole = role;
   }
 
-  /// Fatal error codes that indicate the room is gone (no retry possible).
+  
   static const _fatalErrorCodes = {
     'room_not_found',
     'room_closed',
@@ -148,8 +148,8 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
     'role_invalid',
   };
 
-  /// Starts listening to SignalR connection state changes and RoomRepository
-  /// events for room:joined and room:error responses after a rejoin attempt.
+  
+  
   void startListening() {
     _connectionSubscription?.cancel();
     _connectionSubscription = _signalRClient.connectionState.listen((state) {
@@ -178,11 +178,11 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
       if (state is! ReconnectStateAttempting) return;
 
       if (event is RoomEventRoomJoined) {
-        // room:joined after reconnect → success
+        
         add(const ReconnectEventSucceeded());
       } else if (event is RoomEventError &&
           _fatalErrorCodes.contains(event.code)) {
-        // room:error with fatal code after rejoin → failed
+        
         add(ReconnectEventFailed(event.code));
       }
     });
@@ -200,7 +200,7 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
     }
   }
 
-  /// On SignalR reconnected, calls RoomRepository.joinRoom to attempt rejoin.
+  
   Future<void> _onAttemptRejoin(
     ReconnectEventAttemptRejoin event,
     Emitter<ReconnectState> emit,
@@ -211,7 +211,7 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
       return;
     }
 
-    // Guard: only one rejoin in-flight at a time
+    
     if (_rejoinInFlight) return;
     _rejoinInFlight = true;
 
@@ -225,7 +225,7 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
       bool success = false;
 
       while (attempt < maxRetries && !success) {
-        // Bail out if the bloc was closed during a previous delay or invoke.
+        
         if (isClosed) return;
         try {
           await _signalRClient.invoke(
@@ -233,15 +233,15 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
             args: [_storedRoomCode!, _storedRole!],
           );
           success = true;
-          // Success/failure is determined by the room:joined or room:error events
-          // dispatched through RoomBloc → which calls ReconnectEventSucceeded
-          // or ReconnectEventFailed.
+          
+          
+          
         } catch (e) {
           attempt++;
           if (attempt >= maxRetries) {
             throw Exception('Max retries reached: $e');
           }
-          final delayMs = 1000 * (1 << (attempt - 1)); // 1s, 2s, 4s
+          final delayMs = 1000 * (1 << (attempt - 1)); 
           _logger.w(
             '[reconnect.attempt] Rejoin invocation failed. Retrying in ${delayMs / 1000}s (Attempt $attempt of $maxRetries) — $e',
           );
@@ -275,7 +275,7 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
     }
   }
 
-  /// On room:joined after reconnect — transitions state to success then idle.
+  
   void _onSucceeded(
     ReconnectEventSucceeded event,
     Emitter<ReconnectState> emit,
@@ -285,7 +285,7 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
     emit(const ReconnectStateIdle());
   }
 
-  /// On room:error or max retries — transitions state to failed.
+  
   void _onFailed(ReconnectEventFailed event, Emitter<ReconnectState> emit) {
     _logger.w('[reconnect.failed] Reconnect failed: ${event.reason}');
     emit(ReconnectStateFailed(event.reason));

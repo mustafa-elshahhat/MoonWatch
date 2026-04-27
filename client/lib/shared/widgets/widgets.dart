@@ -1,5 +1,5 @@
-/// Shared widget library for WatchParty.
-/// Import this single file to access all reusable components.
+
+
 library;
 
 export 'buttons.dart';

@@ -68,9 +68,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           return Stack(
             fit: StackFit.expand,
             children: [
-              // Rich atmospheric background
+              
               _buildAtmosphere(c.maxWidth, c.maxHeight),
-              // Main content
+              
               SafeArea(
                 child: isDesktop
                     ? _buildDesktopLayout(context, c.maxWidth, isWide)
@@ -83,12 +83,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // —— Atmospheric background —————————————————————————————————————————
+  
 
   Widget _buildAtmosphere(double w, double h) {
     return Stack(
       children: [
-        // Deep space base
+        
         Container(
           decoration: const BoxDecoration(
             gradient: RadialGradient(
@@ -99,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ),
-        // Cinematic accent glow — top left
+        
         Positioned(
           top: -h * 0.2,
           left: -w * 0.15,
@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ),
-        // Gold accent — bottom right
+        
         Positioned(
           bottom: -h * 0.1,
           right: -w * 0.2,
@@ -135,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ),
-        // Subtle film grain texture simulation via AnimatedBuilder
+        
         AnimatedBuilder(
           animation: _particleCtrl,
           builder: (_, __) {
@@ -145,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             );
           },
         ),
-        // Horizontal streak lines — cinematic atmosphere
+        
         Positioned(
           top: h * 0.3,
           left: 0,
@@ -184,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // —— Desktop layout —————————————————————————————————————————————————
+  
 
   Widget _buildDesktopLayout(BuildContext context, double w, bool isWide) {
     final hPad = isWide ? w * 0.12 : w * 0.08;
@@ -252,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // —— Mobile layout ——————————————————————————————————————————————————
+  
 
   Widget _buildMobileLayout(BuildContext context) {
     return SingleChildScrollView(
@@ -306,17 +306,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // —— Hero ———————————————————————————————————————————————————————————
+  
 
   Widget _buildHero({required bool isDesktop}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Eyebrow
+        
         const SectionEyebrow('Tonight on moon', color: AppColors.accentPrimary),
         const SizedBox(height: AppSpacing.lg),
 
-        // Cinematic headline
+        
         RichText(
           text: TextSpan(
             children: [
@@ -356,7 +356,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
 
         const SizedBox(height: AppSpacing.lg),
-        // Tagline
+        
         Text(
           'A quiet place to watch live TV, films, and series with the\npeople you care about — latency measured in milliseconds,\nnot moods.',
           style: AppTypography.bodyLarge.copyWith(
@@ -366,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
 
         const SizedBox(height: AppSpacing.xxl),
-        // Stats row — inject trust/soul
+        
         const Wrap(
           spacing: AppSpacing.xl,
           runSpacing: AppSpacing.md,
@@ -381,7 +381,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 }
 
-// —— Watch Solo Card ————————————————————————————————————————————————
+
 
 class _WatchSoloCard extends StatefulWidget {
   final VoidCallback onTap;
@@ -435,7 +435,7 @@ class _WatchSoloCardState extends State<_WatchSoloCard> {
             padding: const EdgeInsets.all(AppSpacing.xl),
             child: Row(
               children: [
-                // Icon cluster
+                
                 Stack(
                   children: [
                     AnimatedContainer(
@@ -487,7 +487,7 @@ class _WatchSoloCardState extends State<_WatchSoloCard> {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      // Mini tags
+                      
                       const Wrap(
                         spacing: 6,
                         children: [
@@ -515,7 +515,7 @@ class _WatchSoloCardState extends State<_WatchSoloCard> {
       );
 }
 
-// —— Room Cards —————————————————————————————————————————————————————
+
 
 enum _RoomCardType { create, join }
 
@@ -673,9 +673,9 @@ class _RoomCardState extends State<_RoomCard> {
       );
 }
 
-// —— Shared micro-components ————————————————————————————————————————
 
-// _SectionLabel removed in favor of SectionEyebrow
+
+
 
 class _StatChip extends StatelessWidget {
   final String label;
@@ -736,7 +736,7 @@ class _MiniTag extends StatelessWidget {
       );
 }
 
-// —— Particle painter for cinematic atmosphere ——————————————————————
+
 
 class _ParticlePainter extends CustomPainter {
   final double progress;
@@ -744,10 +744,10 @@ class _ParticlePainter extends CustomPainter {
   static final _particles = List.generate(
     25,
     (i) => [
-      _rng.nextDouble(), // x
-      _rng.nextDouble(), // y
-      _rng.nextDouble() * 0.5 + 0.5, // speed
-      _rng.nextDouble() * 2 + 1, // size
+      _rng.nextDouble(), 
+      _rng.nextDouble(), 
+      _rng.nextDouble() * 0.5 + 0.5, 
+      _rng.nextDouble() * 2 + 1, 
     ],
   );
 

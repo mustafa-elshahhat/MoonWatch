@@ -2,9 +2,9 @@ import 'package:test/test.dart';
 import 'package:watch_party_protocol/protocol/payloads.dart';
 import 'package:watch_party_protocol/protocol/room_events.dart';
 
-/// Verifies that key protocol fields are present and parse correctly.
-/// These tests fail immediately if a field is accidentally removed or renamed
-/// in the shared Dart definitions, which are the Dart source of truth.
+
+
+
 void main() {
   group('RoomEvents constants', () {
     test('hub method names are non-empty', () {

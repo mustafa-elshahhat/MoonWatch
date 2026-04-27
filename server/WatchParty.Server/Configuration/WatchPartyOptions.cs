@@ -1,9 +1,9 @@
 namespace WatchParty.Server.Configuration;
 
-/// <summary>
-/// Strongly-typed configuration model.
-/// Bound from appsettings.json section "WatchParty".
-/// </summary>
+
+
+
+
 public class WatchPartyOptions
 {
     public RoomOptions Room { get; set; } = new();

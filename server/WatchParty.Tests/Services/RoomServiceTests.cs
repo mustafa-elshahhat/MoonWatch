@@ -8,10 +8,10 @@ using WatchParty.Shared.Protocol.Payloads;
 
 namespace WatchParty.Tests.Services;
 
-/// <summary>
-/// Unit tests for RoomService per  and .
-/// Tests all state transitions and role authorization.
-/// </summary>
+
+
+
+
 public class RoomServiceTests
 {
     private readonly IRoomRegistry _registry;
@@ -30,7 +30,7 @@ public class RoomServiceTests
         _service = new RoomService(_registry, logger, config);
     }
 
-    // ── CreateRoom ───────────────────────────────────────────────────────────
+    
 
     [Fact]
     public void CreateRoom_ReturnsValidCode()
@@ -41,7 +41,7 @@ public class RoomServiceTests
         Assert.Equal(RoomState.Created, room!.State);
     }
 
-    // ── JoinRoom — Host ──────────────────────────────────────────────────────
+    
 
     [Fact]
     public async Task JoinRoom_HostJoinsCreatedRoom_TransitionsToWaiting()
@@ -67,7 +67,7 @@ public class RoomServiceTests
             _service.HandleJoinRoom("host2-conn", code, "host"));
     }
 
-    // ── JoinRoom — Guest ─────────────────────────────────────────────────────
+    
 
     [Fact]
     public async Task JoinRoom_GuestJoinsWaitingRoom_NoContent_TransitionsToJoined()
@@ -153,7 +153,7 @@ public class RoomServiceTests
             _service.HandleJoinRoom("guest-conn", code, "guest"));
     }
 
-    // ── SetContent ───────────────────────────────────────────────────────────
+    
 
     [Fact]
     public async Task SetContent_ValidDescriptor_TransitionsJoinedToActive()
@@ -171,7 +171,7 @@ public class RoomServiceTests
         Assert.Equal(RoomState.Active, room.State);
     }
 
-    // ── Play/Pause/Seek ──────────────────────────────────────────────────────
+    
 
     [Fact]
     public async Task Play_HostPlays_UpdatesPositionAndReturnsData()
@@ -206,7 +206,7 @@ public class RoomServiceTests
         Assert.Equal(120000, room.HostPositionMs);
     }
 
-    // ── Role Authorization  ───────────────────────────────────────────
+    
 
     [Fact]
     public async Task Play_GuestCalling_ThrowsRoleUnauthorized()
@@ -248,7 +248,7 @@ public class RoomServiceTests
             _service.HandlePlay("random-conn", 42000, 1000000));
     }
 
-    // ── Host Disconnect ──────────────────────────────────────────────────────
+    
 
     [Fact]
     public async Task HostDisconnect_ClosesRoom()
@@ -272,7 +272,7 @@ public class RoomServiceTests
         Assert.Null(result);
     }
 
-    // ── Guest Disconnect ─────────────────────────────────────────────────────
+    
 
     [Fact]
     public async Task GuestDisconnect_StartsGracePeriod()
@@ -301,7 +301,7 @@ public class RoomServiceTests
         Assert.Equal(RoomState.Waiting, room.State);
     }
 
-    // ── LeaveRoom ────────────────────────────────────────────────────────────
+    
 
     [Fact]
     public async Task LeaveRoom_HostLeaves_ClosesRoom()
@@ -325,7 +325,7 @@ public class RoomServiceTests
         Assert.Equal(RoomState.Waiting, room.State);
     }
 
-    // ── Ping ─────────────────────────────────────────────────────────────────
+    
 
     [Fact]
     public async Task Ping_ReturnsTimestamps()
@@ -336,7 +336,7 @@ public class RoomServiceTests
         Assert.True(result.ServerTimestampMs > 0);
     }
 
-    // ── Buffering Coordination ,  ───────────────────────────────
+    
 
     [Fact]
     public async Task BufferingStall_GuestStalls_SetsGuestToStalled()
@@ -373,7 +373,7 @@ public class RoomServiceTests
         await _service.HandleNotifyBufferingStall("guest-conn", 42000, 1);
         var result = await _service.HandleNotifyBufferingStall("guest-conn", 43000, 1);
 
-        // Duplicate stall returns no peer (ignored)
+        
         Assert.Null(result.PeerConnectionId);
         Assert.Equal(BufferingState.Stalled, room.Guest!.BufferingState);
     }
@@ -383,40 +383,40 @@ public class RoomServiceTests
     {
         var (code, room) = await SetupActiveRoom();
 
-        // Guest is already Ready (default) — sending ready is out-of-sequence
+        
         var result = await _service.HandleNotifyBufferingReady("guest-conn", 1);
 
         Assert.False(result.GateOpened);
         Assert.Equal(BufferingState.Ready, room.Guest!.BufferingState);
     }
 
-    /// <summary>
-    /// Full buffering gate sequence: guest stalls, host stalls, guest ready (gate stays closed),
-    /// then host ready opens the gate.
-    /// </summary>
+    
+    
+    
+    
     [Fact]
     public async Task BufferingGate_BothStall_GateOpensOnlyWhenBothReady()
     {
         var (code, room) = await SetupActiveRoom();
-        room.HostPositionMs = 60000; // Set host position for resume
+        room.HostPositionMs = 60000; 
 
-        // 1. Guest stalls
+        
         await _service.HandleNotifyBufferingStall("guest-conn", 58000, 1);
         Assert.Equal(BufferingState.Stalled, room.Guest!.BufferingState);
         Assert.Equal(BufferingState.Ready, room.Host!.BufferingState);
 
-        // 2. Host stalls
+        
         await _service.HandleNotifyBufferingStall("host-conn", 60000, 1);
         Assert.Equal(BufferingState.Stalled, room.Host!.BufferingState);
         Assert.Equal(BufferingState.Stalled, room.Guest!.BufferingState);
 
-        // 3. Guest becomes ready — gate should NOT open (host still stalled)
+        
         var guestReadyResult = await _service.HandleNotifyBufferingReady("guest-conn", 1);
         Assert.False(guestReadyResult.GateOpened);
         Assert.Equal(BufferingState.Ready, room.Guest!.BufferingState);
         Assert.Equal(BufferingState.Stalled, room.Host!.BufferingState);
 
-        // 4. Host becomes ready — gate OPENS
+        
         var hostReadyResult = await _service.HandleNotifyBufferingReady("host-conn", 1);
         Assert.True(hostReadyResult.GateOpened);
         Assert.Equal(60000, hostReadyResult.ResumePositionMs);
@@ -424,11 +424,11 @@ public class RoomServiceTests
         Assert.Equal(BufferingState.Ready, room.Guest!.BufferingState);
     }
 
-    /// <summary>
-    /// Guest stalls while host was playing — buffering:stall is sent to host.
-    /// Guest ready → gate does not open until host also ready.
-    /// (In this scenario host never stalls — peer stays Ready on server.)
-    /// </summary>
+    
+    
+    
+    
+    
     [Fact]
     public async Task BufferingGate_GuestStalls_HostStaysReady_GateOpensOnGuestReady()
     {
@@ -436,13 +436,13 @@ public class RoomServiceTests
         room.HostPositionMs = 42000;
         room.HostIsPlaying = true;
 
-        // 1. Guest stalls
+        
         var stallResult = await _service.HandleNotifyBufferingStall("guest-conn", 42000, 1);
         Assert.Equal("host-conn", stallResult.PeerConnectionId);
         Assert.Equal(BufferingState.Stalled, room.Guest!.BufferingState);
         Assert.Equal(BufferingState.Ready, room.Host!.BufferingState);
 
-        // 2. Guest becomes ready — host was always Ready → gate opens
+        
         var readyResult = await _service.HandleNotifyBufferingReady("guest-conn", 1);
         Assert.True(readyResult.GateOpened);
         Assert.Equal(42000, readyResult.ResumePositionMs);
@@ -462,12 +462,12 @@ public class RoomServiceTests
             _service.HandleNotifyBufferingReady("random-conn", 1));
     }
 
-    // ── Guest Reconnection ,  ─────────────────────────────────
+    
 
-    /// <summary>
-    /// Guest reconnects within 30s — grace timer cancelled,
-    /// guest re-associated, state sync data returned, room stays Active.
-    /// </summary>
+    
+    
+    
+    
     [Fact]
     public async Task GuestReconnect_WithinGracePeriod_RestoresState()
     {
@@ -475,13 +475,13 @@ public class RoomServiceTests
         room.HostPositionMs = 142000;
         room.HostIsPlaying = true;
 
-        // Guest disconnects
+        
         var disconnectResult = await _service.HandleDisconnected("guest-conn");
         Assert.NotNull(disconnectResult);
         Assert.True(room.GuestAway);
         Assert.NotNull(room.GuestGraceCts);
 
-        // Guest reconnects with a new connection ID
+        
         var rejoinResult = await _service.HandleJoinRoom("guest-conn2", code, "guest");
 
         Assert.Equal("guest", rejoinResult.Role);
@@ -494,34 +494,34 @@ public class RoomServiceTests
         Assert.Equal("guest-conn2", room.Guest!.ConnectionId);
     }
 
-    /// <summary>
-    /// Reconnecting guest has BufferingState reset to Ready.
-    /// </summary>
+    
+    
+    
     [Fact]
     public async Task GuestReconnect_ResetsBufferingStateToReady()
     {
         var (code, room) = await SetupActiveRoom();
 
-        // Guest stalls, then disconnects
+        
         await _service.HandleNotifyBufferingStall("guest-conn", 42000, 1);
         Assert.Equal(BufferingState.Stalled, room.Guest!.BufferingState);
 
         await _service.HandleDisconnected("guest-conn");
 
-        // Guest reconnects
+        
         var rejoinResult = await _service.HandleJoinRoom("guest-conn2", code, "guest");
 
         Assert.Equal(BufferingState.Ready, room.Guest!.BufferingState);
     }
 
-    /// <summary>
-    /// Guest does not reconnect — grace timer fires, guest slot cleared,
-    /// room remains open, host can still receive a new guest.
-    /// </summary>
+    
+    
+    
+    
     [Fact]
     public async Task GuestGracePeriodExpiry_ClearsGuestSlot_RoomRemainsOpen()
     {
-        // Use a short grace period for testing
+        
         var registry = new InMemoryRoomRegistry();
         var logger = Mock.Of<ILogger<RoomService>>();
         var config = new ConfigurationBuilder()
@@ -540,32 +540,32 @@ public class RoomServiceTests
 
         registry.TryGet(code, out var room);
 
-        // Guest disconnects — 1s grace period
+        
         await service.HandleDisconnected("guest-conn");
         Assert.True(room!.GuestAway);
 
-        // Wait for grace period to expire
+        
         await Task.Delay(3000);
 
-        // Guest slot should be cleared
+        
         Assert.Null(room.Guest);
         Assert.False(room.GuestAway);
         Assert.Null(room.GuestGraceCts);
 
-        // Room remains open — host is still connected
+        
         Assert.Equal(RoomState.Active, room.State);
         Assert.True(registry.TryGet(code, out _));
 
-        // A new guest can join
+        
         var newGuestResult = await service.HandleJoinRoom("new-guest-conn", code, "guest");
         Assert.True(newGuestResult.IsNewGuest);
         Assert.Equal("guest", newGuestResult.Role);
     }
 
-    /// <summary>
-    /// Guest reconnects from Joined state —
-    /// transitions back to Joined (no stream URL) or Active (with stream URL).
-    /// </summary>
+    
+    
+    
+    
     [Fact]
     public async Task GuestReconnect_FromWaitingState_RestoresJoinedState()
     {
@@ -576,18 +576,18 @@ public class RoomServiceTests
         _registry.TryGet(code, out var room);
         Assert.Equal(RoomState.Joined, room!.State);
 
-        // Guest disconnects from Joined state → transitions to Waiting
+        
         await _service.HandleDisconnected("guest-conn");
         Assert.Equal(RoomState.Waiting, room.State);
         Assert.True(room.GuestAway);
 
-        // Guest reconnects → should go back to Joined (no stream URL)
+        
         var rejoinResult = await _service.HandleJoinRoom("guest-conn2", code, "guest");
         Assert.Equal(RoomState.Joined, room.State);
         Assert.False(room.GuestAway);
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    
 
     [Fact]
     public async Task PlayerReady_ContentSwitch_RequiresFreshReadyForNewContent()

@@ -29,7 +29,7 @@ public class HealthCheckTests : IClassFixture<WebApplicationFactory<Program>>
     [Fact]
     public async Task GetHealth_ReturnsActiveRoomCount()
     {
-        // Create a room via API, then check health
+        
         await _client.PostAsync("/api/v1/rooms", null);
 
         var response = await _client.GetAsync("/health");

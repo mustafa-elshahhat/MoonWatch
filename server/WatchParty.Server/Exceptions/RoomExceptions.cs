@@ -1,6 +1,6 @@
 namespace WatchParty.Server.Exceptions;
 
-/// <summary>Room not found in registry.</summary>
+
 public class RoomNotFoundException : Exception
 {
     public string RoomId { get; }
@@ -14,7 +14,7 @@ public class RoomNotFoundException : Exception
     }
 }
 
-/// <summary>Room already has 2 participants.</summary>
+
 public class RoomFullException : Exception
 {
     public string RoomId { get; }
@@ -26,7 +26,7 @@ public class RoomFullException : Exception
     }
 }
 
-/// <summary>Room is in Closed state.</summary>
+
 public class RoomClosedException : Exception
 {
     public string RoomId { get; }
@@ -38,7 +38,7 @@ public class RoomClosedException : Exception
     }
 }
 
-/// <summary>Action not permitted for this role (e.g., guest calling Play).</summary>
+
 public class RoleUnauthorizedException : Exception
 {
     public string RoomId { get; }
@@ -54,7 +54,7 @@ public class RoleUnauthorizedException : Exception
     }
 }
 
-/// <summary>Stream URL failed format validation.</summary>
+
 public class InvalidStreamUrlException : Exception
 {
     public string RoomId { get; }
@@ -66,7 +66,7 @@ public class InvalidStreamUrlException : Exception
     }
 }
 
-/// <summary>Hub method called before JoinRoom.</summary>
+
 public class ConnectionNotInRoomException : Exception
 {
     public string ConnectionId { get; }
@@ -78,7 +78,7 @@ public class ConnectionNotInRoomException : Exception
     }
 }
 
-/// <summary>Connection already joined a room.</summary>
+
 public class AlreadyJoinedException : Exception
 {
     public string ConnectionId { get; }
@@ -92,7 +92,7 @@ public class AlreadyJoinedException : Exception
     }
 }
 
-/// <summary>Invalid role value.</summary>
+
 public class InvalidRoleException : Exception
 {
     public string RoomId { get; }

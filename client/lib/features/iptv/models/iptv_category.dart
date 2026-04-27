@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-/// Shared category model used across Live, VOD, and Series.
+
 class IptvCategory extends Equatable {
   final String categoryId;
   final String categoryName;
@@ -24,6 +24,6 @@ class IptvCategory extends Equatable {
   List<Object?> get props => [categoryId, categoryName, parentId];
 }
 
-// —— Content type enum ——————————————————————————————————————————————
+
 
 enum IptvContentType { live, movie, series }

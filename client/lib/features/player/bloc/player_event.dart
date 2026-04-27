@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-/// PlayerBloc events per STATE_MANAGEMENT.md.
+
 sealed class PlayerEvent extends Equatable {
   const PlayerEvent();
 
@@ -11,8 +11,8 @@ sealed class PlayerEvent extends Equatable {
 class PlayerEventInitialize extends PlayerEvent {
   final String streamUrl;
 
-  /// Debug tag identifying who dispatched this event.
-  /// Values: 'room_active', 'retry', 'solo', 'next_episode', etc.
+  
+  
   final String? source;
 
   final bool isRoomMode;

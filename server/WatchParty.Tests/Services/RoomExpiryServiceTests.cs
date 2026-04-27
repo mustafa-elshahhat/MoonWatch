@@ -40,7 +40,7 @@ public class RoomExpiryServiceTests
     [Fact]
     public async Task SweepExpiredRooms_RemovesCreatedRoomExpired()
     {
-        // Created room older than CreationExpiryMinutes (5 min)
+        
         var room = CreateRoom("AAAAAA", RoomState.Created);
         SetCreatedAt(room, DateTimeOffset.UtcNow.AddMinutes(-6));
         _registry.TryAdd(room.RoomCode, room);
@@ -55,7 +55,7 @@ public class RoomExpiryServiceTests
     public async Task SweepExpiredRooms_DoesNotRemoveRecentCreatedRoom()
     {
         var room = CreateRoom("BBBBBB", RoomState.Created);
-        // Created just now — not expired
+        
         _registry.TryAdd(room.RoomCode, room);
 
         var expired = await _service.SweepExpiredRoomsAsync();
@@ -67,7 +67,7 @@ public class RoomExpiryServiceTests
     [Fact]
     public async Task SweepExpiredRooms_RemovesWaitingRoomExpired()
     {
-        // Waiting room older than WaitingExpiryMinutes (30 min)
+        
         var room = CreateRoom("CCCCCC", RoomState.Waiting);
         room.LastActivityAt = DateTimeOffset.UtcNow.AddMinutes(-31);
         _registry.TryAdd(room.RoomCode, room);
@@ -94,7 +94,7 @@ public class RoomExpiryServiceTests
     [Fact]
     public async Task SweepExpiredRooms_RemovesActiveRoomExpired()
     {
-        // Active room with no activity for > ActiveExpiryHours (2 hr)
+        
         var room = CreateRoom("EEEEEE", RoomState.Active);
         room.LastActivityAt = DateTimeOffset.UtcNow.AddHours(-3);
         _registry.TryAdd(room.RoomCode, room);
@@ -121,7 +121,7 @@ public class RoomExpiryServiceTests
     [Fact]
     public async Task SweepExpiredRooms_RemovesJoinedRoomExpired()
     {
-        // Joined room older than WaitingExpiryMinutes
+        
         var room = CreateRoom("GGGGGG", RoomState.Joined);
         room.LastActivityAt = DateTimeOffset.UtcNow.AddMinutes(-31);
         _registry.TryAdd(room.RoomCode, room);
@@ -148,7 +148,7 @@ public class RoomExpiryServiceTests
     [Fact]
     public async Task SweepExpiredRooms_MultipleMixed()
     {
-        // 2 expired, 1 not expired
+        
         var expired1 = CreateRoom("AAAAAA", RoomState.Created);
         SetCreatedAt(expired1, DateTimeOffset.UtcNow.AddMinutes(-6));
         _registry.TryAdd(expired1.RoomCode, expired1);
@@ -171,12 +171,12 @@ public class RoomExpiryServiceTests
     public async Task SweepExpiredRooms_RemovesAlreadyClosedRoomsFromRegistry()
     {
         var room = CreateRoom("JJJJJJ", RoomState.Closed);
-        // Manually add — typically shouldn't be in registry but test the defensive cleanup
+        
         _registry.TryAdd(room.RoomCode, room);
 
         var expired = await _service.SweepExpiredRoomsAsync();
 
-        // Closed rooms are defensively removed from registry  but not counted as expired
+        
         Assert.Equal(0, expired);
         Assert.False(_registry.TryGet("JJJJJJ", out _));
     }
@@ -189,7 +189,7 @@ public class RoomExpiryServiceTests
 
     private static void SetCreatedAt(Room room, DateTimeOffset time)
     {
-        // Use reflection to set the read-only CreatedAt property for testing
+        
         var field = typeof(Room).GetField("<CreatedAt>k__BackingField",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         field?.SetValue(room, time);

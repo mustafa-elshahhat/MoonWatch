@@ -7,13 +7,13 @@ import '../models/vod_stream.dart';
 import '../models/series_item.dart';
 import '../service/iptv_api_service.dart';
 
-/// Repository with in-memory caching. Translates IptvApiException
-/// into business-level errors and caches category/stream lists.
+
+
 class IptvRepository {
   final IptvApiService _apiService;
   final AppLogger _logger;
 
-  // In-memory caches keyed by content type / category id.
+  
   final Map<IptvContentType, List<IptvCategory>> _categoryCache = {};
   final Map<String, List<LiveStream>> _liveStreamsCache = {};
   final Map<String, List<VodStream>> _vodStreamsCache = {};
@@ -34,7 +34,7 @@ class IptvRepository {
     _seriesInfoCache.clear();
   }
 
-  // —— Categories ———————————————————————————————————————————————————
+  
 
   Future<List<IptvCategory>> getCategories(
     IptvContentType type, {
@@ -59,7 +59,7 @@ class IptvRepository {
     }
   }
 
-  // —— Live Streams —————————————————————————————————————————————————
+  
 
   Future<List<LiveStream>> getLiveStreams(
     String categoryId, {
@@ -82,7 +82,7 @@ class IptvRepository {
     }
   }
 
-  // —— VOD / Movies —————————————————————————————————————————————————
+  
 
   Future<List<VodStream>> getVodStreams(
     String categoryId, {
@@ -105,7 +105,7 @@ class IptvRepository {
     }
   }
 
-  // —— Series ———————————————————————————————————————————————————————
+  
 
   Future<List<SeriesItem>> getSeriesList(
     String categoryId, {
@@ -146,7 +146,7 @@ class IptvRepository {
     }
   }
 
-  // —— Playback URLs ————————————————————————————————————————————————
+  
 
   String getLivePlaybackUrl(int streamId) =>
       config.livePlaybackUrl(streamId.toString());
@@ -177,8 +177,8 @@ class IptvRepository {
     return url;
   }
 
-  /// Resolve final playback URL from a content descriptor using local credentials.
-  /// Each device uses its own IPTV account (platform-routed via IptvConfig.defaultProvider).
+  
+  
   String resolvePlaybackUrl(IptvContentDescriptor descriptor) {
     final String url = switch (descriptor.contentType) {
       IptvDescriptorType.live => config.livePlaybackUrl(descriptor.streamId),

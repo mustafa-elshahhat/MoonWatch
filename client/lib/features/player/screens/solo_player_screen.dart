@@ -19,8 +19,8 @@ import '../widgets/player_top_bar.dart';
 import '../widgets/player_state_overlay.dart';
 import '../widgets/smart_playback_controls.dart';
 
-/// Standalone playback screen — plays content without a room.
-/// Uses PlayerBloc directly; no sync/room involvement.
+
+
 class SoloPlayerScreen extends StatelessWidget {
   const SoloPlayerScreen({super.key});
 
@@ -49,10 +49,10 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
   final GlobalKey<SmartPlaybackControlsState> _controlsKey =
       GlobalKey<SmartPlaybackControlsState>();
 
-  /// Current video fit/fill mode — presentation-only, no effect on playback.
+  
   VideoFitMode _fitMode = VideoFitMode.contain;
 
-  /// Whether the top bar overlay is currently visible.
+  
   bool _topBarVisible = true;
   Timer? _topBarHideTimer;
 
@@ -146,8 +146,8 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
     );
   }
 
-  /// Advance to the next episode in the same series.
-  /// Called when the user taps the Next Episode button (solo mode only).
+  
+  
   void _handleNextEpisode() {
     final navCtx = EpisodeNavService().current;
     final next = navCtx?.nextEpisode;
@@ -158,8 +158,8 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
       next.containerExtension,
     );
 
-    // Advance the service first so the rebuilt _uiContext reflects the new
-    // episode's hasNext status immediately after setState.
+    
+    
     EpisodeNavService().advanceTo(next.id);
 
     setState(() {
@@ -183,16 +183,16 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
             uiContext,
             isFullscreen,
           );
-          // Removing top-level SafeArea allows the video surface to stretch edge-to-edge.
-          // Overlay controls maintain their own SafeArea padding.
+          
+          
           return playerBody;
         },
       ),
     );
   }
 
-  /// Stack-based player layout: video is the base layer, controls and top bar
-  /// are positioned overlays. Hiding overlays never reduces the video area.
+  
+  
   Widget _buildPlayerStack(
     BuildContext context,
     PlayerUIContext uiContext,
@@ -223,9 +223,9 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
             return Stack(
               fit: StackFit.expand,
               children: [
-                // —— Video surface — always fills full area ——————————————————
+                
                 _buildVideoView(_fitMode.boxFit),
-                // —— State overlays (loading / buffering / error / ended) ——
+                
                 if (overlayType != null)
                   PlayerStateOverlay(
                     type: overlayType,
@@ -239,7 +239,7 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
                         : null,
                     onBack: () => Navigator.pop(context),
                   ),
-                // —— Top bar overlay — fades out in fullscreen after idle ————
+                
                 Positioned(
                   top: 0,
                   left: 0,
@@ -259,7 +259,7 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
                     ),
                   ),
                 ),
-                // —— Bottom controls overlay — SmartPlaybackControls manages its own visibility —
+                
                 Positioned(
                   bottom: 0,
                   left: 0,

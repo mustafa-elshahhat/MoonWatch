@@ -14,7 +14,7 @@ import '../../reconnect/reconnect_bloc.dart';
 import '../../iptv/service/iptv_navigation_memory.dart';
 import 'package:get_it/get_it.dart';
 
-/// Cinematic flagship waiting screen — host waiting for guest.
+
 class WaitingScreen extends StatefulWidget {
   const WaitingScreen({super.key});
   @override
@@ -88,12 +88,12 @@ class _WaitingScreenState extends State<WaitingScreen>
         body: Stack(
           fit: StackFit.expand,
           children: [
-            // Rich cinematic atmosphere
+            
             _buildAtmosphere(sw),
             SafeArea(
               child: Column(
                 children: [
-                  // Header bar
+                  
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.xxl,
@@ -179,7 +179,7 @@ class _WaitingScreenState extends State<WaitingScreen>
   Widget _buildAtmosphere(double w) {
     return Stack(
       children: [
-        // Purple glow top-right
+        
         Positioned(
           top: -w * 0.3,
           right: -w * 0.2,
@@ -197,7 +197,7 @@ class _WaitingScreenState extends State<WaitingScreen>
             ),
           ),
         ),
-        // Teal glow bottom-left
+        
         Positioned(
           bottom: -w * 0.2,
           left: -w * 0.15,
@@ -226,7 +226,7 @@ class _WaitingScreenState extends State<WaitingScreen>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Orbit ring 1
+          
           AnimatedBuilder(
             animation: _orbitAnim,
             builder: (_, __) {
@@ -266,7 +266,7 @@ class _WaitingScreenState extends State<WaitingScreen>
               );
             },
           ),
-          // Orbit ring 2 (reverse)
+          
           AnimatedBuilder(
             animation: _orbitAnim,
             builder: (_, __) {
@@ -298,7 +298,7 @@ class _WaitingScreenState extends State<WaitingScreen>
               );
             },
           ),
-          // Pulse ring
+          
           AnimatedBuilder(
             animation: _pulseAnim,
             builder: (_, __) => Container(
@@ -315,7 +315,7 @@ class _WaitingScreenState extends State<WaitingScreen>
               ),
             ),
           ),
-          // Center icon
+          
           Container(
             width: 68,
             height: 68,
@@ -341,7 +341,7 @@ class _WaitingScreenState extends State<WaitingScreen>
               size: 28,
             ),
           ),
-          // Progress ring
+          
           SizedBox(
             width: 76,
             height: 76,
@@ -388,7 +388,7 @@ class _WaitingScreenState extends State<WaitingScreen>
       ),
       child: Column(
         children: [
-          // Label
+          
           Text(
             'ROOM CODE',
             style: AppTypography.sectionLabel.copyWith(
@@ -397,7 +397,7 @@ class _WaitingScreenState extends State<WaitingScreen>
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          // Code — with per-character spacing
+          
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -408,7 +408,7 @@ class _WaitingScreenState extends State<WaitingScreen>
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
-          // Copy button
+          
           GestureDetector(
             onTap: () {
               Clipboard.setData(ClipboardData(text: roomCode));
@@ -460,7 +460,7 @@ class _WaitingScreenState extends State<WaitingScreen>
   }
 }
 
-// —— Code char tile —————————————————————————————————————————————————
+
 
 class _CodeChar extends StatelessWidget {
   final String char;
