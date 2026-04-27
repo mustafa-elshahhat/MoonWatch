@@ -1,19 +1,21 @@
-# ── Dart / Flutter ──────────────────────────────────────────────────────────
-.dart_tool/
-.packages
-.pub-cache/
-.pub/
-build/
-doc/api/
-
-# Generated Flutter metadata
+# Flutter generated/local
 .flutter-plugins
 .flutter-plugins-dependencies
+.dart_tool/
+build/
 .metadata
-flutter_export_environment.sh
 
-# Generated plugin registrants / CMake lists (Windows Flutter)
-client/windows/flutter/ephemeral/
+# Android local/generated
+**/android/local.properties
+**/android/key.properties
+**/android/*.jks
+**/android/*.keystore
+**/android/.gradle/
+**/android/app/build/
+**/android/build/
+
+# Windows Flutter generated
+**/windows/flutter/ephemeral/
 client/windows/flutter/generated_plugins.cmake
 client/windows/flutter/generated_plugin_registrant.cc
 client/windows/flutter/generated_plugin_registrant.h
@@ -27,14 +29,11 @@ client/windows/Release/
 *.ipr
 .idea/
 .vscode/
-
-# ── Android ──────────────────────────────────────────────────────────────────
-client/android/local.properties
-client/android/key.properties
-client/android/**/*.jks
-client/android/**/*.keystore
-client/android/.gradle/
-client/android/app/build/
+.packages
+.pub-cache/
+.pub/
+doc/api/
+flutter_export_environment.sh
 client/android/captures/
 *.apk
 *.aab
