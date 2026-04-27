@@ -230,7 +230,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
       emit(
         const RoomStateError(
           code: RoomErrorCode.internalError,
-          message: 'Failed to set content: ',
+          message: 'Failed to set content.',
         ),
       );
     }

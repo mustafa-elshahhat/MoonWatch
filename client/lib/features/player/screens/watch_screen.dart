@@ -393,17 +393,14 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                 duration: AppAnimation.normal,
                 child: IgnorePointer(
                   ignoring: isFullscreen && !_topBarVisible,
-                  child: SafeArea(
-                    bottom: false,
-                    child: PlayerTopBar(
-                      uiContext: uiContext,
-                      roomCode: roomCode,
-                      peerStatus: peerStatus,
-                      onBack: () => _confirmLeave(context),
-                      onBrowseContent: uiContext.canChangeContent
-                          ? () => _browseContentInRoom(context)
-                          : null,
-                    ),
+                  child: PlayerTopBar(
+                    uiContext: uiContext,
+                    roomCode: roomCode,
+                    peerStatus: peerStatus,
+                    onBack: () => _confirmLeave(context),
+                    onBrowseContent: uiContext.canChangeContent
+                        ? () => _browseContentInRoom(context)
+                        : null,
                   ),
                 ),
               ),
@@ -412,12 +409,9 @@ class WatchScreenContentState extends State<WatchScreenContent> {
               bottom: 0,
               left: 0,
               right: 0,
-              child: SafeArea(
-                top: false,
-                child: BlocBuilder<PlayerBloc, PlayerState>(
-                  builder: (context, playerState) =>
-                      _buildSmartControls(context, playerState, uiContext),
-                ),
+              child: BlocBuilder<PlayerBloc, PlayerState>(
+                builder: (context, playerState) =>
+                    _buildSmartControls(context, playerState, uiContext),
               ),
             ),
           ],

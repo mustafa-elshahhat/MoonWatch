@@ -22,10 +22,9 @@ class SignalRClient {
   SignalRConnectionState _currentState = SignalRConnectionState.disconnected;
   SignalRConnectionState get currentState => _currentState;
 
-  SignalRClient({AppLogger? logger})
+  SignalRClient({required String baseUrl, AppLogger? logger})
       : _logger = logger ?? AppLogger('SignalR') {
-    const serverUrl =
-        '${AppConstants.kServerBaseUrl}${AppConstants.kSignalRHubPath}';
+    final serverUrl = '$baseUrl${AppConstants.kSignalRHubPath}';
 
     _hubConnection = HubConnectionBuilder()
         .withUrl(serverUrl)

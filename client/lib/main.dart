@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:window_manager/window_manager.dart';
 import 'core/di/injection.dart';
 import 'core/logging/app_logger.dart';
+import 'core/config/app_config.dart';
+import 'features/auth/screens/config_missing_screen.dart';
 import 'app.dart';
 
 void main() {
@@ -15,6 +17,19 @@ void main() {
       GoogleFonts.config.allowRuntimeFetching = false;
       final startTime = DateTime.now();
       debugPrint('[PROFILER] app_start: ${startTime.toIso8601String()}');
+
+      AppConfig? appConfig;
+      String? configError;
+
+      try {
+        appConfig = await AppConfig.load();
+      } catch (e) {
+        configError = e.toString();
+      }
+
+      if (appConfig != null) {
+        await configureDependencies(appConfig: appConfig);
+      }
 
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         final elapsed = DateTime.now().difference(startTime).inMilliseconds;
@@ -28,8 +43,6 @@ void main() {
           'Main',
         ).i('App fully started after first frame ($elapsed ms)');
       });
-
-      configureDependencies();
 
       FlutterError.onError = (FlutterErrorDetails details) {
         AppLogger('FlutterError').e(
@@ -46,7 +59,14 @@ void main() {
         return true;
       };
 
-      runApp(const WatchPartyApp());
+      if (appConfig == null) {
+        runApp(MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: ConfigMissingScreen(error: configError),
+        ));
+      } else {
+        runApp(const WatchPartyApp());
+      }
     },
     (Object error, StackTrace stack) {
       AppLogger(

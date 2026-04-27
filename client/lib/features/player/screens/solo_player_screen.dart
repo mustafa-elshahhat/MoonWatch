@@ -235,13 +235,10 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
                     duration: AppAnimation.normal,
                     child: IgnorePointer(
                       ignoring: isFullscreen && !_topBarVisible,
-                      child: SafeArea(
-                        bottom: false,
-                        child: PlayerTopBar(
-                          uiContext: uiContext,
-                          onBack: () => Navigator.pop(context),
-                        ),
-                      ),
+                    child: PlayerTopBar(
+                      uiContext: uiContext,
+                      onBack: () => Navigator.pop(context),
+                    ),
                     ),
                   ),
                 ),
@@ -249,10 +246,7 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  child: SafeArea(
-                    top: false,
-                    child: _buildSmartControls(context, state, uiContext),
-                  ),
+                  child: _buildSmartControls(context, state, uiContext),
                 ),
               ],
             );

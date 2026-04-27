@@ -9,30 +9,8 @@ class IptvConfig {
     required this.baseUrl,
   });
 
-  static const String _kBaseUrl = String.fromEnvironment('IPTV_BASE_URL');
-  static const String _kUsername = String.fromEnvironment('IPTV_USERNAME');
-  static const String _kPassword = String.fromEnvironment('IPTV_PASSWORD');
-
-  static IptvConfig get defaultProvider => const IptvConfig(
-        username: _kUsername,
-        password: _kPassword,
-        baseUrl: _kBaseUrl,
-      );
-
   bool get isConfigured =>
       username.isNotEmpty && password.isNotEmpty && baseUrl.isNotEmpty;
-
-  void ensureConfigured() {
-    if (!isConfigured) {
-      throw StateError(
-        'IPTV credentials are not configured.\n'
-        'Supply them at build time:\n'
-        '  --dart-define=IPTV_BASE_URL=<url>\n'
-        '  --dart-define=IPTV_USERNAME=<user>\n'
-        '  --dart-define=IPTV_PASSWORD=<pass>',
-      );
-    }
-  }
 
   String get _authParams => 'username=$username&password=$password';
 

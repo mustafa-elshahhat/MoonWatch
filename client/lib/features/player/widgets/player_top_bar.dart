@@ -25,6 +25,8 @@ class PlayerTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final safe = MediaQuery.paddingOf(context);
+
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -34,10 +36,10 @@ class PlayerTopBar extends StatelessWidget {
           stops: [0.0, 0.5, 1.0],
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.md,
-        AppSpacing.md,
+      padding: EdgeInsets.fromLTRB(
+        safe.left + AppSpacing.md,
+        safe.top + AppSpacing.md,
+        safe.right + AppSpacing.md,
         AppSpacing.xxl,
       ),
       child: Row(

@@ -1,3 +1,5 @@
+import '../../../core/security/credential_store.dart';
+import '../../../core/config/app_config.dart';
 import 'package:dio/dio.dart';
 import '../../../core/logging/app_logger.dart';
 import '../config/iptv_config.dart';
@@ -18,11 +20,19 @@ class IptvApiException implements Exception {
 
 class IptvApiService {
   final Dio _dio;
-  final IptvConfig _config;
+  final AppConfig _appConfig;
+  final CredentialStore _credentialStore;
   final AppLogger _logger;
+  IptvConfig? _currentConfig;
 
-  IptvApiService({required IptvConfig config, AppLogger? logger})
-      : _config = config,
+  IptvApiService({
+    required AppConfig appConfig,
+    required CredentialStore credentialStore,
+    IptvConfig? initialConfig,
+    AppLogger? logger,
+  })  : _appConfig = appConfig,
+        _credentialStore = credentialStore,
+        _currentConfig = initialConfig,
         _logger = logger ?? AppLogger('IptvApiService'),
         _dio = Dio(
           BaseOptions(
@@ -51,21 +61,57 @@ class IptvApiService {
     return AppLogger.sanitizeUrl(uri.toString());
   }
 
-  IptvConfig get config => _config;
+  IptvConfig get config {
+    if (_currentConfig == null) {
+      throw const IptvApiException('IPTV config is not initialized.');
+    }
+    return _currentConfig!;
+  }
 
-  void _checkCredentials() {
-    if (!_config.isConfigured) {
-      throw const IptvApiException(
-        'IPTV credentials are not configured. '
-        'Supply --dart-define=IPTV_BASE_URL, IPTV_USERNAME, IPTV_PASSWORD at build time.',
+  Future<void> _ensureConfigured() async {
+    if (_currentConfig != null) return;
+
+    final creds = await _credentialStore.readIptvCredentials();
+    if (creds == null) {
+      throw const IptvApiException('IPTV credentials missing. Login required.');
+    }
+
+    _currentConfig = IptvConfig(
+      username: creds.username,
+      password: creds.password,
+      baseUrl: _appConfig.iptvBaseUrl,
+    );
+  }
+
+  void clearConfig() {
+    _currentConfig = null;
+  }
+
+  Future<bool> verifyCredentials(String username, String password) async {
+    try {
+      final config = IptvConfig(
+        username: username.trim(),
+        password: password,
+        baseUrl: _appConfig.iptvBaseUrl,
       );
+      final dio = Dio(BaseOptions(
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+      ));
+      final response = await dio.getUri(config.authUrl);
+      final data = response.data as Map<String, dynamic>;
+      final userInfo = data['user_info'] as Map<String, dynamic>?;
+      return userInfo?['auth']?.toString() == '1';
+    } catch (e) {
+      _logger.e('Credential verification failed', error: e);
+      return false;
     }
   }
 
   Future<Map<String, dynamic>> authenticate() async {
-    _checkCredentials();
+    await _ensureConfigured();
     try {
-      final response = await _dio.getUri(_config.authUrl);
+      final response = await _dio.getUri(config.authUrl);
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
       throw _mapError(e);
@@ -73,15 +119,15 @@ class IptvApiService {
   }
 
   Future<List<IptvCategory>> getLiveCategories() async {
-    _checkCredentials();
-    return _fetchCategories(_config.liveCategoriesUrl);
+    await _ensureConfigured();
+    return _fetchCategories(config.liveCategoriesUrl);
   }
 
   Future<List<LiveStream>> getLiveStreams({String? categoryId}) async {
-    _checkCredentials();
+    await _ensureConfigured();
     try {
       final response = await _dio.getUri(
-        _config.liveStreamsUrl(categoryId: categoryId),
+        config.liveStreamsUrl(categoryId: categoryId),
       );
       final list = response.data as List<dynamic>? ?? [];
       return list
@@ -94,15 +140,15 @@ class IptvApiService {
   }
 
   Future<List<IptvCategory>> getVodCategories() async {
-    _checkCredentials();
-    return _fetchCategories(_config.vodCategoriesUrl);
+    await _ensureConfigured();
+    return _fetchCategories(config.vodCategoriesUrl);
   }
 
   Future<List<VodStream>> getVodStreams({String? categoryId}) async {
-    _checkCredentials();
+    await _ensureConfigured();
     try {
       final response = await _dio.getUri(
-        _config.vodStreamsUrl(categoryId: categoryId),
+        config.vodStreamsUrl(categoryId: categoryId),
       );
       final list = response.data as List<dynamic>? ?? [];
       return list
@@ -115,15 +161,15 @@ class IptvApiService {
   }
 
   Future<List<IptvCategory>> getSeriesCategories() async {
-    _checkCredentials();
-    return _fetchCategories(_config.seriesCategoriesUrl);
+    await _ensureConfigured();
+    return _fetchCategories(config.seriesCategoriesUrl);
   }
 
   Future<List<SeriesItem>> getSeriesList({String? categoryId}) async {
-    _checkCredentials();
+    await _ensureConfigured();
     try {
       final response = await _dio.getUri(
-        _config.seriesListUrl(categoryId: categoryId),
+        config.seriesListUrl(categoryId: categoryId),
       );
       final list = response.data as List<dynamic>? ?? [];
       return list
@@ -136,9 +182,9 @@ class IptvApiService {
   }
 
   Future<Map<String, dynamic>> getSeriesInfo(String seriesId) async {
-    _checkCredentials();
+    await _ensureConfigured();
     try {
-      final response = await _dio.getUri(_config.seriesInfoUrl(seriesId));
+      final response = await _dio.getUri(config.seriesInfoUrl(seriesId));
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
       throw _mapError(e);

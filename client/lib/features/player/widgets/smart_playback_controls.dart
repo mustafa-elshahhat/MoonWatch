@@ -537,23 +537,27 @@ class _ChromeContainer extends StatelessWidget {
   final Widget child;
   const _ChromeContainer({required this.child});
   @override
-  Widget build(BuildContext context) => Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-            colors: [Color(0xE6000000), Color(0x66000000), Color(0x00000000)],
-            stops: [0.0, 0.55, 1.0],
-          ),
+  Widget build(BuildContext context) {
+    final safe = MediaQuery.paddingOf(context);
+
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [Color(0xE6000000), Color(0x66000000), Color(0x00000000)],
+          stops: [0.0, 0.55, 1.0],
         ),
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.md,
-          AppSpacing.xl,
-          AppSpacing.md,
-          AppSpacing.md,
-        ),
-        child: child,
-      );
+      ),
+      padding: EdgeInsets.fromLTRB(
+        safe.left + AppSpacing.md,
+        AppSpacing.xl,
+        safe.right + AppSpacing.md,
+        safe.bottom + AppSpacing.md,
+      ),
+      child: child,
+    );
+  }
 }
 
 class _PlayPauseBtn extends StatefulWidget {

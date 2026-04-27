@@ -119,6 +119,7 @@ appsettings.*.Local.json
 .env.*
 secrets.json
 local.settings.json
+client/assets/config/appsettings.local.json
 
 # Signing keys
 *.jks

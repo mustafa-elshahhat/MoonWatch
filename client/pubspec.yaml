@@ -38,6 +38,7 @@ dependencies:
   path_provider: ^2.1.0
   window_manager: ^0.5.1
   google_fonts: ^8.0.2
+  flutter_secure_storage: ^9.2.2
 
 dev_dependencies:
   flutter_test:
@@ -51,6 +52,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/config/appsettings.local.json
 
 flutter_launcher_icons:
   android: "launcher_icon"

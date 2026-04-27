@@ -6,6 +6,8 @@ import '../../iptv/screens/iptv_browse_screen.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../auth/bloc/auth_bloc.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -143,6 +145,18 @@ class MainShellState extends State<MainShell> {
           _buildSideNavItem(1, Icons.explore_rounded, 'Browse'),
           _buildSideNavItem(2, Icons.meeting_room_rounded, 'Rooms'),
           const Spacer(),
+          IconButton(
+            onPressed: () {
+              context.read<AuthBloc>().add(AuthLogoutRequested());
+            },
+            icon: const Icon(
+              Icons.logout_rounded,
+              color: AppColors.textDisabled,
+              size: 20,
+            ),
+            tooltip: 'Logout',
+          ),
+          const SizedBox(height: AppSpacing.sm),
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.lg),
             child: Text(

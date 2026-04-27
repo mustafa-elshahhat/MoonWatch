@@ -1,9 +1,6 @@
 class AppConstants {
   AppConstants._();
 
-  static const String kServerBaseUrl = String.fromEnvironment(
-    'SERVER_BASE_URL',
-  );
   static const String kSignalRHubPath = '/hubs/room';
 
   static const int kDriftThresholdMs = 400;
@@ -22,15 +19,4 @@ class AppConstants {
   static const int kPingIntervalMs = 15000;
 
   static const double kRttSmoothingAlpha = 0.3;
-
-  static bool get hasServerBaseUrl => kServerBaseUrl.isNotEmpty;
-
-  static void requireServerBaseUrl() {
-    if (!hasServerBaseUrl) {
-      throw StateError(
-        'SERVER_BASE_URL is not configured. '
-        'Supply --dart-define=SERVER_BASE_URL=<url> at build time.',
-      );
-    }
-  }
 }

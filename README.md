@@ -40,9 +40,10 @@ MoonWatch lets a small group watch the same IPTV stream together in real time. T
 ```
 MoonWatch/
 ├── client/          # Flutter app (Windows, Android)
+│   ├── assets/config/   # App configuration (appsettings.local.json)
 │   ├── lib/
-│   │   ├── core/        # DI, logging, network, player abstraction, constants
-│   │   ├── features/    # iptv, player, room, sync, reconnect, navigation
+│   │   ├── core/        # DI, config, logging, security, network, player, constants
+│   │   ├── features/    # auth, iptv, player, room, sync, reconnect, navigation
 │   │   └── shared/      # shared widgets
 │   └── test/
 ├── server/
@@ -57,34 +58,35 @@ MoonWatch/
 
 ## Configuration
 
-All secrets and environment-specific values are supplied at build time. **Nothing sensitive belongs in source control.**
+MoonWatch uses a local configuration file for infrastructure URLs and secure storage for user credentials.
 
-| Variable | Used by | Description |
-|---|---|---|
-| `SERVER_BASE_URL` | Flutter client | Base URL of the WatchParty server, e.g. `http://192.168.1.10:5035` |
-| `IPTV_BASE_URL` | Flutter client | Xtream Codes provider base URL |
-| `IPTV_USERNAME` | Flutter client | Provider username |
-| `IPTV_PASSWORD` | Flutter client | Provider password |
+### 1. Setup Infrastructure URLs
 
-Pass them at build time via `--dart-define`:
+Create a local configuration file for the Flutter client:
+`client/assets/config/appsettings.local.json`
 
+You can use the template provided:
 ```bash
-flutter run \
-  --dart-define=SERVER_BASE_URL=http://192.168.1.10:5035 \
-  --dart-define=IPTV_BASE_URL=http://your-provider.example \
-  --dart-define=IPTV_USERNAME=myuser \
-  --dart-define=IPTV_PASSWORD=mypass
+# Windows PowerShell
+Copy-Item client/assets/config/appsettings.example.json client/assets/config/appsettings.local.json
+
+# Linux/macOS
+cp client/assets/config/appsettings.example.json client/assets/config/appsettings.local.json
 ```
 
-Server CORS origins are configured in `appsettings.json` (or `appsettings.Development.json` for local dev):
-
+Edit `client/assets/config/appsettings.local.json`:
 ```json
-"WatchParty": {
-  "Cors": {
-    "AllowedOrigins": ["http://your-client-origin"]
-  }
+{
+  "serverBaseUrl": "https://moviedate.runasp.net",
+  "iptvBaseUrl": "http://xc.nv2.xyz"
 }
 ```
+
+**Security Note:** `appsettings.local.json` is ignored by Git. Do not commit your real URLs.
+
+### 2. IPTV Credentials
+
+IPTV username and password are entered directly in the app during the first launch and are stored securely on the device using `flutter_secure_storage`.
 
 ---
 
@@ -102,36 +104,33 @@ The server starts on `http://localhost:5035` by default (see `Properties/launchS
 
 ## Running the Flutter client
 
+1. Ensure `client/assets/config/appsettings.local.json` exists.
+2. Run:
 ```bash
 cd client
 flutter pub get
-flutter run \
-  --dart-define=SERVER_BASE_URL=http://localhost:5035 \
-  --dart-define=IPTV_BASE_URL=http://your-provider.example \
-  --dart-define=IPTV_USERNAME=myuser \
-  --dart-define=IPTV_PASSWORD=mypass
+flutter run
 ```
+
+The app will prompt for your IPTV username and password on the first launch.
 
 ---
 
 ## Running tests
 
 **Server tests:**
-
 ```bash
 cd server
 dotnet test WatchParty.slnx -c Release
 ```
 
 **Flutter client tests:**
-
 ```bash
 cd client
 flutter test
 ```
 
 **Shared protocol tests:**
-
 ```bash
 cd shared
 dart pub get
@@ -142,26 +141,11 @@ dart test
 
 ## Build
 
-**Windows desktop:**
-
+**Windows desktop / Android APK:**
 ```bash
 cd client
-flutter build windows --release \
-  --dart-define=SERVER_BASE_URL=http://your-server \
-  --dart-define=IPTV_BASE_URL=http://your-provider \
-  --dart-define=IPTV_USERNAME=myuser \
-  --dart-define=IPTV_PASSWORD=mypass
-```
-
-**Android APK:**
-
-```bash
-cd client
-flutter build apk --release \
-  --dart-define=SERVER_BASE_URL=http://your-server \
-  --dart-define=IPTV_BASE_URL=http://your-provider \
-  --dart-define=IPTV_USERNAME=myuser \
-  --dart-define=IPTV_PASSWORD=mypass
+flutter build windows --release
+flutter build apk --release
 ```
 
 Android release builds require a signing key. See the [Flutter documentation](https://docs.flutter.dev/deployment/android) and add your `key.properties` and `.jks` files locally — **never commit them**.
@@ -170,7 +154,6 @@ Android release builds require a signing key. See the [Flutter documentation](ht
 
 ## Security notes
 
-- **Never commit** IPTV credentials, signing keys (`.jks`, `.keystore`, `key.properties`), publish profiles (`.pubxml`), `local.properties`, or `appsettings.Production.json`.
-- All sensitive values belong in environment variables or build-time `--dart-define` flags.
+- **Never commit** real `appsettings.local.json`, signing keys (`.jks`, `.keystore`, `key.properties`), publish profiles (`.pubxml`), `local.properties`, or `appsettings.Production.json`.
+- IPTV credentials are never logged or hardcoded.
 - The `.gitignore` at the repository root is configured to exclude all of the above.
-- If any credentials were present in earlier commits, rotate them.

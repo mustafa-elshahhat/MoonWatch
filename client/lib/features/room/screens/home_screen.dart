@@ -4,6 +4,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/app_components.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../auth/bloc/auth_bloc.dart';
 import '../../navigation/screens/main_shell.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -251,7 +253,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 60),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  onPressed: () {
+                    context.read<AuthBloc>().add(AuthLogoutRequested());
+                  },
+                  icon: const Icon(
+                    Icons.logout_rounded,
+                    color: AppColors.textMuted,
+                    size: 20,
+                  ),
+                  tooltip: 'Logout',
+                ),
+              ),
+              const SizedBox(height: 20),
               _buildHero(isDesktop: false),
               const SizedBox(height: 56),
               const SectionEyebrow(

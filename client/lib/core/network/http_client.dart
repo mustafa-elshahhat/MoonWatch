@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import '../logging/app_logger.dart';
-import '../constants/app_constants.dart';
 
 class NetworkException implements Exception {
   final String message;
@@ -17,11 +16,11 @@ class HttpClient {
   final Dio _dio;
   final AppLogger _logger;
 
-  HttpClient({AppLogger? logger})
+  HttpClient({required String baseUrl, AppLogger? logger})
       : _logger = logger ?? AppLogger('HttpClient'),
         _dio = Dio(
           BaseOptions(
-            baseUrl: '${AppConstants.kServerBaseUrl}/api/v1',
+            baseUrl: '$baseUrl/api/v1',
             connectTimeout: const Duration(seconds: 10),
             receiveTimeout: const Duration(seconds: 10),
           ),
