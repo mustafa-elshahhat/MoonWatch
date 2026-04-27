@@ -9,6 +9,7 @@ import 'package:watch_party/core/protocol/room_events.dart';
 import 'package:watch_party/features/room/bloc/room_bloc.dart';
 import 'package:watch_party/features/room/bloc/room_event.dart';
 import 'package:watch_party/features/room/bloc/room_state.dart';
+import 'package:watch_party/features/room/domain/room_error_code.dart';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 
 const _testDescriptor = IptvContentDescriptor(

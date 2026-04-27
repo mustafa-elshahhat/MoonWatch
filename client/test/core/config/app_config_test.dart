@@ -47,5 +47,16 @@ void main() {
 
       expect(AppConfig.load(), throwsA(isA<Exception>()));
     });
+
+    test('throws helpful error when config file is missing', () async {
+      expect(
+        AppConfig.load(),
+        throwsA(
+          predicate<Exception>((e) =>
+              e.toString().contains('appsettings.local.json') &&
+              e.toString().contains('appsettings.example.json')),
+        ),
+      );
+    });
   });
 }

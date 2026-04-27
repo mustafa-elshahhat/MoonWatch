@@ -77,12 +77,12 @@ cp client/assets/config/appsettings.example.json client/assets/config/appsetting
 Edit `client/assets/config/appsettings.local.json`:
 ```json
 {
-  "serverBaseUrl": "https://moviedate.runasp.net",
-  "iptvBaseUrl": "http://xc.nv2.xyz"
+  "serverBaseUrl": "https://your-watchparty-server.example.com",
+  "iptvBaseUrl": "https://your-iptv-provider.example.com"
 }
 ```
 
-**Security Note:** `appsettings.local.json` is ignored by Git. Do not commit your real URLs.
+**Security Note:** `appsettings.local.json` is ignored by Git. Never commit real server URLs or credentials.
 
 ### 2. IPTV Credentials
 

@@ -56,21 +56,12 @@ try
     var wpOptions = builder.Configuration.GetSection("WatchParty").Get<WatchPartyOptions>() ?? new WatchPartyOptions();
     builder.Services.Configure<WatchPartyOptions>(builder.Configuration.GetSection("WatchParty"));
 
-    
-    if (builder.Environment.IsProduction() &&
-        (wpOptions.Cors.AllowedOrigins == null || wpOptions.Cors.AllowedOrigins.Length == 0))
-    {
-        throw new InvalidOperationException(
-            "WatchParty:Cors:AllowedOrigins must not be empty in Production. " +
-            "Configure explicit origins in appsettings.Production.json.");
-    }
 
-    
     builder.Services.AddControllers();
     builder.Services.AddSingleton<IRoomRegistry, InMemoryRoomRegistry>();
     builder.Services.AddSingleton<IRoomService, RoomService>();
 
-    
+
     builder.Services.AddSignalR(options =>
     {
         options.KeepAliveInterval = TimeSpan.FromSeconds(wpOptions.SignalR.KeepAliveIntervalSeconds);
@@ -78,7 +69,7 @@ try
         options.MaximumParallelInvocationsPerClient = wpOptions.SignalR.MaximumParallelInvocationsPerClient;
     });
 
-    
+
     builder.Services.AddCors(options =>
     {
         options.AddDefaultPolicy(policy =>
@@ -90,9 +81,18 @@ try
                     .AllowAnyMethod()
                     .AllowCredentials();
             }
+            else if (builder.Environment.IsProduction())
+            {
+                Log.Warning("WatchParty:Cors:AllowedOrigins is empty in Production. " +
+                    "Browser-based clients will be blocked by CORS. " +
+                    "Native mobile/desktop clients are unaffected. " +
+                    "To enable browser clients, set AllowedOrigins in appsettings.Production.json or via environment variables.");
+                policy.WithOrigins(Array.Empty<string>())
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            }
             else
             {
-                
                 policy.SetIsOriginAllowed(_ => true)
                     .AllowAnyHeader()
                     .AllowAnyMethod()

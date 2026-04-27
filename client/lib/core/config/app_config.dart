@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart'
+    show rootBundle, PlatformException;
 
 class AppConfig {
   final String serverBaseUrl;
@@ -11,31 +12,38 @@ class AppConfig {
   });
 
   static Future<AppConfig> load() async {
+    String jsonString;
     try {
-      final jsonString =
+      jsonString =
           await rootBundle.loadString('assets/config/appsettings.local.json');
-      final Map<String, dynamic> json = jsonDecode(jsonString);
-
-      final serverUrl = _normalizeUrl(json['serverBaseUrl'] as String?);
-      final iptvUrl = _normalizeUrl(json['iptvBaseUrl'] as String?);
-
-      if (serverUrl == null || serverUrl.isEmpty) {
-        throw Exception('serverBaseUrl is missing in config');
-      }
-      if (iptvUrl == null || iptvUrl.isEmpty) {
-        throw Exception('iptvBaseUrl is missing in config');
-      }
-
-      _validateUrl(serverUrl, 'serverBaseUrl');
-      _validateUrl(iptvUrl, 'iptvBaseUrl');
-
-      return AppConfig(
-        serverBaseUrl: serverUrl,
-        iptvBaseUrl: iptvUrl,
-      );
     } catch (e) {
-      rethrow;
+      throw Exception(
+        'Configuration file appsettings.local.json not found. '
+        'Copy appsettings.example.json to appsettings.local.json and '
+        'update with your server and IPTV provider URLs. '
+        'Details: $e'
+      );
     }
+
+    final Map<String, dynamic> json = jsonDecode(jsonString);
+
+    final serverUrl = _normalizeUrl(json['serverBaseUrl'] as String?);
+    final iptvUrl = _normalizeUrl(json['iptvBaseUrl'] as String?);
+
+    if (serverUrl == null || serverUrl.isEmpty) {
+      throw Exception('serverBaseUrl is missing in config');
+    }
+    if (iptvUrl == null || iptvUrl.isEmpty) {
+      throw Exception('iptvBaseUrl is missing in config');
+    }
+
+    _validateUrl(serverUrl, 'serverBaseUrl');
+    _validateUrl(iptvUrl, 'iptvBaseUrl');
+
+    return AppConfig(
+      serverBaseUrl: serverUrl,
+      iptvBaseUrl: iptvUrl,
+    );
   }
 
   static String? _normalizeUrl(String? url) {

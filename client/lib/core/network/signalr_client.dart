@@ -47,25 +47,33 @@ class SignalRClient {
     });
   }
 
-  bool _isConnecting = false;
+  Future<void>? _connectFuture;
 
   Future<void> ensureConnected() async {
-    if (_currentState == SignalRConnectionState.connected || _isConnecting) {
+    if (_currentState == SignalRConnectionState.connected) {
       return;
     }
 
-    _isConnecting = true;
+    if (_connectFuture != null) {
+      return _connectFuture!;
+    }
 
+    _connectFuture = _doConnect().whenComplete(() {
+      _connectFuture = null;
+    });
+
+    return _connectFuture!;
+  }
+
+  Future<void> _doConnect() async {
     if (_hubConnection.state == HubConnectionState.Connected) {
       _updateState(SignalRConnectionState.connected);
-      _isConnecting = false;
       return;
     }
 
     if (_hubConnection.state == HubConnectionState.Connecting ||
         _hubConnection.state == HubConnectionState.Reconnecting) {
       _updateState(SignalRConnectionState.connecting);
-      _isConnecting = false;
       return;
     }
 
@@ -78,13 +86,9 @@ class SignalRClient {
       } catch (e) {
         _updateState(SignalRConnectionState.disconnected);
         _logger.e('SignalR connect failed: $e');
-
-        _isConnecting = false;
         rethrow;
       }
     }
-
-    _isConnecting = false;
   }
 
   Future<void> connect() async {
@@ -121,6 +125,7 @@ class SignalRClient {
   }
 
   Future<void> dispose() async {
+    await _hubConnection.stop();
     await _connectionStateController.close();
   }
 }

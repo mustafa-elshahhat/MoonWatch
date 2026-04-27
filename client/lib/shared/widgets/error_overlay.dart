@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
-import '../../features/room/bloc/room_state.dart';
+import '../../features/room/domain/room_error_code.dart';
 
 class ErrorOverlay extends StatelessWidget {
   final RoomErrorCode code;

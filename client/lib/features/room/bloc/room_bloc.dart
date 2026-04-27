@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/logging/app_logger.dart';
 import '../../../core/network/signalr_client.dart';
 import '../../../core/protocol/room_events.dart';
+import '../domain/room_error_code.dart';
 import '../repository/room_repository.dart';
 import 'room_event.dart';
 import 'room_state.dart';
