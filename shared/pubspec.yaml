@@ -1,0 +1,10 @@
+name: watch_party_protocol
+description: >
+  Canonical Dart protocol definitions (event constants and payload models)
+  shared between the WatchParty Flutter client and any future Dart tooling.
+  C# counterparts live alongside: RoomEvents.cs and Payloads.cs.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'

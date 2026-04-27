@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="WatchParty.Server/WatchParty.Server.csproj" />
+  <Project Path="WatchParty.Tests/WatchParty.Tests.csproj" />
+</Solution>
