@@ -214,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionEyebrow(
-          'A—01 Â· Watch Solo',
+          'A—01  -  Watch Solo',
           color: AppColors.textMuted,
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -226,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         const SizedBox(height: AppSpacing.xxxl),
         const SectionEyebrow(
-          'A—02 Â· Watch Together',
+          'A—02  -  Watch Together',
           color: AppColors.textMuted,
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -271,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               _buildHero(isDesktop: false),
               const SizedBox(height: 56),
               const SectionEyebrow(
-                'A—01 Â· Watch Solo',
+                'A—01  -  Watch Solo',
                 color: AppColors.textMuted,
               ),
               const SizedBox(height: AppSpacing.md),
@@ -284,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               const SizedBox(height: AppSpacing.xxxl),
               const SectionEyebrow(
-                'A—02 Â· Watch Together',
+                'A—02  -  Watch Together',
                 color: AppColors.textMuted,
               ),
               const SizedBox(height: AppSpacing.md),
@@ -484,7 +484,7 @@ class _WatchSoloCardState extends State<_WatchSoloCard> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Live TV Â· Movies Â· Series — all in one place',
+                        'Live TV  -  Movies  -  Series — all in one place',
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textMuted,
                         ),

@@ -30,7 +30,7 @@ MoonWatch lets a small group watch the same IPTV stream together in real time. T
 | Video | media_kit |
 | State | flutter_bloc |
 | Networking | Dio (REST), signalr_netcore (SignalR) |
-| Server | ASP.NET Core 8, SignalR |
+| Server | ASP.NET Core 10 (.NET 10), SignalR |
 | Tests | xUnit (server), flutter_test / test (client) |
 
 ---
@@ -61,7 +61,7 @@ All secrets and environment-specific values are supplied at build time. **Nothin
 
 | Variable | Used by | Description |
 |---|---|---|
-| `SERVER_BASE_URL` | Flutter client | Base URL of the WatchParty server, e.g. `http://192.168.1.10:5000` |
+| `SERVER_BASE_URL` | Flutter client | Base URL of the WatchParty server, e.g. `http://192.168.1.10:5035` |
 | `IPTV_BASE_URL` | Flutter client | Xtream Codes provider base URL |
 | `IPTV_USERNAME` | Flutter client | Provider username |
 | `IPTV_PASSWORD` | Flutter client | Provider password |
@@ -96,7 +96,7 @@ dotnet restore WatchParty.slnx
 dotnet run --project WatchParty.Server
 ```
 
-The server starts on `http://localhost:5000` by default (see `Properties/launchSettings.json`).
+The server starts on `http://localhost:5035` by default (see `Properties/launchSettings.json`).
 
 ---
 
@@ -106,7 +106,7 @@ The server starts on `http://localhost:5000` by default (see `Properties/launchS
 cd client
 flutter pub get
 flutter run \
-  --dart-define=SERVER_BASE_URL=http://localhost:5000 \
+  --dart-define=SERVER_BASE_URL=http://localhost:5035 \
   --dart-define=IPTV_BASE_URL=http://your-provider.example \
   --dart-define=IPTV_USERNAME=myuser \
   --dart-define=IPTV_PASSWORD=mypass

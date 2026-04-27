@@ -10,12 +10,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 10.0.x
 
     - name: Restore dependencies
       run: dotnet restore server/WatchParty.slnx
@@ -37,5 +37,20 @@ jobs:
     - name: Flutter Analyze
       run: cd client && flutter analyze
 
+    - name: Flutter Format Check
+      run: cd client && dart format --set-exit-if-changed lib test
+
     - name: Flutter Test
       run: cd client && flutter test
+
+    - name: Shared Dart Pub Get
+      run: cd shared && dart pub get
+
+    - name: Shared Format Check
+      run: cd shared && dart format --set-exit-if-changed lib test
+
+    - name: Shared Analyze
+      run: cd shared && dart analyze
+
+    - name: Shared Test
+      run: cd shared && dart test

@@ -33,4 +33,18 @@ class AppConstants {
   /// EMA smoothing factor for RTT (α). Range 0.0–1.0.
   /// Lower = smoother but slower to react; higher = more reactive but noisier.
   static const double kRttSmoothingAlpha = 0.3;
+
+  // Server URL validation
+  static bool get hasServerBaseUrl => kServerBaseUrl.isNotEmpty;
+
+  /// Throws [StateError] if SERVER_BASE_URL is not configured.
+  /// Call before constructing HttpClient or SignalRClient.
+  static void requireServerBaseUrl() {
+    if (!hasServerBaseUrl) {
+      throw StateError(
+        'SERVER_BASE_URL is not configured. '
+        'Supply --dart-define=SERVER_BASE_URL=<url> at build time.',
+      );
+    }
+  }
 }

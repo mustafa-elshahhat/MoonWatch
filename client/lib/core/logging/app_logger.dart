@@ -8,14 +8,11 @@ import 'package:path_provider/path_provider.dart';
 ///
 /// Writes all log entries to both the console and a text file.
 ///
-/// Android/iOS: logs to app-specific external storage (user-visible in the
-///   device Files app) under a folder named "Watch Party Logs".
-///   Path example:
-///     /storage/emulated/0/Android/data/`package`/files/Watch Party Logs/log.txt
-///   Falls back to internal app-documents directory if external storage is
-///   unavailable.
-///
-/// Desktop (Windows/Linux/macOS): logs to `D:\projects\WATCH_PARTY\logs\`.
+/// All platforms: logs to a "Watch Party Logs" folder within the app-specific
+/// documents or support directory:
+///   - Android: /storage/emulated/0/Android/data/`package`/files/Watch Party Logs/log.txt
+///   - iOS: Library/Documents/Watch Party Logs/log.txt (or equivalent)
+///   - Windows/macOS/Linux: Platform-specific app support directory
 ///
 /// The log file (log.txt) is deleted and recreated on every app launch so
 /// each session starts with a completely fresh file.
@@ -26,9 +23,9 @@ import 'package:path_provider/path_provider.dart';
 /// _log.i('Room created', event: 'room.created');
 /// ```
 class AppLogger {
-  // —— Constants ————————————————————————————————————————————————————————————
+  // -- Constants
+  // --------------------------------------------------------
 
-  static const String _desktopLogDir = r'D:\projects\WATCH_PARTY\logs';
   static const String _logFolderName = 'Watch Party Logs';
   static const String _logFileName = 'log.txt';
 
@@ -50,14 +47,16 @@ class AppLogger {
     caseSensitive: false,
   );
 
-  // —— Static state —————————————————————————————————————————————————————————
+  // -- Static state
+  // -------------------------------------------------
 
   static String? _logFilePath;
   static IOSink? _fileSink;
   static bool _initialized = false;
   static String _platform = 'unknown';
 
-  // —— Instance state ———————————————————————————————————————————————————————
+  // -- Instance state
+  // -----------------------------------------------
 
   final String tag;
   final Logger _logger;
@@ -73,7 +72,8 @@ class AppLogger {
           filter: ProductionFilter(),
         );
 
-  // —— Initialization ———————————————————————————————————————————————————————
+  // -- Initialization
+  // -----------------------------------------------
 
   /// Initialize the file logging system. Must be called once at app startup
   /// before any logging occurs. Deletes any previous log file and starts fresh.
@@ -114,15 +114,15 @@ class AppLogger {
               : 'release';
 
       _fileSink!.writeln(
-        'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•',
+        '================================================================',
       );
-      _fileSink!.writeln('  WatchParty Client — session start');
+      _fileSink!.writeln('  WatchParty Client - session start');
       _fileSink!.writeln('  Platform : ${_platform.toUpperCase()}');
       _fileSink!.writeln('  Build    : $buildMode');
       _fileSink!.writeln('  Log file : $_logFilePath');
       _fileSink!.writeln('  Started  : $now');
       _fileSink!.writeln(
-        'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•',
+        '================================================================',
       );
       _fileSink!.writeln('');
       await _fileSink!.flush();
@@ -140,11 +140,11 @@ class AppLogger {
       final now = _formatTimestamp(DateTime.now());
       _fileSink?.writeln('');
       _fileSink?.writeln(
-        'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•',
+        '================================================================',
       );
       _fileSink?.writeln('  Session end: $now');
       _fileSink?.writeln(
-        'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•',
+        '================================================================',
       );
       await _fileSink?.flush();
       await _fileSink?.close();
@@ -155,7 +155,8 @@ class AppLogger {
     _initialized = false;
   }
 
-  // —— URL sanitization —————————————————————————————————————————————————————
+  // -- URL sanitization
+  // -------------------------------------------------
 
   /// Returns a sanitized copy of [url] safe to write to a log file.
   ///
@@ -164,10 +165,10 @@ class AppLogger {
   ///
   /// Examples:
   ///   http://host/live/Alice/secret99/123.ts
-  ///     → http://host/live/****/****/123.ts
+  ///     -> http://host/live/****/****/123.ts
   ///
   ///   http://host/player_api.php?username=Alice&password=secret99&action=get
-  ///     → http://host/player_api.php?username=****&password=****&action=get
+  ///     -> http://host/player_api.php?username=****&password=****&action=get
   static String sanitizeUrl(String url) {
     // 1. Mask path-segment credentials (Xtream Codes stream URLs).
     String result = url.replaceFirstMapped(_pathCredentialsRe, (m) {
@@ -186,7 +187,8 @@ class AppLogger {
     return result;
   }
 
-  // —— Logging methods ——————————————————————————————————————————————————————
+  // -- Logging methods
+  // -------------------------------------------------
 
   /// Debug-level log. For verbose diagnostics (position polls, internal state).
   void d(String message, {String? event, Map<String, dynamic>? data}) {
@@ -230,7 +232,8 @@ class AppLogger {
     );
   }
 
-  // —— File writer ——————————————————————————————————————————————————————————
+  // -- File writer
+  // -------------------------------------------------
 
   void _writeToFile(
     String level,
@@ -261,7 +264,8 @@ class AppLogger {
     }
   }
 
-  // —— Helpers ——————————————————————————————————————————————————————————————
+  // -- Helpers
+  // -------------------------------------------------
 
   static String _detectPlatform() {
     if (Platform.isAndroid) return 'android';
@@ -274,18 +278,17 @@ class AppLogger {
 
   /// Returns the absolute path for the "Watch Party Logs" directory.
   ///
-  /// Android/iOS: prefers app-specific external storage so the folder is
-  /// visible to the user in the device Files app without any extra permissions.
-  /// Falls back to the internal app-documents directory if external storage is
-  /// not available.
+  /// Android: app-specific external storage (user-visible in Files app),
+  /// falling back to app-documents directory if external storage is unavailable.
   ///
-  /// Desktop: returns the hardcoded development log directory.
+  /// iOS: app-documents directory (sandboxed).
+  ///
+  /// Desktop (Windows/macOS/Linux): app support directory.
   static Future<String> _resolveLogDir() async {
     if (Platform.isAndroid) {
       // getExternalStorageDirectory() resolves to:
       //   /storage/emulated/0/Android/data/<package>/files
-      // No READ_EXTERNAL_STORAGE / WRITE_EXTERNAL_STORAGE permission is needed
-      // for this app-specific path on any Android version.
+      // No READ_EXTERNAL_STORAGE / WRITE_EXTERNAL_STORAGE permission needed.
       try {
         final extDir = await getExternalStorageDirectory();
         if (extDir != null) {
@@ -305,7 +308,9 @@ class AppLogger {
       return '${appDir.path}${Platform.pathSeparator}$_logFolderName';
     }
 
-    return _desktopLogDir;
+    // Desktop: Windows, macOS, Linux.
+    final appDir = await getApplicationSupportDirectory();
+    return '${appDir.path}${Platform.pathSeparator}$_logFolderName';
   }
 
   /// Format a [DateTime] as `YYYY-MM-DD HH:mm:ss.SSS` (local time).

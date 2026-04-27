@@ -1,4 +1,5 @@
 ﻿import 'package:get_it/get_it.dart';
+import '../constants/app_constants.dart';
 import '../network/signalr_client.dart';
 import '../network/http_client.dart';
 import '../player/player_controller.dart';
@@ -19,6 +20,9 @@ final getIt = GetIt.instance;
 
 /// Registers all singletons and factories for DI.
 void configureDependencies() {
+  // Validate required configuration
+  AppConstants.requireServerBaseUrl();
+
   // Singletons — network
   getIt.registerLazySingleton<SignalRClient>(() => SignalRClient());
   getIt.registerLazySingleton<HttpClient>(() => HttpClient());

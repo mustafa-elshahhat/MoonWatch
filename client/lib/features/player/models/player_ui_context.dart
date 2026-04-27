@@ -21,7 +21,7 @@ class PlayerUIContext {
   /// Can this user seek (scrub) through the content?
   final bool canSeek;
 
-  /// Can this user skip Â±10s?
+  /// Can this user skip +/-10s?
   final bool canSkip;
 
   /// Can this user change content (browse IPTV)?
@@ -61,7 +61,7 @@ class PlayerUIContext {
   /// Content title for top bar.
   final String title;
 
-  /// Optional metadata subtitle (e.g. "S2 E5 Â· Episode Title").
+  /// Optional metadata subtitle (e.g. "S2 E5  -  Episode Title").
   final String? subtitle;
 
   const PlayerUIContext._({

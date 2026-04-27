@@ -2,8 +2,8 @@
 import 'package:flutter/widgets.dart';
 import 'player_controller.dart';
 
-/// Test mock per TESTING_STRATEGY.md.
-/// Exposes seekHistory, simulateBufferingStall(), etc.
+/// Test mock for the player controller.
+/// Exposes seekHistory, simulateBufferingStall(), and other helpers for testing.
 class MockPlayerImpl implements PlayerController {
   final _eventController = StreamController<PlayerEvent>.broadcast();
   final _positionStreamController = StreamController<Duration>.broadcast();
