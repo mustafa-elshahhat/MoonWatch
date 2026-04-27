@@ -23,7 +23,7 @@ public class Room
     /// <summary>Content descriptor set by the host. Null until SetContent is called.</summary>
     public IptvContentDescriptor? ContentDescriptor { get; set; }
 
-    /// <summary>Per-room semaphore for serializing state mutations (ADR-007).</summary>
+    /// <summary>Per-room semaphore for serializing state mutations .</summary>
     public SemaphoreSlim Lock { get; } = new(1, 1);
 
     /// <summary>Cancellation token source for the guest grace period timer.</summary>

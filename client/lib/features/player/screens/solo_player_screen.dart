@@ -134,7 +134,8 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
 
   PlayerUIContext get _uiContext {
     final navCtx = EpisodeNavService().current;
-    final hasNext = _contentType == IptvDescriptorType.episode &&
+    final hasNext =
+        _contentType == IptvDescriptorType.episode &&
         navCtx != null &&
         navCtx.hasNext;
     return PlayerUIContext.solo(
@@ -231,9 +232,8 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
                     errorMessage: errorMessage,
                     onRetry: _streamUrl != null
                         ? () => context.read<PlayerBloc>().add(
-                              PlayerEventInitialize(_streamUrl!,
-                                  source: 'retry'),
-                            )
+                            PlayerEventInitialize(_streamUrl!, source: 'retry'),
+                          )
                         : null,
                     onBack: () => Navigator.pop(context),
                   ),

@@ -1,4 +1,4 @@
-﻿import 'package:equatable/equatable.dart';
+import 'package:equatable/equatable.dart';
 import '../../../core/protocol/payloads.dart';
 
 /// RoomBloc events per STATE_MANAGEMENT.md.

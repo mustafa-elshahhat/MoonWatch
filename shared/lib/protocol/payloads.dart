@@ -21,16 +21,17 @@ class IptvContentDescriptor {
   });
 
   Map<String, dynamic> toJson() => {
-        'contentType': contentType.name,
-        'streamId': streamId,
-        'containerExtension': containerExtension,
-        'title': title,
-      };
+    'contentType': contentType.name,
+    'streamId': streamId,
+    'containerExtension': containerExtension,
+    'title': title,
+  };
 
   factory IptvContentDescriptor.fromJson(Map<String, dynamic> json) =>
       IptvContentDescriptor(
-        contentType: IptvDescriptorType.values
-            .firstWhere((e) => e.name == json['contentType'] as String),
+        contentType: IptvDescriptorType.values.firstWhere(
+          (e) => e.name == json['contentType'] as String,
+        ),
         streamId: json['streamId'] as String,
         containerExtension: json['containerExtension'] as String?,
         title: json['title'] as String,
@@ -78,7 +79,8 @@ class RoomJoinedPayload {
         contentDescriptor: json['contentDescriptor'] == null
             ? null
             : IptvContentDescriptor.fromJson(
-                json['contentDescriptor'] as Map<String, dynamic>),
+                json['contentDescriptor'] as Map<String, dynamic>,
+              ),
         serverTimestampMs: json['serverTimestampMs'] as int,
       );
 }
@@ -90,7 +92,8 @@ class RoomGuestJoinedPayload {
 
   factory RoomGuestJoinedPayload.fromJson(Map<String, dynamic> json) =>
       RoomGuestJoinedPayload(
-          serverTimestampMs: json['serverTimestampMs'] as int);
+        serverTimestampMs: json['serverTimestampMs'] as int,
+      );
 }
 
 class RoomGuestLeftPayload {
@@ -116,15 +119,18 @@ class RoomGuestReconnectedPayload {
 
   factory RoomGuestReconnectedPayload.fromJson(Map<String, dynamic> json) =>
       RoomGuestReconnectedPayload(
-          serverTimestampMs: json['serverTimestampMs'] as int);
+        serverTimestampMs: json['serverTimestampMs'] as int,
+      );
 }
 
 class RoomClosedPayload {
   final String reason;
   final int serverTimestampMs;
 
-  const RoomClosedPayload(
-      {required this.reason, required this.serverTimestampMs});
+  const RoomClosedPayload({
+    required this.reason,
+    required this.serverTimestampMs,
+  });
 
   factory RoomClosedPayload.fromJson(Map<String, dynamic> json) =>
       RoomClosedPayload(
@@ -137,13 +143,16 @@ class RoomContentSetPayload {
   final IptvContentDescriptor descriptor;
   final int serverTimestampMs;
 
-  const RoomContentSetPayload(
-      {required this.descriptor, required this.serverTimestampMs});
+  const RoomContentSetPayload({
+    required this.descriptor,
+    required this.serverTimestampMs,
+  });
 
   factory RoomContentSetPayload.fromJson(Map<String, dynamic> json) =>
       RoomContentSetPayload(
         descriptor: IptvContentDescriptor.fromJson(
-            json['descriptor'] as Map<String, dynamic>),
+          json['descriptor'] as Map<String, dynamic>,
+        ),
         serverTimestampMs: json['serverTimestampMs'] as int,
       );
 }
@@ -153,16 +162,17 @@ class ErrorPayload {
   final String message;
   final int serverTimestampMs;
 
-  const ErrorPayload(
-      {required this.code,
-      required this.message,
-      required this.serverTimestampMs});
+  const ErrorPayload({
+    required this.code,
+    required this.message,
+    required this.serverTimestampMs,
+  });
 
   factory ErrorPayload.fromJson(Map<String, dynamic> json) => ErrorPayload(
-        code: json['code'] as String,
-        message: json['message'] as String,
-        serverTimestampMs: json['serverTimestampMs'] as int,
-      );
+    code: json['code'] as String,
+    message: json['message'] as String,
+    serverTimestampMs: json['serverTimestampMs'] as int,
+  );
 }
 
 // ── Playback payloads ────────────────────────────────────────────────────────
@@ -199,10 +209,11 @@ class PlaybackPausePayload {
   /// Monotonically increasing room playback command counter.
   final int seqNo;
 
-  const PlaybackPausePayload(
-      {required this.positionMs,
-      required this.serverTimestampMs,
-      this.seqNo = 0});
+  const PlaybackPausePayload({
+    required this.positionMs,
+    required this.serverTimestampMs,
+    this.seqNo = 0,
+  });
 
   factory PlaybackPausePayload.fromJson(Map<String, dynamic> json) =>
       PlaybackPausePayload(
@@ -223,11 +234,12 @@ class PlaybackSeekPayload {
   /// Guest uses this to decide whether to resume playback after seeking.
   final bool isPlaying;
 
-  const PlaybackSeekPayload(
-      {required this.targetPositionMs,
-      required this.serverTimestampMs,
-      this.seqNo = 0,
-      this.isPlaying = true});
+  const PlaybackSeekPayload({
+    required this.targetPositionMs,
+    required this.serverTimestampMs,
+    this.seqNo = 0,
+    this.isPlaying = true,
+  });
 
   factory PlaybackSeekPayload.fromJson(Map<String, dynamic> json) =>
       PlaybackSeekPayload(
@@ -267,13 +279,15 @@ class PongPayload {
   final int clientTimestampMs;
   final int serverTimestampMs;
 
-  const PongPayload(
-      {required this.clientTimestampMs, required this.serverTimestampMs});
+  const PongPayload({
+    required this.clientTimestampMs,
+    required this.serverTimestampMs,
+  });
 
   factory PongPayload.fromJson(Map<String, dynamic> json) => PongPayload(
-        clientTimestampMs: json['clientTimestampMs'] as int,
-        serverTimestampMs: json['serverTimestampMs'] as int,
-      );
+    clientTimestampMs: json['clientTimestampMs'] as int,
+    serverTimestampMs: json['serverTimestampMs'] as int,
+  );
 }
 
 // ── Buffering payloads ───────────────────────────────────────────────────────

@@ -19,9 +19,9 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
   RoomBloc({
     required RoomRepository roomRepository,
     required SignalRClient signalRClient,
-  })  : _roomRepository = roomRepository,
-        _signalRClient = signalRClient,
-        super(const RoomStateInitial()) {
+  }) : _roomRepository = roomRepository,
+       _signalRClient = signalRClient,
+       super(const RoomStateInitial()) {
     on<RoomEventCreateRoom>(_onCreateRoom);
     on<RoomEventJoinRoom>(_onJoinRoom);
     on<RoomEventRoomJoined>(_onRoomJoined);

@@ -4,7 +4,7 @@ using WatchParty.Server.Services;
 namespace WatchParty.Tests.Services;
 
 /// <summary>
-/// Unit tests for InMemoryRoomRegistry per SV-06.
+/// Unit tests for InMemoryRoomRegistry per .
 /// </summary>
 public class InMemoryRoomRegistryTests
 {

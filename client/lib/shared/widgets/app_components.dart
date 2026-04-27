@@ -252,16 +252,16 @@ class StatusBadge extends StatelessWidget {
   });
 
   factory StatusBadge.host() => const StatusBadge(
-        label: 'HOST',
-        color: AppColors.hostBadge,
-        backgroundColor: AppColors.hostBadgeBg,
-      );
+    label: 'HOST',
+    color: AppColors.hostBadge,
+    backgroundColor: AppColors.hostBadgeBg,
+  );
 
   factory StatusBadge.guest() => const StatusBadge(
-        label: 'GUEST',
-        color: AppColors.guestBadge,
-        backgroundColor: AppColors.guestBadgeBg,
-      );
+    label: 'GUEST',
+    color: AppColors.guestBadge,
+    backgroundColor: AppColors.guestBadgeBg,
+  );
 
   @override
   Widget build(BuildContext context) {

@@ -203,7 +203,7 @@ public class RoomService : IRoomService
 
             if (room.Host?.ConnectionId == connectionId)
             {
-                // Host disconnect → close room immediately (ADR-003)
+                // Host disconnect → close room immediately 
                 var leave = CloseRoom(room, "host_disconnected", "host");
                 _logger.LogInformation("Host disconnected, room closed {Event} {RoomId} {ConnectionId}",
                     "room.closed", room.RoomCode, connectionId);

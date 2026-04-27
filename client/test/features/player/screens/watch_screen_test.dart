@@ -1,4 +1,4 @@
-﻿import 'package:bloc_test/bloc_test.dart';
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -136,19 +136,20 @@ void main() {
     roomRepository = MockRoomRepository();
     iptvRepository = MockIptvRepository();
 
-    when(() => roomRepository.invokePlay(any(), any()))
-        .thenAnswer((_) async {});
+    when(
+      () => roomRepository.invokePlay(any(), any()),
+    ).thenAnswer((_) async {});
     when(() => roomRepository.invokePause(any())).thenAnswer((_) async {});
     when(() => roomRepository.invokeSeek(any())).thenAnswer((_) async {});
     when(() => roomRepository.events).thenAnswer((_) => const Stream.empty());
 
-    when(() => iptvRepository.resolvePlaybackUrl(any())).thenAnswer(
-      (invocation) {
-        final descriptor =
-            invocation.positionalArguments.first as IptvContentDescriptor;
-        return 'https://example.com/${descriptor.streamId}.m3u8';
-      },
-    );
+    when(() => iptvRepository.resolvePlaybackUrl(any())).thenAnswer((
+      invocation,
+    ) {
+      final descriptor =
+          invocation.positionalArguments.first as IptvContentDescriptor;
+      return 'https://example.com/${descriptor.streamId}.m3u8';
+    });
 
     when(() => playerBloc.state).thenReturn(const PlayerStateIdle());
     when(() => playerBloc.setRoomMode(any())).thenReturn(null);
@@ -164,8 +165,9 @@ void main() {
     ).thenReturn(null);
 
     when(() => reconnectBloc.state).thenReturn(const ReconnectStateIdle());
-    when(() => reconnectBloc.storeRoomCredentials(any(), any()))
-        .thenReturn(null);
+    when(
+      () => reconnectBloc.storeRoomCredentials(any(), any()),
+    ).thenReturn(null);
     when(() => reconnectBloc.startListening()).thenReturn(null);
 
     getIt.registerSingleton<pc.PlayerController>(_FakePlayerController());
@@ -223,8 +225,9 @@ void main() {
     await tester.pump();
 
     final captured = verify(() => playerBloc.add(captureAny())).captured;
-    final initializeEvents =
-        captured.whereType<PlayerEventInitialize>().toList();
+    final initializeEvents = captured
+        .whereType<PlayerEventInitialize>()
+        .toList();
     expect(initializeEvents, hasLength(1));
     expect(initializeEvents.single.contentKey, _contentA.contentKey);
   });
@@ -232,9 +235,9 @@ void main() {
   testWidgets(
     'repeated identical active states do not dispatch a duplicate initialize',
     (tester) async {
-      when(() => roomBloc.state).thenReturn(
-        const RoomStateJoined(roomCode: 'ABC123', role: 'guest'),
-      );
+      when(
+        () => roomBloc.state,
+      ).thenReturn(const RoomStateJoined(roomCode: 'ABC123', role: 'guest'));
       whenListen(
         roomBloc,
         Stream<RoomState>.fromIterable([
@@ -273,8 +276,9 @@ void main() {
       await tester.pump();
 
       final captured = verify(() => playerBloc.add(captureAny())).captured;
-      final initializeEvents =
-          captured.whereType<PlayerEventInitialize>().toList();
+      final initializeEvents = captured
+          .whereType<PlayerEventInitialize>()
+          .toList();
       expect(initializeEvents, hasLength(1));
       expect(initializeEvents.single.contentKey, _contentA.contentKey);
     },
@@ -328,11 +332,12 @@ void main() {
     await tester.pump();
 
     final captured = verify(() => playerBloc.add(captureAny())).captured;
-    final initializeEvents =
-        captured.whereType<PlayerEventInitialize>().toList();
-    expect(
-      initializeEvents.map((event) => event.contentKey).toList(),
-      [_contentA.contentKey, _contentB.contentKey],
-    );
+    final initializeEvents = captured
+        .whereType<PlayerEventInitialize>()
+        .toList();
+    expect(initializeEvents.map((event) => event.contentKey).toList(), [
+      _contentA.contentKey,
+      _contentB.contentKey,
+    ]);
   });
 }

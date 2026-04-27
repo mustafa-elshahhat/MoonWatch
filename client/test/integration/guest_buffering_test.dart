@@ -1,9 +1,9 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:watch_party/features/sync/sync_engine.dart';
 import 'package:watch_party/core/player/mock_player_impl.dart';
 import '../mocks/mock_room_repository.dart';
 
-/// CL-32: Integration test — guest_buffering_test.
+/// : Integration test — guest_buffering_test.
 /// Both playing, mock guest stall, verify both pause.
 /// Both report ready, verify resume with position.
 void main() {
@@ -22,7 +22,7 @@ void main() {
     await syncBloc.close();
   });
 
-  group('guest_buffering integration (CL-32)', () {
+  group('guest_buffering integration ', () {
     test(
       'guest stalls → notifyBufferingStall called, SyncBloc enters Buffering',
       () async {

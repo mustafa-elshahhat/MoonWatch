@@ -25,7 +25,7 @@ class SignalRClient {
   SignalRConnectionState get currentState => _currentState;
 
   SignalRClient({AppLogger? logger})
-      : _logger = logger ?? AppLogger('SignalR') {
+    : _logger = logger ?? AppLogger('SignalR') {
     const serverUrl =
         '${AppConstants.kServerBaseUrl}${AppConstants.kSignalRHubPath}';
 

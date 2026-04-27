@@ -1,4 +1,4 @@
-﻿import 'package:bloc_test/bloc_test.dart';
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:watch_party/features/sync/sync_engine.dart';
 import 'package:watch_party/core/player/mock_player_impl.dart';
@@ -430,7 +430,7 @@ void main() {
       },
     );
   });
-  group('SyncBloc Ã¢â‚¬â€ player ready notifications', () {
+  group('SyncBloc - player ready notifications', () {
     blocTest<SyncBloc, SyncState>(
       'notifies ready once per content key and sends again for new content',
       build: () => syncBloc,
@@ -441,10 +441,10 @@ void main() {
       },
       expect: () => <SyncState>[],
       verify: (_) {
-        expect(
-          mockRepo.notifyPlayerReadyCalls,
-          ['episode|1|m3u8', 'episode|2|m3u8'],
-        );
+        expect(mockRepo.notifyPlayerReadyCalls, [
+          'episode|1|m3u8',
+          'episode|2|m3u8',
+        ]);
       },
     );
   });

@@ -37,47 +37,47 @@ class PeerStatusIndicator extends StatelessWidget {
   Widget _buildIcon() {
     return switch (status) {
       PeerStatus.connected => Container(
-          width: 8,
-          height: 8,
-          decoration: const BoxDecoration(
-            color: AppColors.peerConnected,
-            shape: BoxShape.circle,
-          ),
+        width: 8,
+        height: 8,
+        decoration: const BoxDecoration(
+          color: AppColors.peerConnected,
+          shape: BoxShape.circle,
         ),
+      ),
       PeerStatus.buffering => const SizedBox(
-          width: 12,
-          height: 12,
-          child: CircularProgressIndicator(
-            strokeWidth: 1.5,
-            color: AppColors.peerBuffering,
-          ),
+        width: 12,
+        height: 12,
+        child: CircularProgressIndicator(
+          strokeWidth: 1.5,
+          color: AppColors.peerBuffering,
         ),
+      ),
       PeerStatus.away => Container(
-          width: 8,
-          height: 8,
-          decoration: const BoxDecoration(
-            color: AppColors.peerAway,
-            shape: BoxShape.circle,
-          ),
+        width: 8,
+        height: 8,
+        decoration: const BoxDecoration(
+          color: AppColors.peerAway,
+          shape: BoxShape.circle,
         ),
+      ),
     };
   }
 
   String get _label => switch (status) {
-        PeerStatus.connected => 'Peer connected',
-        PeerStatus.buffering => 'Peer buffering',
-        PeerStatus.away => 'Peer away',
-      };
+    PeerStatus.connected => 'Peer connected',
+    PeerStatus.buffering => 'Peer buffering',
+    PeerStatus.away => 'Peer away',
+  };
 
   Color get _labelColor => switch (status) {
-        PeerStatus.connected => AppColors.peerConnected,
-        PeerStatus.buffering => AppColors.peerBuffering,
-        PeerStatus.away => AppColors.peerAway,
-      };
+    PeerStatus.connected => AppColors.peerConnected,
+    PeerStatus.buffering => AppColors.peerBuffering,
+    PeerStatus.away => AppColors.peerAway,
+  };
 
   Color get _bgColor => switch (status) {
-        PeerStatus.connected => AppColors.peerConnected,
-        PeerStatus.buffering => AppColors.peerBuffering,
-        PeerStatus.away => AppColors.peerAway,
-      };
+    PeerStatus.connected => AppColors.peerConnected,
+    PeerStatus.buffering => AppColors.peerBuffering,
+    PeerStatus.away => AppColors.peerAway,
+  };
 }

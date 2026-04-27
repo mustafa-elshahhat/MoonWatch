@@ -78,7 +78,11 @@ public class RoomExpiryService : BackgroundService
         {
             if (IsExpired(room, now, roomOptions))
             {
-                List<Task> sendTasks = new List<Task>();
+                var sendTasks = new List<Task>();
+                string? hostId = null;
+                string? guestId = null;
+                RoomClosedPayload? closedPayload = null;
+
                 await room.Lock.WaitAsync();
                 try
                 {
@@ -106,20 +110,11 @@ public class RoomExpiryService : BackgroundService
                     // Stop state sync timer for this room
                     _stateSyncTimer.StopForRoom(room.RoomCode);
 
-                    // Notify connected participants before closing
+                    // Snapshot connection IDs and payload data for async sending outside the lock
+                    hostId = room.Host?.ConnectionId;
+                    guestId = (room.Guest?.ConnectionId != null && !room.GuestAway) ? room.Guest.ConnectionId : null;
                     var serverTimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                    var closedPayload = new RoomClosedPayload("room_expired", serverTimestampMs);
-
-                    if (room.Host?.ConnectionId != null)
-                    {
-                        sendTasks.Add(_hubContext.Clients.Client(room.Host.ConnectionId)
-                            .SendAsync(RoomEvents.RoomClosed, closedPayload));
-                    }
-                    if (room.Guest?.ConnectionId != null && !room.GuestAway)
-                    {
-                        sendTasks.Add(_hubContext.Clients.Client(room.Guest.ConnectionId)
-                            .SendAsync(RoomEvents.RoomClosed, closedPayload));
-                    }
+                    closedPayload = new RoomClosedPayload("room_expired", serverTimestampMs);
 
                     room.State = RoomState.Closed;
                     _registry.TryRemove(room.RoomCode, out _);
@@ -133,6 +128,21 @@ public class RoomExpiryService : BackgroundService
                     room.Lock.Release();
                 }
 
+                // Create tasks outside the lock block
+                if (closedPayload != null)
+                {
+                    if (hostId != null)
+                    {
+                        sendTasks.Add(_hubContext.Clients.Client(hostId)
+                            .SendAsync(RoomEvents.RoomClosed, closedPayload));
+                    }
+                    if (guestId != null)
+                    {
+                        sendTasks.Add(_hubContext.Clients.Client(guestId)
+                            .SendAsync(RoomEvents.RoomClosed, closedPayload));
+                    }
+                }
+
                 if (sendTasks.Count > 0)
                 {
                     try
@@ -144,6 +154,8 @@ public class RoomExpiryService : BackgroundService
                         _logger.LogError(ex, "Failed to send room closed events for room {RoomId}", room.RoomCode);
                     }
                 }
+
+
             }
         }
 

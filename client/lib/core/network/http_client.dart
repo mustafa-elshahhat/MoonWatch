@@ -20,14 +20,14 @@ class HttpClient {
   final AppLogger _logger;
 
   HttpClient({AppLogger? logger})
-      : _logger = logger ?? AppLogger('HttpClient'),
-        _dio = Dio(
-          BaseOptions(
-            baseUrl: '${AppConstants.kServerBaseUrl}/api/v1',
-            connectTimeout: const Duration(seconds: 10),
-            receiveTimeout: const Duration(seconds: 10),
-          ),
-        ) {
+    : _logger = logger ?? AppLogger('HttpClient'),
+      _dio = Dio(
+        BaseOptions(
+          baseUrl: '${AppConstants.kServerBaseUrl}/api/v1',
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        ),
+      ) {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {

@@ -46,8 +46,8 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   }
 
   PlayerBloc({required pc.PlayerController playerController})
-      : _playerController = playerController,
-        super(const PlayerStateIdle()) {
+    : _playerController = playerController,
+      super(const PlayerStateIdle()) {
     on<PlayerEventInitialize>(_onInitialize);
     on<PlayerEventPlay>(_onPlay);
     on<PlayerEventPause>(_onPause);
@@ -182,9 +182,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
         emit(PlayerStatePlaying(_playerController.currentPosition));
         _logger.i('player.init: playing started');
       } else {
-        _logger.i(
-          'player.init: room mode — waiting for protocol play command',
-        );
+        _logger.i('player.init: room mode — waiting for protocol play command');
       }
       _logger.i('[PLAYER_INIT_COMPLETED] url=${AppLogger.sanitizeUrl(url)}');
     } catch (e, st) {

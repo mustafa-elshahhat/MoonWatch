@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'player_controller.dart';
 

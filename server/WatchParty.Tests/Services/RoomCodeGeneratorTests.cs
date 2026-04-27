@@ -3,7 +3,7 @@ using WatchParty.Server.Services;
 namespace WatchParty.Tests.Services;
 
 /// <summary>
-/// Unit tests for RoomCodeGenerator per SV-05.
+/// Unit tests for RoomCodeGenerator per .
 /// </summary>
 public class RoomCodeGeneratorTests
 {

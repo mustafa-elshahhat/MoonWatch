@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:watch_party/core/network/signalr_client.dart';
@@ -24,7 +24,7 @@ class MockRoomRepository extends Mock implements RoomRepository {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 
-/// CL-43: Integration test — host_disconnect_test.
+/// : Integration test — host_disconnect_test.
 /// Host disconnects → guest receives room:closed → RoomBloc → Closed.
 /// ReconnectBloc should NOT attempt reconnection (host disconnect = no grace).
 void main() {
@@ -73,7 +73,7 @@ void main() {
     await repoEventsController.close();
   });
 
-  group('host_disconnect integration (CL-43)', () {
+  group('host_disconnect integration ', () {
     test('host disconnects → guest RoomBloc transitions to Closed', () async {
       // Subscribe roomBloc to the mock repo stream before streaming events.
       roomBloc.startListening();

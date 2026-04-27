@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:watch_party/core/network/signalr_client.dart';
 import 'package:watch_party/core/protocol/room_events.dart';

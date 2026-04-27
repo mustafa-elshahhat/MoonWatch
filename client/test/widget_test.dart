@@ -1,4 +1,4 @@
-﻿// Basic smoke test: verify the app renders the home screen without crashing.
+// Basic smoke test: verify the app renders the home screen without crashing.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:watch_party/app.dart';

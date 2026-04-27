@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 /// Centralized color tokens for WatchParty.
 /// All semantic colors are defined here — never use raw Colors.xxx in widgets.

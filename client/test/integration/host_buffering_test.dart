@@ -1,9 +1,9 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:watch_party/features/sync/sync_engine.dart';
 import 'package:watch_party/core/player/mock_player_impl.dart';
 import '../mocks/mock_room_repository.dart';
 
-/// CL-33: Integration test — host_buffering_test.
+/// : Integration test — host_buffering_test.
 /// Same as guest buffering but from host's side.
 /// Host stalls, guest pauses when receiving buffering:stall from peer.
 void main() {
@@ -22,7 +22,7 @@ void main() {
     await syncBloc.close();
   });
 
-  group('host_buffering integration (CL-33)', () {
+  group('host_buffering integration ', () {
     test(
       'peer stalls → local player pauses, SyncBloc enters Buffering',
       () async {

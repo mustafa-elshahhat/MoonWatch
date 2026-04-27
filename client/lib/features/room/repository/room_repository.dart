@@ -8,14 +8,14 @@ import '../bloc/room_event.dart';
 
 /// Callback types for sync-related events handled outside RoomBloc.
 typedef PlaybackEventCallback = void Function(Map<String, dynamic> json);
-typedef BufferingStallCallback = void Function(
-    BufferingStallBroadcastPayload payload);
+typedef BufferingStallCallback =
+    void Function(BufferingStallBroadcastPayload payload);
 typedef BufferingResumeCallback = void Function(BufferingResumePayload payload);
 typedef PlaybackPlayCallback = void Function(PlaybackPlayPayload payload);
 typedef PlaybackPauseCallback = void Function(PlaybackPausePayload payload);
 typedef PlaybackSeekCallback = void Function(PlaybackSeekPayload payload);
-typedef PlaybackStateSyncCallback = void Function(
-    PlaybackStateSyncPayload payload);
+typedef PlaybackStateSyncCallback =
+    void Function(PlaybackStateSyncPayload payload);
 
 /// Translates SignalRClient events into RoomBloc events and exposes
 /// REST room-listing for the join screen.
@@ -42,8 +42,8 @@ class RoomRepository {
   RoomRepository({
     required SignalRClient signalRClient,
     required HttpClient httpClient,
-  })  : _signalRClient = signalRClient,
-        _httpClient = httpClient;
+  }) : _signalRClient = signalRClient,
+       _httpClient = httpClient;
 
   void registerHandlers() {
     unregisterHandlers();
@@ -196,7 +196,7 @@ class RoomRepository {
   }
 
   /// Host: invoke Play via SignalR hub method.
-  /// Per ARCHITECTURE.md: host controls flow through the protocol.
+  /// Per : host controls flow through the protocol.
   Future<void> invokePlay(int positionMs, int clientTimestampMs) async {
     _logger.i('RoomRepository.invokePlay: positionMs=$positionMs');
     await _signalRClient.invoke(

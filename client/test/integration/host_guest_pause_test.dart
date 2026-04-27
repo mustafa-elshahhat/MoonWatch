@@ -1,10 +1,10 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:watch_party/features/sync/sync_engine.dart';
 import 'package:watch_party/core/player/mock_player_impl.dart';
 import '../mocks/mock_room_repository.dart';
 
-/// CL-25: Integration tests — host pauses, verify guest behavior.
-/// Seek tests are in host_guest_seek_test.dart per TESTING_STRATEGY.md.
+/// : Integration tests — host pauses, verify guest behavior.
+/// Seek tests are in host_guest_seek_test.dart per .
 void main() {
   late MockPlayerImpl mockPlayer;
   late MockRoomRepository mockRepo;

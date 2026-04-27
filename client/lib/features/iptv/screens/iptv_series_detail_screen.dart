@@ -41,11 +41,11 @@ class _IptvSeriesDetailScreenState extends State<IptvSeriesDetailScreen> {
   void initState() {
     super.initState();
     context.read<IptvBloc>().add(
-          IptvLoadSeriesInfo(
-            seriesId: widget.seriesId,
-            seriesName: widget.seriesName,
-          ),
-        );
+      IptvLoadSeriesInfo(
+        seriesId: widget.seriesId,
+        seriesName: widget.seriesName,
+      ),
+    );
   }
 
   void _handleSelection({
@@ -105,8 +105,8 @@ class _IptvSeriesDetailScreenState extends State<IptvSeriesDetailScreen> {
     final hPad = isDesktop
         ? sw * 0.15
         : isTablet
-            ? AppSpacing.xxl
-            : AppSpacing.lg;
+        ? AppSpacing.xxl
+        : AppSpacing.lg;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -119,11 +119,11 @@ class _IptvSeriesDetailScreenState extends State<IptvSeriesDetailScreen> {
             return ErrorState(
               message: state.message,
               onRetry: () => context.read<IptvBloc>().add(
-                    IptvLoadSeriesInfo(
-                      seriesId: widget.seriesId,
-                      seriesName: widget.seriesName,
-                    ),
-                  ),
+                IptvLoadSeriesInfo(
+                  seriesId: widget.seriesId,
+                  seriesName: widget.seriesName,
+                ),
+              ),
             );
           }
           if (state is IptvSeriesInfoLoaded) {
@@ -198,11 +198,11 @@ class _IptvSeriesDetailScreenState extends State<IptvSeriesDetailScreen> {
                 ? SliverGrid(
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 400,
-                      mainAxisSpacing: AppSpacing.md,
-                      crossAxisSpacing: AppSpacing.md,
-                      mainAxisExtent: 140,
-                    ),
+                          maxCrossAxisExtent: 400,
+                          mainAxisSpacing: AppSpacing.md,
+                          crossAxisSpacing: AppSpacing.md,
+                          mainAxisExtent: 140,
+                        ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => _EpisodeCard(
                         episode: episodes[index],
@@ -367,19 +367,19 @@ class _MetaChip extends StatelessWidget {
   const _MetaChip({required this.label});
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceElevated,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          border: Border.all(color: AppColors.borderSubtle),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.captionSmall.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: AppColors.surfaceElevated,
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      border: Border.all(color: AppColors.borderSubtle),
+    ),
+    child: Text(
+      label,
+      style: AppTypography.captionSmall.copyWith(
+        color: AppColors.textSecondary,
+      ),
+    ),
+  );
 }
 
 // —— Premium Episode Card ——————————————————————————————————————————

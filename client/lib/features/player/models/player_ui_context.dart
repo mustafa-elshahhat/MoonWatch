@@ -98,7 +98,8 @@ class PlayerUIContext {
     bool hasPrevEpisode = false,
   }) {
     final isLive = contentType == IptvDescriptorType.live;
-    final isVod = contentType == IptvDescriptorType.movie ||
+    final isVod =
+        contentType == IptvDescriptorType.movie ||
         contentType == IptvDescriptorType.episode;
     final isEpisode = contentType == IptvDescriptorType.episode;
 
@@ -136,7 +137,8 @@ class PlayerUIContext {
     bool hasNextEpisode = false,
   }) {
     final isLive = contentType == IptvDescriptorType.live;
-    final isVod = contentType == IptvDescriptorType.movie ||
+    final isVod =
+        contentType == IptvDescriptorType.movie ||
         contentType == IptvDescriptorType.episode;
 
     return PlayerUIContext._(

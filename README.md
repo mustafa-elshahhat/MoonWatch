@@ -70,7 +70,7 @@ Pass them at build time via `--dart-define`:
 
 ```bash
 flutter run \
-  --dart-define=SERVER_BASE_URL=http://192.168.1.10:5000 \
+  --dart-define=SERVER_BASE_URL=http://192.168.1.10:5035 \
   --dart-define=IPTV_BASE_URL=http://your-provider.example \
   --dart-define=IPTV_USERNAME=myuser \
   --dart-define=IPTV_PASSWORD=mypass

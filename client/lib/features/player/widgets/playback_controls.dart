@@ -120,9 +120,9 @@ class _PlaybackControlsState extends State<PlaybackControls> {
     bool canControl,
   ) {
     final maxMs = duration.inMilliseconds.toDouble().clamp(
-          1.0,
-          double.infinity,
-        );
+      1.0,
+      double.infinity,
+    );
     final valMs = position.inMilliseconds.toDouble().clamp(0.0, maxMs);
     return SliderTheme(
       data: SliderThemeData(
@@ -143,8 +143,8 @@ class _PlaybackControlsState extends State<PlaybackControls> {
         max: maxMs,
         onChanged: canControl
             ? (v) {
-                final ws =
-                    context.findAncestorStateOfType<WatchScreenContentState>();
+                final ws = context
+                    .findAncestorStateOfType<WatchScreenContentState>();
                 ws?.invokeSeekAction(Duration(milliseconds: v.toInt()));
               }
             : null,
@@ -238,8 +238,8 @@ class _PlaybackControlsState extends State<PlaybackControls> {
           isPlaying: isPlaying,
           canControl: canControl,
           onTap: () {
-            final ws =
-                context.findAncestorStateOfType<WatchScreenContentState>();
+            final ws = context
+                .findAncestorStateOfType<WatchScreenContentState>();
             if (isPlaying) {
               ws?.invokePauseAction(position);
             } else {
@@ -391,11 +391,11 @@ class _PlaybackControlsState extends State<PlaybackControls> {
   }
 
   Duration _position(PlayerState state) => switch (state) {
-        PlayerStatePlaying(position: final p) => p,
-        PlayerStatePaused(position: final p) => p,
-        PlayerStateBuffering(lastKnownPosition: final p) => p,
-        _ => Duration.zero,
-      };
+    PlayerStatePlaying(position: final p) => p,
+    PlayerStatePaused(position: final p) => p,
+    PlayerStateBuffering(lastKnownPosition: final p) => p,
+    _ => Duration.zero,
+  };
 
   Duration _duration(PlayerController c) {
     final d = c.duration;
@@ -429,41 +429,39 @@ class _PlayPauseBtnState extends State<_PlayPauseBtn> {
   bool _hovered = false;
   @override
   Widget build(BuildContext context) => MouseRegion(
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: widget.canControl ? widget.onTap : null,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: _hovered
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white.withValues(alpha: _hovered ? 0.0 : 0.25),
-                width: 1.5,
-              ),
-              boxShadow: _hovered
-                  ? [
-                      const BoxShadow(
-                        color: Colors.black38,
-                        blurRadius: 16,
-                        offset: Offset(0, 6),
-                      ),
-                    ]
-                  : [],
-            ),
-            child: Icon(
-              widget.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-              color: _hovered ? AppColors.background : Colors.white,
-              size: 26,
-            ),
+    onEnter: (_) => setState(() => _hovered = true),
+    onExit: (_) => setState(() => _hovered = false),
+    child: GestureDetector(
+      onTap: widget.canControl ? widget.onTap : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          color: _hovered ? Colors.white : Colors.white.withValues(alpha: 0.15),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white.withValues(alpha: _hovered ? 0.0 : 0.25),
+            width: 1.5,
           ),
+          boxShadow: _hovered
+              ? [
+                  const BoxShadow(
+                    color: Colors.black38,
+                    blurRadius: 16,
+                    offset: Offset(0, 6),
+                  ),
+                ]
+              : [],
         ),
-      );
+        child: Icon(
+          widget.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+          color: _hovered ? AppColors.background : Colors.white,
+          size: 26,
+        ),
+      ),
+    ),
+  );
 }
 
 // —— Chrome button —————————————————————————————————————————————————————————————
@@ -481,31 +479,31 @@ class _ChrBtnState extends State<_ChrBtn> {
   bool _hovered = false;
   @override
   Widget build(BuildContext context) => Tooltip(
-        message: widget.tooltip,
-        child: MouseRegion(
-          onEnter: (_) => setState(() => _hovered = true),
-          onExit: (_) => setState(() => _hovered = false),
-          child: GestureDetector(
-            onTap: widget.onTap,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: _hovered
-                    ? Colors.white.withValues(alpha: 0.15)
-                    : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                widget.icon,
-                color: widget.onTap == null
-                    ? Colors.white.withValues(alpha: 0.25)
-                    : Colors.white,
-                size: 20,
-              ),
-            ),
+    message: widget.tooltip,
+    child: MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: _hovered
+                ? Colors.white.withValues(alpha: 0.15)
+                : Colors.transparent,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            widget.icon,
+            color: widget.onTap == null
+                ? Colors.white.withValues(alpha: 0.25)
+                : Colors.white,
+            size: 20,
           ),
         ),
-      );
+      ),
+    ),
+  );
 }

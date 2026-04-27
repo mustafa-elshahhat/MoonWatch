@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -58,9 +58,9 @@ void main() {
   });
 
   RoomBloc buildBloc() => RoomBloc(
-        roomRepository: mockRoomRepository,
-        signalRClient: mockSignalRClient,
-      );
+    roomRepository: mockRoomRepository,
+    signalRClient: mockSignalRClient,
+  );
 
   group('RoomBloc - CreateRoom', () {
     blocTest<RoomBloc, RoomState>(

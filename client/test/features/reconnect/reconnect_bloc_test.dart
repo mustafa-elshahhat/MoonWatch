@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -44,9 +44,9 @@ void main() {
   });
 
   ReconnectBloc buildBloc() => ReconnectBloc(
-        signalRClient: mockSignalRClient,
-        roomRepository: mockRoomRepository,
-      );
+    signalRClient: mockSignalRClient,
+    roomRepository: mockRoomRepository,
+  );
 
   // —— Initial state ——————————————————————————————————————————————————————
 
@@ -301,9 +301,9 @@ void main() {
     });
   });
 
-  // —— CL-37/CL-38: Room event listening after rejoin ————————————————————
+  // —— /: Room event listening after rejoin ————————————————————
 
-  group('ReconnectBloc — room event listening (CL-37/CL-38)', () {
+  group('ReconnectBloc — room event listening /', () {
     blocTest<ReconnectBloc, ReconnectState>(
       'room:joined while Attempting → Succeeded → Idle',
       build: () {

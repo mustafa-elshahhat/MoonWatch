@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:watch_party/core/player/player_controller.dart';
 import 'package:watch_party/features/player/bloc/player_bloc.dart';
@@ -24,10 +24,12 @@ void main() {
     roomRepository = MockRoomRepository();
 
     when(() => playerController.events).thenAnswer((_) => const Stream.empty());
-    when(() => playerController.durationStream)
-        .thenAnswer((_) => const Stream.empty());
-    when(() => playerController.positionStream)
-        .thenAnswer((_) => const Stream.empty());
+    when(
+      () => playerController.durationStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => playerController.positionStream,
+    ).thenAnswer((_) => const Stream.empty());
     when(() => playerController.currentPosition).thenReturn(Duration.zero);
     when(() => playerController.duration).thenReturn(Duration.zero);
     when(() => playerController.isPlaying).thenReturn(false);
@@ -79,7 +81,8 @@ void main() {
       await Future.delayed(const Duration(milliseconds: 50));
       // Still only 1 call to play because seqNo 50 <= 100
       verifyNever(
-          () => playerController.seekTo(const Duration(milliseconds: 2000)));
+        () => playerController.seekTo(const Duration(milliseconds: 2000)),
+      );
 
       // Dispose SyncBloc A (simulating leaving WatchScreen)
       await syncBlocA.close();

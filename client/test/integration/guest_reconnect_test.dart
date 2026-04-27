@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:watch_party/core/network/signalr_client.dart';
@@ -18,7 +18,7 @@ class MockRoomRepository extends Mock implements RoomRepository {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 
-/// CL-42: Integration test — guest_reconnect_test.
+/// : Integration test — guest_reconnect_test.
 /// Simulates: guest connected → SignalR drops → reconnects → rejoin → state_sync.
 void main() {
   late MockSignalRClient mockSignalRClient;
@@ -66,7 +66,7 @@ void main() {
     await repoEventsController.close();
   });
 
-  group('guest_reconnect integration (CL-42)', () {
+  group('guest_reconnect integration ', () {
     test(
       'SignalR drop → reconnect → rejoin invocation → room:joined → Success',
       () async {
@@ -96,7 +96,7 @@ void main() {
         ).called(1);
 
         // 5. Server responds with room:joined via RoomRepository events
-        //    (CL-37: ReconnectBloc listens and auto-dispatches Succeeded)
+        //    : ReconnectBloc listens and auto-dispatches Succeeded)
         repoEventsController.add(
           const RoomEventRoomJoined(
             roomCode: 'ABC123',
@@ -144,7 +144,7 @@ void main() {
       await Future.delayed(const Duration(milliseconds: 100));
 
       // Server responds with room:error via RoomRepository events
-      // (CL-38: ReconnectBloc listens and auto-dispatches Failed)
+      // : ReconnectBloc listens and auto-dispatches Failed)
       repoEventsController.add(
         const RoomEventError(
           code: 'room_closed',

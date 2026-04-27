@@ -6,8 +6,9 @@ class AppConstants {
   AppConstants._();
 
   // Server connection — supply SERVER_BASE_URL via --dart-define at build time.
-  static const String kServerBaseUrl =
-      String.fromEnvironment('SERVER_BASE_URL');
+  static const String kServerBaseUrl = String.fromEnvironment(
+    'SERVER_BASE_URL',
+  );
   static const String kSignalRHubPath = '/hubs/room';
 
   // Sync engine thresholds

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 /// Video viewport fit modes — controls how the video frame maps to the
 /// available screen area. Purely a presentation/rendering concern.

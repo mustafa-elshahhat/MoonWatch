@@ -1,4 +1,4 @@
-﻿/// Design system barrel export.
+/// Design system barrel export.
 /// Import this single file to access all theme tokens.
 library;
 

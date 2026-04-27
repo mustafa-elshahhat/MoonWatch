@@ -368,10 +368,11 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
 
   Widget _buildPremiumTimeline(Duration safe) {
     final maxMs = safe.inMilliseconds.toDouble().clamp(1.0, double.infinity);
-    final posMs = (_isDragging
-            ? (_dragValue ?? 0)
-            : _currentPosition.inMilliseconds.toDouble())
-        .clamp(0.0, maxMs);
+    final posMs =
+        (_isDragging
+                ? (_dragValue ?? 0)
+                : _currentPosition.inMilliseconds.toDouble())
+            .clamp(0.0, maxMs);
     final progress = posMs / maxMs;
 
     return MouseRegion(
@@ -522,18 +523,18 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
   }
 
   TextStyle get _timeStyle => const TextStyle(
-        color: Colors.white,
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        fontFamily: 'Inter',
-        shadows: [Shadow(color: Colors.black, blurRadius: 4)],
-      );
+    color: Colors.white,
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'Inter',
+    shadows: [Shadow(color: Colors.black, blurRadius: 4)],
+  );
   TextStyle get _durationStyle => TextStyle(
-        color: Colors.white.withValues(alpha: 0.5),
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-        fontFamily: 'Inter',
-      );
+    color: Colors.white.withValues(alpha: 0.5),
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    fontFamily: 'Inter',
+  );
 
   void _seekRelative(int seconds, Duration safe) {
     showControls();
@@ -562,22 +563,22 @@ class _ChromeContainer extends StatelessWidget {
   const _ChromeContainer({required this.child});
   @override
   Widget build(BuildContext context) => Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-            colors: [Color(0xE6000000), Color(0x66000000), Color(0x00000000)],
-            stops: [0.0, 0.55, 1.0],
-          ),
-        ),
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.md,
-          AppSpacing.xl,
-          AppSpacing.md,
-          AppSpacing.md,
-        ),
-        child: child,
-      );
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+        colors: [Color(0xE6000000), Color(0x66000000), Color(0x00000000)],
+        stops: [0.0, 0.55, 1.0],
+      ),
+    ),
+    padding: const EdgeInsets.fromLTRB(
+      AppSpacing.md,
+      AppSpacing.xl,
+      AppSpacing.md,
+      AppSpacing.md,
+    ),
+    child: child,
+  );
 }
 
 class _PlayPauseBtn extends StatefulWidget {
@@ -597,44 +598,42 @@ class _PlayPauseBtnState extends State<_PlayPauseBtn> {
   bool _h = false;
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-        child: MouseRegion(
-          onEnter: (_) => setState(() => _h = true),
-          onExit: (_) => setState(() => _h = false),
-          child: GestureDetector(
-            onTap: widget.canInteract ? widget.onTap : null,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 160),
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: _h ? Colors.white : Colors.white.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: _h ? 0 : 0.3),
-                  width: 1.5,
-                ),
-                boxShadow: _h
-                    ? [
-                        const BoxShadow(
-                          color: Colors.black38,
-                          blurRadius: 16,
-                          offset: Offset(0, 6),
-                        ),
-                      ]
-                    : [],
-              ),
-              child: Icon(
-                widget.isPlaying
-                    ? Icons.pause_rounded
-                    : Icons.play_arrow_rounded,
-                color: _h ? AppColors.background : Colors.white,
-                size: 26,
-              ),
+    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+    child: MouseRegion(
+      onEnter: (_) => setState(() => _h = true),
+      onExit: (_) => setState(() => _h = false),
+      child: GestureDetector(
+        onTap: widget.canInteract ? widget.onTap : null,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: _h ? Colors.white : Colors.white.withValues(alpha: 0.15),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withValues(alpha: _h ? 0 : 0.3),
+              width: 1.5,
             ),
+            boxShadow: _h
+                ? [
+                    const BoxShadow(
+                      color: Colors.black38,
+                      blurRadius: 16,
+                      offset: Offset(0, 6),
+                    ),
+                  ]
+                : [],
+          ),
+          child: Icon(
+            widget.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+            color: _h ? AppColors.background : Colors.white,
+            size: 26,
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _ChromeBtn extends StatefulWidget {
@@ -658,39 +657,39 @@ class _ChromeBtnState extends State<_ChromeBtn> {
   bool _h = false;
   @override
   Widget build(BuildContext context) => Tooltip(
-        message: widget.tooltip,
-        child: MouseRegion(
-          onEnter: (_) => setState(() => _h = true),
-          onExit: (_) => setState(() => _h = false),
-          child: GestureDetector(
-            onTap: widget.onTap,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              width: widget.size,
-              height: widget.size,
-              decoration: BoxDecoration(
-                color: _h
-                    ? (widget.accent
-                        ? AppColors.accentPrimary
-                        : Colors.white.withValues(alpha: 0.15))
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-              ),
-              child: Icon(
-                widget.icon,
-                color: widget.onTap == null
-                    ? Colors.white.withValues(alpha: 0.25)
-                    : (widget.accent && _h
-                        ? Colors.white
-                        : (widget.accent
+    message: widget.tooltip,
+    child: MouseRegion(
+      onEnter: (_) => setState(() => _h = true),
+      onExit: (_) => setState(() => _h = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: widget.size,
+          height: widget.size,
+          decoration: BoxDecoration(
+            color: _h
+                ? (widget.accent
+                      ? AppColors.accentPrimary
+                      : Colors.white.withValues(alpha: 0.15))
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+          ),
+          child: Icon(
+            widget.icon,
+            color: widget.onTap == null
+                ? Colors.white.withValues(alpha: 0.25)
+                : (widget.accent && _h
+                      ? Colors.white
+                      : (widget.accent
                             ? AppColors.accentPrimary
                             : Colors.white)),
-                size: 20,
-              ),
-            ),
+            size: 20,
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _FitBtn extends StatelessWidget {
@@ -699,22 +698,22 @@ class _FitBtn extends StatelessWidget {
   const _FitBtn({required this.mode, this.onChanged});
   @override
   Widget build(BuildContext context) => Tooltip(
-        message: mode.label,
-        child: GestureDetector(
-          onTap: () => onChanged?.call(mode.next),
-          child: SizedBox(
-            width: 36,
-            height: 36,
-            child: Icon(
-              mode.icon,
-              size: AppIconSize.lg,
-              color: mode == VideoFitMode.contain
-                  ? Colors.white.withValues(alpha: 0.6)
-                  : AppColors.accentPrimary,
-            ),
-          ),
+    message: mode.label,
+    child: GestureDetector(
+      onTap: () => onChanged?.call(mode.next),
+      child: SizedBox(
+        width: 36,
+        height: 36,
+        child: Icon(
+          mode.icon,
+          size: AppIconSize.lg,
+          color: mode == VideoFitMode.contain
+              ? Colors.white.withValues(alpha: 0.6)
+              : AppColors.accentPrimary,
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _LiveBadge extends StatelessWidget {
@@ -722,35 +721,35 @@ class _LiveBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        decoration: BoxDecoration(
-          color: AppColors.error,
-          borderRadius: BorderRadius.circular(4),
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+    decoration: BoxDecoration(
+      color: AppColors.error,
+      borderRadius: BorderRadius.circular(4),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 5,
+          height: 5,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 5,
-              height: 5,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 4),
-            const Text(
-              'LIVE',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 9,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1,
-              ),
-            ),
-          ],
+        const SizedBox(width: 4),
+        const Text(
+          'LIVE',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 9,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1,
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _HostControlsBadge extends StatelessWidget {
@@ -758,29 +757,29 @@ class _HostControlsBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.only(left: 4), // Tighter margin
-        padding: const EdgeInsets.symmetric(
-          horizontal: 6,
-          vertical: 3,
-        ), // Tighter padding
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(
-            alpha: 0.1,
-          ), // Solid faint bg instead of border
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(
-          'HOST CONTROLS',
-          style: TextStyle(
-            color: Colors.white.withValues(
-              alpha: 0.6,
-            ), // Slightly brighter for contrast on bg
-            fontSize: 9,
-            fontWeight: FontWeight.w600, // Slightly less bold
-            letterSpacing: 0.5, // Less letter spacing for compactness
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      );
+    margin: const EdgeInsets.only(left: 4), // Tighter margin
+    padding: const EdgeInsets.symmetric(
+      horizontal: 6,
+      vertical: 3,
+    ), // Tighter padding
+    decoration: BoxDecoration(
+      color: Colors.white.withValues(
+        alpha: 0.1,
+      ), // Solid faint bg instead of border
+      borderRadius: BorderRadius.circular(4),
+    ),
+    child: Text(
+      'HOST CONTROLS',
+      style: TextStyle(
+        color: Colors.white.withValues(
+          alpha: 0.6,
+        ), // Slightly brighter for contrast on bg
+        fontSize: 9,
+        fontWeight: FontWeight.w600, // Slightly less bold
+        letterSpacing: 0.5, // Less letter spacing for compactness
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    ),
+  );
 }

@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 import 'package:watch_party/features/room/bloc/room_event.dart';
 

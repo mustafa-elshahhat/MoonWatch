@@ -1,4 +1,4 @@
-﻿/// Shared widget library for WatchParty.
+/// Shared widget library for WatchParty.
 /// Import this single file to access all reusable components.
 library;
 

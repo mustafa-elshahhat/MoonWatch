@@ -39,7 +39,7 @@ class LatencyEstimator {
   void Function(int offsetMs)? onClockOffsetUpdated;
 
   LatencyEstimator({required SignalRClient signalRClient})
-      : _signalRClient = signalRClient;
+    : _signalRClient = signalRClient;
 
   void start() {
     // Idempotency guard: if already running, ignore the second call.
@@ -115,12 +115,14 @@ class LatencyEstimator {
       _hasFirstMeasurement = true;
     } else {
       // Exponential moving average (α = 0.3) to smooth out transient spikes.
-      _currentRttMs = (AppConstants.kRttSmoothingAlpha * rawRttMs +
-              (1.0 - AppConstants.kRttSmoothingAlpha) * _currentRttMs)
-          .round();
-      _clockOffsetMs = (AppConstants.kRttSmoothingAlpha * rawOffsetMs +
-              (1.0 - AppConstants.kRttSmoothingAlpha) * _clockOffsetMs)
-          .round();
+      _currentRttMs =
+          (AppConstants.kRttSmoothingAlpha * rawRttMs +
+                  (1.0 - AppConstants.kRttSmoothingAlpha) * _currentRttMs)
+              .round();
+      _clockOffsetMs =
+          (AppConstants.kRttSmoothingAlpha * rawOffsetMs +
+                  (1.0 - AppConstants.kRttSmoothingAlpha) * _clockOffsetMs)
+              .round();
     }
 
     _logger.d(

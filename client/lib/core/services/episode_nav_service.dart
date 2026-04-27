@@ -35,11 +35,11 @@ class EpisodeRef {
   /// or [PlayerEventInitialize]. The descriptor carries no episode-navigation
   /// metadata — that lives only in [EpisodeNavService].
   IptvContentDescriptor toDescriptor() => IptvContentDescriptor(
-        contentType: IptvDescriptorType.episode,
-        streamId: id,
-        containerExtension: containerExtension,
-        title: displayTitle,
-      );
+    contentType: IptvDescriptorType.episode,
+    streamId: id,
+    containerExtension: containerExtension,
+    title: displayTitle,
+  );
 }
 
 // —— Episode navigation context ———————————————————————————————————————————————

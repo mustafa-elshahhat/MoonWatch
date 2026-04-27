@@ -206,8 +206,9 @@ class MainShellState extends State<MainShell> {
             Text(
               label,
               style: AppTypography.captionSmall.copyWith(
-                color:
-                    isSelected ? AppColors.textPrimary : AppColors.textDisabled,
+                color: isSelected
+                    ? AppColors.textPrimary
+                    : AppColors.textDisabled,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 letterSpacing: 0.5,
               ),

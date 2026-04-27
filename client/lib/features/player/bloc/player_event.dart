@@ -31,13 +31,13 @@ class PlayerEventInitialize extends PlayerEvent {
 
   @override
   List<Object?> get props => [
-        streamUrl,
-        source,
-        isRoomMode,
-        roomCode,
-        role,
-        contentKey,
-      ];
+    streamUrl,
+    source,
+    isRoomMode,
+    roomCode,
+    role,
+    contentKey,
+  ];
 }
 
 class PlayerEventPlay extends PlayerEvent {

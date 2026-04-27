@@ -1,8 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/di/injection.dart';
 import 'core/theme/app_theme.dart';
 import 'features/room/bloc/room_bloc.dart';
+import 'features/room/bloc/room_list_bloc.dart';
 import 'features/reconnect/reconnect_bloc.dart';
 import 'features/iptv/bloc/iptv_bloc.dart';
 import 'features/room/screens/home_screen.dart';
@@ -24,7 +25,9 @@ class WatchPartyApp extends StatelessWidget {
         BlocProvider<RoomBloc>(create: (_) => getIt<RoomBloc>()),
         BlocProvider<ReconnectBloc>(create: (_) => getIt<ReconnectBloc>()),
         BlocProvider<IptvBloc>(create: (_) => getIt<IptvBloc>()),
+        BlocProvider<RoomListBloc>(create: (_) => getIt<RoomListBloc>()),
       ],
+
       child: MaterialApp(
         title: 'WatchParty',
         debugShowCheckedModeBanner: false,

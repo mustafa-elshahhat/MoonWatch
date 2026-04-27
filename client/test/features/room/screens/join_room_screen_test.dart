@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_test/bloc_test.dart';
@@ -46,7 +46,7 @@ void main() {
 
     testWidgets('shows error for empty input', (tester) async {
       // The JoinRoomScreen has an active-rooms section above the manual entry
-      // form, pushing the Join button below the default 800Ã—600 test surface.
+      // form, pushing the Join button below the default 800x600 test surface.
       // Expand the surface so the full screen fits without scrolling.
       await tester.binding.setSurfaceSize(const Size(800, 1200));
       addTearDown(() => tester.binding.setSurfaceSize(null));

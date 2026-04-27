@@ -76,11 +76,11 @@ class SyncEventSeekReceived extends SyncEvent {
 
   @override
   List<Object?> get props => [
-        targetPositionMs,
-        serverTimestampMs,
-        seqNo,
-        isPlaying,
-      ];
+    targetPositionMs,
+    serverTimestampMs,
+    seqNo,
+    isPlaying,
+  ];
 }
 
 class SyncEventStateSyncReceived extends SyncEvent {
@@ -100,24 +100,24 @@ class SyncEventStateSyncReceived extends SyncEvent {
 
   @override
   List<Object?> get props => [
-        hostPositionMs,
-        isPlaying,
-        serverTimestampMs,
-        seqNo,
-      ];
+    hostPositionMs,
+    isPlaying,
+    serverTimestampMs,
+    seqNo,
+  ];
 }
 
-/// Local player stalled (CL-27).
+/// Local player stalled .
 class SyncEventPlayerStalled extends SyncEvent {
   const SyncEventPlayerStalled();
 }
 
-/// Local player ready after stall (CL-28).
+/// Local player ready after stall .
 class SyncEventPlayerReady extends SyncEvent {
   const SyncEventPlayerReady();
 }
 
-/// Peer's player stalled — received via buffering:stall (CL-29).
+/// Peer's player stalled — received via buffering:stall .
 class SyncEventPeerStalled extends SyncEvent {
   final int positionMs;
   final int episodeId;
@@ -130,7 +130,7 @@ class SyncEventPeerStalled extends SyncEvent {
   List<Object?> get props => [positionMs, episodeId];
 }
 
-/// Server sent buffering:resume — both ready (CL-30).
+/// Server sent buffering:resume — both ready .
 class SyncEventBufferingResumeReceived extends SyncEvent {
   final int resumePositionMs;
   final int episodeId;
@@ -192,7 +192,7 @@ class SyncStateDegraded extends SyncState {
 
 /// SyncBloc
 /// Receives playback events from RoomRepository, implements drift detection
-/// and correction seek. Handles buffering coordination (CL-27 through CL-30).
+/// and correction seek. Handles buffering coordination  through .
 ///
 /// Deferred command queue (RC-FIX):
 /// All incoming playback commands (play/pause/seek/state_sync) are queued while
@@ -269,9 +269,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   SyncBloc({
     required PlayerController playerController,
     required RoomRepository roomRepository,
-  })  : _playerController = playerController,
-        _roomRepository = roomRepository,
-        super(const SyncStateIdle()) {
+  }) : _playerController = playerController,
+       _roomRepository = roomRepository,
+       super(const SyncStateIdle()) {
     on<SyncEventPlayReceived>(_onPlayReceived);
     on<SyncEventPauseReceived>(_onPauseReceived);
     on<SyncEventSeekReceived>(_onSeekReceived);
@@ -524,7 +524,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     SyncEventStateSyncReceived event,
     Emitter<SyncState> emit,
   ) async {
-    // Per SYNC_ENGINE.md: drift correction applies only to guest.
+    // Per : drift correction applies only to guest.
     if (_role == 'host') {
       return;
     }
@@ -991,8 +991,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       final candidateScore = seqNo * 2 + (_isStateSyncEvent(event) ? 1 : 0);
 
       // Fallback to timestamp ordering when seqNo == 0 (old server).
-      final isNewer =
-          seqNo > 0 ? candidateScore > existingScore : ts > serverTimestampMs;
+      final isNewer = seqNo > 0
+          ? candidateScore > existingScore
+          : ts > serverTimestampMs;
 
       if (!isNewer && hasIntent) continue;
 
@@ -1080,20 +1081,20 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   }
 
   static int _seqNoOf(SyncEvent event) => switch (event) {
-        SyncEventPlayReceived(seqNo: final s) => s,
-        SyncEventPauseReceived(seqNo: final s) => s,
-        SyncEventSeekReceived(seqNo: final s) => s,
-        SyncEventStateSyncReceived(seqNo: final s) => s,
-        _ => 0,
-      };
+    SyncEventPlayReceived(seqNo: final s) => s,
+    SyncEventPauseReceived(seqNo: final s) => s,
+    SyncEventSeekReceived(seqNo: final s) => s,
+    SyncEventStateSyncReceived(seqNo: final s) => s,
+    _ => 0,
+  };
 
   static int _serverTsOf(SyncEvent event) => switch (event) {
-        SyncEventPlayReceived(serverTimestampMs: final t) => t,
-        SyncEventPauseReceived(serverTimestampMs: final t) => t,
-        SyncEventSeekReceived(serverTimestampMs: final t) => t,
-        SyncEventStateSyncReceived(serverTimestampMs: final t) => t,
-        _ => 0,
-      };
+    SyncEventPlayReceived(serverTimestampMs: final t) => t,
+    SyncEventPauseReceived(serverTimestampMs: final t) => t,
+    SyncEventSeekReceived(serverTimestampMs: final t) => t,
+    SyncEventStateSyncReceived(serverTimestampMs: final t) => t,
+    _ => 0,
+  };
 
   static bool _isStateSyncEvent(SyncEvent event) =>
       event is SyncEventStateSyncReceived;

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 namespace WatchParty.Tests.Integration;
 
 /// <summary>
-/// Integration tests for REST endpoints per SV-35, SV-36.
+/// Integration tests for REST endpoints per , .
 /// Uses WebApplicationFactory to spin up in-memory test server.
 /// Note: POST /rooms/{code}/join is a pre-check endpoint; actual join is via SignalR.
 /// </summary>
@@ -19,7 +19,7 @@ public class RoomApiTests : IClassFixture<WebApplicationFactory<Program>>
         _client = factory.CreateClient();
     }
 
-    // ── SV-35: POST /api/v1/rooms ────────────────────────────────────────────
+    // ── : POST /api/v1/rooms ────────────────────────────────────────────
 
     [Fact]
     public async Task CreateRoom_Returns201_WithRoomCode()
@@ -49,7 +49,7 @@ public class RoomApiTests : IClassFixture<WebApplicationFactory<Program>>
             b2.GetProperty("roomCode").GetString());
     }
 
-    // ── SV-36: POST /api/v1/rooms/{code}/join ────────────────────────────────
+    // ── : POST /api/v1/rooms/{code}/join ────────────────────────────────
 
     [Fact]
     public async Task JoinPreCheck_NonexistentCode_Returns404()

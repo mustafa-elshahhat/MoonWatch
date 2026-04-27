@@ -56,7 +56,7 @@ try
     var wpOptions = builder.Configuration.GetSection("WatchParty").Get<WatchPartyOptions>() ?? new WatchPartyOptions();
     builder.Services.Configure<WatchPartyOptions>(builder.Configuration.GetSection("WatchParty"));
 
-    // ── Production CORS guard (SECURITY.md) ──────────────────────────────────
+    // ── Production CORS guard  ──────────────────────────────────
     if (builder.Environment.IsProduction() &&
         (wpOptions.Cors.AllowedOrigins == null || wpOptions.Cors.AllowedOrigins.Length == 0))
     {
@@ -70,7 +70,7 @@ try
     builder.Services.AddSingleton<IRoomRegistry, InMemoryRoomRegistry>();
     builder.Services.AddSingleton<IRoomService, RoomService>();
 
-    // ── SignalR (CONFIGURATION.md) ───────────────────────────────────────────
+    // ── SignalR  ───────────────────────────────────────────
     builder.Services.AddSignalR(options =>
     {
         options.KeepAliveInterval = TimeSpan.FromSeconds(wpOptions.SignalR.KeepAliveIntervalSeconds);
@@ -101,7 +101,7 @@ try
         });
     });
 
-    // ── Rate Limiting (SECURITY.md) ──────────────────────────────────────────
+    // ── Rate Limiting  ──────────────────────────────────────────
     builder.Services.AddRateLimiter(options =>
     {
         options.RejectionStatusCode = 429;
@@ -163,10 +163,10 @@ try
     builder.Services.AddHealthChecks()
         .AddCheck<RoomHealthCheck>("rooms");
 
-    // ── Room expiry background service (SV-52, ROOM_LIFECYCLE.md §Room Expiry) ──
+    // ── Room expiry background service ,  §Room Expiry) ──
     builder.Services.AddHostedService<RoomExpiryService>();
 
-    // ── State sync timer (SYNC_ENGINE.md §Server-Side Sync Responsibilities) ──
+    // ── State sync timer  §Server-Side Sync Responsibilities) ──
     builder.Services.AddSingleton<StateSyncTimerService>();
     builder.Services.AddHostedService(sp => sp.GetRequiredService<StateSyncTimerService>());
 

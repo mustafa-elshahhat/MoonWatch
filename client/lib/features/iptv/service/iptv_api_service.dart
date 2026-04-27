@@ -23,14 +23,14 @@ class IptvApiService {
   final AppLogger _logger;
 
   IptvApiService({required IptvConfig config, AppLogger? logger})
-      : _config = config,
-        _logger = logger ?? AppLogger('IptvApiService'),
-        _dio = Dio(
-          BaseOptions(
-            connectTimeout: const Duration(seconds: 15),
-            receiveTimeout: const Duration(seconds: 30),
-          ),
-        ) {
+    : _config = config,
+      _logger = logger ?? AppLogger('IptvApiService'),
+      _dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
+      ) {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {

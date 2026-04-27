@@ -9,7 +9,7 @@ using WatchParty.Shared.Protocol.Payloads;
 namespace WatchParty.Tests.Services;
 
 /// <summary>
-/// Unit tests for RoomService per SV-17 and SV-18.
+/// Unit tests for RoomService per  and .
 /// Tests all state transitions and role authorization.
 /// </summary>
 public class RoomServiceTests
@@ -206,7 +206,7 @@ public class RoomServiceTests
         Assert.Equal(120000, room.HostPositionMs);
     }
 
-    // ── Role Authorization (SV-18) ───────────────────────────────────────────
+    // ── Role Authorization  ───────────────────────────────────────────
 
     [Fact]
     public async Task Play_GuestCalling_ThrowsRoleUnauthorized()
@@ -336,7 +336,7 @@ public class RoomServiceTests
         Assert.True(result.ServerTimestampMs > 0);
     }
 
-    // ── Buffering Coordination (SV-44, SV-45) ───────────────────────────────
+    // ── Buffering Coordination ,  ───────────────────────────────
 
     [Fact]
     public async Task BufferingStall_GuestStalls_SetsGuestToStalled()
@@ -391,7 +391,7 @@ public class RoomServiceTests
     }
 
     /// <summary>
-    /// SV-44: Full buffering gate sequence.
+    /// : Full buffering gate sequence.
     /// Guest stalls → host stalls → guest ready (gate still closed) → host ready (gate opens).
     /// </summary>
     [Fact]
@@ -425,7 +425,7 @@ public class RoomServiceTests
     }
 
     /// <summary>
-    /// SV-45: Guest stalls while host was playing → buffering:stall sent to host.
+    /// : Guest stalls while host was playing → buffering:stall sent to host.
     /// Guest ready → gate does not open until host also ready.
     /// (In this scenario host never stalls — peer stays Ready on server.)
     /// </summary>
@@ -462,10 +462,10 @@ public class RoomServiceTests
             _service.HandleNotifyBufferingReady("random-conn", 1));
     }
 
-    // ── Guest Reconnection (SV-50, SV-51) ─────────────────────────────────
+    // ── Guest Reconnection ,  ─────────────────────────────────
 
     /// <summary>
-    /// SV-50: Guest reconnects within 30s — grace timer cancelled,
+    /// : Guest reconnects within 30s — grace timer cancelled,
     /// guest re-associated, state sync data returned, room stays Active.
     /// </summary>
     [Fact]
@@ -495,7 +495,7 @@ public class RoomServiceTests
     }
 
     /// <summary>
-    /// SV-49: Reconnecting guest has BufferingState reset to Ready.
+    /// : Reconnecting guest has BufferingState reset to Ready.
     /// </summary>
     [Fact]
     public async Task GuestReconnect_ResetsBufferingStateToReady()
@@ -515,7 +515,7 @@ public class RoomServiceTests
     }
 
     /// <summary>
-    /// SV-51: Guest does not reconnect — grace timer fires, guest slot cleared,
+    /// : Guest does not reconnect — grace timer fires, guest slot cleared,
     /// room remains open, host can still receive a new guest.
     /// </summary>
     [Fact]
@@ -563,7 +563,7 @@ public class RoomServiceTests
     }
 
     /// <summary>
-    /// SV-50: Guest reconnects from Joined state —
+    /// : Guest reconnects from Joined state —
     /// transitions back to Joined (no stream URL) or Active (with stream URL).
     /// </summary>
     [Fact]

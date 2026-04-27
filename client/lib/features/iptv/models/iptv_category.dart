@@ -1,4 +1,4 @@
-﻿import 'package:equatable/equatable.dart';
+import 'package:equatable/equatable.dart';
 
 /// Shared category model used across Live, VOD, and Series.
 class IptvCategory extends Equatable {

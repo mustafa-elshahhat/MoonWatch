@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 /// Player events emitted by the player abstraction.

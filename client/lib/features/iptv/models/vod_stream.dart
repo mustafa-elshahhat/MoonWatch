@@ -1,4 +1,4 @@
-﻿import 'package:equatable/equatable.dart';
+import 'package:equatable/equatable.dart';
 
 /// A VOD / movie item from the IPTV provider.
 class VodStream extends Equatable {

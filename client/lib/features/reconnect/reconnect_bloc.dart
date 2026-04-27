@@ -104,12 +104,12 @@ class ReconnectStateFailed extends ReconnectState {
 /// State machine:
 ///   Connected(Idle) → Reconnecting(Attempting) → Re-joining → Connected(Success) | Failed
 ///
-/// CL-34: State machine
-/// CL-35: Wire SignalR onReconnecting/onReconnected/onClose
-/// CL-36: On reconnected → rejoinRoom
-/// CL-37: On room:joined after reconnect → success
-/// CL-38: On room:error after rejoin → failed
-/// CL-39: On all retries exhausted → persistent disconnect
+/// : State machine
+/// : Wire SignalR onReconnecting/onReconnected/onClose
+/// : On reconnected → rejoinRoom
+/// : On room:joined after reconnect → success
+/// : On room:error after rejoin → failed
+/// : On all retries exhausted → persistent disconnect
 class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
   final SignalRClient _signalRClient;
   final RoomRepository _roomRepository;
@@ -128,9 +128,9 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
   ReconnectBloc({
     required SignalRClient signalRClient,
     required RoomRepository roomRepository,
-  })  : _signalRClient = signalRClient,
-        _roomRepository = roomRepository,
-        super(const ReconnectStateIdle()) {
+  }) : _signalRClient = signalRClient,
+       _roomRepository = roomRepository,
+       super(const ReconnectStateIdle()) {
     on<ReconnectEventDisconnected>(_onDisconnected);
     on<ReconnectEventAttemptRejoin>(_onAttemptRejoin);
     on<ReconnectEventNetworkLost>(_onNetworkLost);
@@ -154,8 +154,8 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
     'role_invalid',
   };
 
-  /// CL-35: Start listening to SignalR connection state changes.
-  /// CL-37/CL-38: Also listen to RoomRepository events for room:joined
+  /// : Start listening to SignalR connection state changes.
+  /// /: Also listen to RoomRepository events for room:joined
   /// and room:error responses after a rejoin attempt.
   void startListening() {
     _connectionSubscription?.cancel();
@@ -185,11 +185,11 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
       if (state is! ReconnectStateAttempting) return;
 
       if (event is RoomEventRoomJoined) {
-        // CL-37: room:joined after reconnect → success
+        // : room:joined after reconnect → success
         add(const ReconnectEventSucceeded());
       } else if (event is RoomEventError &&
           _fatalErrorCodes.contains(event.code)) {
-        // CL-38: room:error with fatal code after rejoin → failed
+        // : room:error with fatal code after rejoin → failed
         add(ReconnectEventFailed(event.code));
       }
     });
@@ -207,7 +207,7 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
     }
   }
 
-  /// CL-36: On SignalR reconnected → call RoomRepository.joinRoom to rejoin.
+  /// : On SignalR reconnected → call RoomRepository.joinRoom to rejoin.
   Future<void> _onAttemptRejoin(
     ReconnectEventAttemptRejoin event,
     Emitter<ReconnectState> emit,
@@ -282,7 +282,7 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
     }
   }
 
-  /// CL-37: On room:joined after reconnect → success.
+  /// : On room:joined after reconnect → success.
   void _onSucceeded(
     ReconnectEventSucceeded event,
     Emitter<ReconnectState> emit,
@@ -292,7 +292,7 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
     emit(const ReconnectStateIdle());
   }
 
-  /// CL-38/CL-39: On room:error or max retries → failed.
+  /// /: On room:error or max retries → failed.
   void _onFailed(ReconnectEventFailed event, Emitter<ReconnectState> emit) {
     _logger.w('[reconnect.failed] Reconnect failed: ${event.reason}');
     emit(ReconnectStateFailed(event.reason));

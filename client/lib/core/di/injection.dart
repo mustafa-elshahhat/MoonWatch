@@ -1,4 +1,4 @@
-﻿import 'package:get_it/get_it.dart';
+import 'package:get_it/get_it.dart';
 import '../constants/app_constants.dart';
 import '../network/signalr_client.dart';
 import '../network/http_client.dart';
@@ -15,6 +15,7 @@ import '../../features/iptv/service/iptv_api_service.dart';
 import '../../features/iptv/repository/iptv_repository.dart';
 import '../../features/iptv/bloc/iptv_bloc.dart';
 import '../../features/iptv/service/iptv_navigation_memory.dart';
+import '../../features/room/bloc/room_list_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -49,6 +50,9 @@ void configureDependencies() {
       roomRepository: getIt<RoomRepository>(),
       signalRClient: getIt<SignalRClient>(),
     ),
+  );
+  getIt.registerFactory<RoomListBloc>(
+    () => RoomListBloc(repository: getIt<RoomRepository>()),
   );
 
   getIt.registerFactory<PlayerBloc>(

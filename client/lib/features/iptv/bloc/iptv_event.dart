@@ -1,4 +1,4 @@
-﻿import 'package:equatable/equatable.dart';
+import 'package:equatable/equatable.dart';
 import '../../iptv/models/iptv_category.dart';
 
 sealed class IptvEvent extends Equatable {

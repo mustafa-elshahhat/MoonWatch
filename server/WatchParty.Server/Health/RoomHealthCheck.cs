@@ -5,7 +5,7 @@ namespace WatchParty.Server.Health;
 
 /// <summary>
 /// Custom health check that reports active room count.
-/// Returns {"status":"healthy","activeRooms":N} per SV-53.
+/// Returns {"status":"healthy","activeRooms":N} per .
 /// </summary>
 public class RoomHealthCheck : IHealthCheck
 {

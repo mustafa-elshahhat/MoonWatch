@@ -35,12 +35,12 @@ class PlayerStateOverlay extends StatelessWidget {
   }
 
   Widget _buildContent() => switch (type) {
-        PlayerOverlayType.loading => _loading(),
-        PlayerOverlayType.buffering => _buffering(),
-        PlayerOverlayType.error => _error(),
-        PlayerOverlayType.ended => _ended(),
-        PlayerOverlayType.idle => _idle(),
-      };
+    PlayerOverlayType.loading => _loading(),
+    PlayerOverlayType.buffering => _buffering(),
+    PlayerOverlayType.error => _error(),
+    PlayerOverlayType.ended => _ended(),
+    PlayerOverlayType.idle => _idle(),
+  };
 
   Widget _loading() => const _SpinnerOverlay(message: 'Loading stream...');
   Widget _buffering() =>
@@ -101,36 +101,35 @@ class PlayerStateOverlay extends StatelessWidget {
   }
 
   Widget _ended() => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.08),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
-            ),
-            child:
-                const Icon(Icons.replay_rounded, color: Colors.white, size: 28),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            'Playback ended',
-            style: AppTypography.body.copyWith(
-              color: Colors.white.withValues(alpha: 0.8),
-            ),
-          ),
-          if (onBack != null) ...[
-            const SizedBox(height: AppSpacing.xl),
-            _PlayerActionBtn(
-              label: 'Back to Browse',
-              icon: Icons.arrow_back_rounded,
-              onTap: onBack!,
-            ),
-          ],
-        ],
-      );
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withValues(alpha: 0.08),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+        ),
+        child: const Icon(Icons.replay_rounded, color: Colors.white, size: 28),
+      ),
+      const SizedBox(height: AppSpacing.md),
+      Text(
+        'Playback ended',
+        style: AppTypography.body.copyWith(
+          color: Colors.white.withValues(alpha: 0.8),
+        ),
+      ),
+      if (onBack != null) ...[
+        const SizedBox(height: AppSpacing.xl),
+        _PlayerActionBtn(
+          label: 'Back to Browse',
+          icon: Icons.arrow_back_rounded,
+          onTap: onBack!,
+        ),
+      ],
+    ],
+  );
 
   Widget _idle() {
     if (uiContext.isRoomMode) {
@@ -216,34 +215,34 @@ class _SpinnerOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: semi ? 0.05 : 0.08),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-            ),
-            child: const Padding(
-              padding: EdgeInsets.all(14),
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppColors.accentPrimary,
-                strokeCap: StrokeCap.round,
-              ),
-            ),
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withValues(alpha: semi ? 0.05 : 0.08),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        ),
+        child: const Padding(
+          padding: EdgeInsets.all(14),
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: AppColors.accentPrimary,
+            strokeCap: StrokeCap.round,
           ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            message,
-            style: AppTypography.bodySmall.copyWith(
-              color: Colors.white.withValues(alpha: 0.65),
-            ),
-          ),
-        ],
-      );
+        ),
+      ),
+      const SizedBox(height: AppSpacing.md),
+      Text(
+        message,
+        style: AppTypography.bodySmall.copyWith(
+          color: Colors.white.withValues(alpha: 0.65),
+        ),
+      ),
+    ],
+  );
 }
 
 class _PlayerActionBtn extends StatefulWidget {
@@ -263,51 +262,49 @@ class _PlayerActionBtnState extends State<_PlayerActionBtn> {
   bool _hovered = false;
   @override
   Widget build(BuildContext context) => MouseRegion(
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            decoration: BoxDecoration(
-              color: _hovered
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: _hovered ? 0.0 : 0.25),
-              ),
-              boxShadow: _hovered
-                  ? const [
-                      BoxShadow(
-                        color: Colors.black38,
-                        blurRadius: 16,
-                        offset: Offset(0, 6),
-                      ),
-                    ]
-                  : [],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  widget.icon,
-                  size: 16,
-                  color: _hovered ? AppColors.background : Colors.white,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  widget.label,
-                  style: AppTypography.buttonSmall.copyWith(
-                    color: _hovered ? AppColors.background : Colors.white,
-                  ),
-                ),
-              ],
-            ),
+    onEnter: (_) => setState(() => _hovered = true),
+    onExit: (_) => setState(() => _hovered = false),
+    child: GestureDetector(
+      onTap: widget.onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: _hovered ? Colors.white : Colors.white.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: _hovered ? 0.0 : 0.25),
           ),
+          boxShadow: _hovered
+              ? const [
+                  BoxShadow(
+                    color: Colors.black38,
+                    blurRadius: 16,
+                    offset: Offset(0, 6),
+                  ),
+                ]
+              : [],
         ),
-      );
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              widget.icon,
+              size: 16,
+              color: _hovered ? AppColors.background : Colors.white,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              widget.label,
+              style: AppTypography.buttonSmall.copyWith(
+                color: _hovered ? AppColors.background : Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 /// Overlay types for state-dependent display.

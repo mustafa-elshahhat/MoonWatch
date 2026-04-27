@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 namespace WatchParty.Tests.Integration;
 
 /// <summary>
-/// Integration test for full SignalR session per SV-37.
+/// Integration test for full SignalR session per .
 /// Tests host join → guest join → SetContent → Play → Pause lifecycle.
 /// </summary>
 public class SignalRSessionTests : IClassFixture<WebApplicationFactory<Program>>
