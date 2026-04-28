@@ -553,27 +553,33 @@ public class RoomService : IRoomService
             if (!room.IsBuffering)
             {
                 room.WasPlayingBeforeBuffering = room.HostIsPlaying;
+                room.BufferingEpisodeId = episodeId;
+                
+                // Authoritative position update when buffering starts
+                var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                if (room.HostIsPlaying && room.HostPositionUpdatedAtMs > 0)
+                {
+                    long elapsed = now - room.HostPositionUpdatedAtMs;
+                    room.HostPositionMs += (long)(elapsed * room.PlaybackRate);
+                }
+                room.HostPositionUpdatedAtMs = now;
             }
 
             participant.BufferingState = BufferingState.Stalled;
             room.LastActivityAt = DateTimeOffset.UtcNow;
 
-            
             if (role == "host")
             {
-                // Capture exact position from host and set it as authoritative
-                room.HostPositionMs = positionMs;
-                room.HostPositionUpdatedAtMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 room.HostIsPlaying = false; 
             }
 
             var peer = role == "host" ? room.Guest : room.Host;
             var peerConnectionId = peer?.ConnectionId;
 
-            _logger.LogInformation("Buffering stall received {Event} {RoomId} {ConnectionId} {Role} {PositionMs}",
-                "buffering.stall", room.RoomCode, connectionId, role, positionMs);
+            _logger.LogInformation("Buffering stall received {Event} {RoomId} {ConnectionId} {Role} {PositionMs} {EpisodeId}",
+                "buffering.stall", room.RoomCode, connectionId, role, room.HostPositionMs, episodeId);
 
-            return new BufferingStallResult(room.RoomCode, role, peerConnectionId, positionMs);
+            return new BufferingStallResult(room.RoomCode, role, peerConnectionId, room.HostPositionMs);
         }
         finally
         {
@@ -592,9 +598,10 @@ public class RoomService : IRoomService
             var (participant, role) = FindParticipant(room, connectionId);
 
             
-            if (participant.BufferingState == BufferingState.Ready)
+            if (participant.BufferingState == BufferingState.Ready || episodeId != room.BufferingEpisodeId)
             {
-                _logger.LogDebug("Out-of-sequence buffering ready ignored {RoomId} {Role}", room.RoomCode, role);
+                _logger.LogDebug("Stale/Duplicate buffering ready ignored {RoomId} {Role} {EpisodeId} (Room has {BufferingEpisodeId})", 
+                    room.RoomCode, role, episodeId, room.BufferingEpisodeId);
                 return new BufferingReadyResult(room.RoomCode, role, GateOpened: false, ResumePositionMs: 0, IsPlaying: false);
             }
 

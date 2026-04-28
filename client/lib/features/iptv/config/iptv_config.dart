@@ -45,11 +45,14 @@ class IptvConfig {
     final fileName =
         (extension != null && extension.isNotEmpty) ? '$streamId.$extension' : streamId;
 
-    return uri
-        .replace(
-          path: '${uri.path}/$username/$password/$fileName'.replaceAll('//', '/'),
-        )
-        .toString();
+    return uri.replace(
+      pathSegments: [
+        ...uri.pathSegments,
+        username,
+        password,
+        fileName,
+      ],
+    ).toString();
   }
 
   Uri get vodCategoriesUrl => _buildApiUri({'action': 'get_vod_categories'});
@@ -68,12 +71,15 @@ class IptvConfig {
         ? '$streamId.$containerExtension'
         : streamId;
 
-    return uri
-        .replace(
-          path: '${uri.path}/movie/$username/$password/$fileName'
-              .replaceAll('//', '/'),
-        )
-        .toString();
+    return uri.replace(
+      pathSegments: [
+        ...uri.pathSegments,
+        'movie',
+        username,
+        password,
+        fileName,
+      ],
+    ).toString();
   }
 
   Uri get seriesCategoriesUrl =>
@@ -98,11 +104,14 @@ class IptvConfig {
         ? '$streamId.$containerExtension'
         : streamId;
 
-    return uri
-        .replace(
-          path: '${uri.path}/series/$username/$password/$fileName'
-              .replaceAll('//', '/'),
-        )
-        .toString();
+    return uri.replace(
+      pathSegments: [
+        ...uri.pathSegments,
+        'series',
+        username,
+        password,
+        fileName,
+      ],
+    ).toString();
   }
 }

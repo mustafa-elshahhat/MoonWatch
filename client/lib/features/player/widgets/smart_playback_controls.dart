@@ -181,11 +181,39 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
   void _handleKey(KeyEvent event) {
     if (event is! KeyDownEvent) return;
     showControls();
-    if (!widget.canInteract || !ctx.canControlPlayback) return;
+
     final safe = _safeDuration;
+
+    // 1. Local-only controls (Available to everyone)
+    switch (event.logicalKey) {
+      case LogicalKeyboardKey.keyM:
+        _toggleMute();
+        return;
+      case LogicalKeyboardKey.keyF:
+        _toggleFullscreen();
+        return;
+      case LogicalKeyboardKey.escape:
+        if (_fullscreenService.isFullscreen) {
+          _fullscreenService.exitFullscreen();
+          if (mounted) setState(() {});
+        }
+        return;
+      case LogicalKeyboardKey.arrowUp:
+        _updateVolume((_volume + 0.1).clamp(0.0, 1.0));
+        return;
+      case LogicalKeyboardKey.arrowDown:
+        _updateVolume((_volume - 0.1).clamp(0.0, 1.0));
+        return;
+    }
+
+    // 2. Shared playback controls (Host/Solo only)
+    if (!widget.canInteract || !ctx.canControlPlayback) return;
+
     switch (event.logicalKey) {
       case LogicalKeyboardKey.space:
       case LogicalKeyboardKey.keyK:
+      case LogicalKeyboardKey.enter:
+      case LogicalKeyboardKey.numpadEnter:
         widget.isPlaying
             ? widget.onPause?.call(_currentPosition)
             : widget.onPlay?.call(_currentPosition);
@@ -195,24 +223,37 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
       case LogicalKeyboardKey.arrowRight:
       case LogicalKeyboardKey.keyL:
         if (ctx.canSkip) _seekRelative(10, safe);
-      case LogicalKeyboardKey.keyM:
-        _toggleMute();
-      case LogicalKeyboardKey.keyF:
-        _toggleFullscreen();
       case LogicalKeyboardKey.keyN:
         if (ctx.canShowNextEpisode) widget.onNextEpisode?.call();
       case LogicalKeyboardKey.bracketLeft:
-        if (_isVOD && ctx.canControlPlayback) _adjustSpeed(-0.25);
+      case LogicalKeyboardKey.comma:
+        if (_isVodContent) _adjustSpeed(-0.25);
       case LogicalKeyboardKey.bracketRight:
-        if (_isVOD && ctx.canControlPlayback) _adjustSpeed(0.25);
+      case LogicalKeyboardKey.period:
+        if (_isVodContent) _adjustSpeed(0.25);
+      case LogicalKeyboardKey.digit1:
+      case LogicalKeyboardKey.numpad1:
+        if (_isVodContent) _setSpeed(1.0);
+      case LogicalKeyboardKey.digit2:
+      case LogicalKeyboardKey.numpad2:
+        if (_isVodContent) _setSpeed(2.0);
       default:
         break;
     }
   }
 
+  void _setSpeed(double speed) {
+    if (widget.onSpeedChanged != null) {
+      widget.onSpeedChanged!(speed);
+    } else {
+      _pc.setPlaybackSpeed(speed);
+    }
+    showControls();
+  }
+
   void _adjustSpeed(double delta) {
     final current = _pc.playbackSpeed;
-    final next = (current + delta).clamp(0.25, 2.0);
+    final next = (current + delta).clamp(0.5, 2.0);
     if (next != current) {
       if (widget.onSpeedChanged != null) {
         widget.onSpeedChanged!(next);
@@ -227,6 +268,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
       ? _currentDuration
       : const Duration(hours: 4);
 
+  bool get _isVodContent => !ctx.isLive && (ctx.isMovie || ctx.isEpisode);
   bool get _isVOD => ctx.showSeekBar && !ctx.isLive;
 
   @override
@@ -264,7 +306,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,
             children: [
-              if (_isVOD) ...[
+              if (_isVodContent) ...[
                 Text(_fmt(_currentPosition), style: _timeStyle),
                 Text(' / ${_fmt(_currentDuration)}', style: _durationStyle),
               ],
@@ -301,7 +343,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
                 tooltip: 'Fullscreen',
                 onTap: _toggleFullscreen,
               ),
-              if (_isVOD)
+              if (_isVodContent)
                 _SpeedBtn(
                   speed: _pc.playbackSpeed,
                   onChanged: (s) {
@@ -409,7 +451,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
                     tooltip: 'Fullscreen (F)',
                     onTap: _toggleFullscreen,
                   ),
-                  if (_isVOD)
+                  if (_isVodContent)
                     _SpeedBtn(
                       speed: _pc.playbackSpeed,
                       onChanged: (s) {
@@ -574,7 +616,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (_isVOD) ...[
+        if (_isVodContent) ...[
           Text(_fmt(_currentPosition), style: _timeStyle),
           Text('  /  ${_fmt(_currentDuration)}', style: _durationStyle),
         ],

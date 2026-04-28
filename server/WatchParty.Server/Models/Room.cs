@@ -43,6 +43,7 @@ public class Room
 
     
     public bool WasPlayingBeforeBuffering { get; set; }
+    public int BufferingEpisodeId { get; set; }
 
     
     public bool IsBuffering => (Host?.BufferingState == BufferingState.Stalled) || (Guest?.BufferingState == BufferingState.Stalled);

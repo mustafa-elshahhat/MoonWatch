@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/network/signalr_client.dart';
 import '../../core/protocol/room_events.dart';
-import '../room/bloc/room_event.dart';
 import '../room/repository/room_repository.dart';
 import '../room/domain/room_repository_event.dart';
 

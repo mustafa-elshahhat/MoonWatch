@@ -5,7 +5,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:watch_party/core/network/signalr_client.dart';
 import 'package:watch_party/core/protocol/room_events.dart';
 import 'package:watch_party/features/reconnect/reconnect_bloc.dart';
-import 'package:watch_party/features/room/bloc/room_event.dart';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 
 import 'package:watch_party/features/room/domain/room_repository_event.dart';
@@ -232,10 +231,10 @@ void main() {
       },
       act: (bloc) async {
         connectionStateController.add(SignalRConnectionState.reconnecting);
-        await Future.delayed(const Duration(milliseconds: 30));
+        await Future.delayed(const Duration(milliseconds: 100));
         connectionStateController.add(SignalRConnectionState.connected);
       },
-      wait: const Duration(milliseconds: 100),
+      wait: const Duration(milliseconds: 200),
       verify: (_) {
         verify(
           () => mockSignalRClient.invoke(
@@ -255,10 +254,10 @@ void main() {
       },
       act: (bloc) async {
         connectionStateController.add(SignalRConnectionState.reconnecting);
-        await Future.delayed(const Duration(milliseconds: 30));
+        await Future.delayed(const Duration(milliseconds: 100));
         connectionStateController.add(SignalRConnectionState.disconnected);
       },
-      wait: const Duration(milliseconds: 100),
+      wait: const Duration(milliseconds: 200),
       expect: () => [
         const ReconnectStateAttempting(attemptNumber: 1),
         const ReconnectStateFailed('max_retries'),

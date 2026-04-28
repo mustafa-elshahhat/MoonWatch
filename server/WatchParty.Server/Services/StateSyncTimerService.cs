@@ -102,7 +102,7 @@ public class StateSyncTimerService : IHostedService, IDisposable
             try
             {
                 
-                if (room.State == RoomState.Active && room.HostIsPlaying)
+                if (room.State == RoomState.Active && room.HostIsPlaying && !room.IsBuffering)
                 {
                     shouldEmit = true;
                     serverTimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();

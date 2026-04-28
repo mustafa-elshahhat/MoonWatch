@@ -8,7 +8,6 @@ import '../../../core/protocol/payloads.dart';
 import '../../../core/services/episode_nav_service.dart';
 import '../../../core/services/fullscreen_service.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_spacing.dart';
 import '../../iptv/repository/iptv_repository.dart';
 import '../../player/bloc/player_bloc.dart';
 import '../../player/bloc/player_event.dart';
@@ -192,83 +191,80 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
     return MouseRegion(
       onHover: (_) => _showOverlays(),
       child: BlocBuilder<PlayerBloc, PlayerState>(
-          builder: (context, state) {
-            PlayerOverlayType? overlayType;
-            String? errorMessage;
-            if (state is PlayerStateLoading) {
-              overlayType = PlayerOverlayType.loading;
-            } else if (state is PlayerStateBuffering) {
-              overlayType = PlayerOverlayType.buffering;
-            } else if (state is PlayerStateError) {
-              overlayType = PlayerOverlayType.error;
-              errorMessage = state.message;
-            } else if (state is PlayerStateEnded) {
-              overlayType = PlayerOverlayType.ended;
-            } else if (state is PlayerStateIdle && _streamUrl == null) {
-              overlayType = PlayerOverlayType.idle;
-            }
+        builder: (context, state) {
+          PlayerOverlayType? overlayType;
+          String? errorMessage;
+          if (state is PlayerStateLoading) {
+            overlayType = PlayerOverlayType.loading;
+          } else if (state is PlayerStateBuffering) {
+            overlayType = PlayerOverlayType.buffering;
+          } else if (state is PlayerStateError) {
+            overlayType = PlayerOverlayType.error;
+            errorMessage = state.message;
+          } else if (state is PlayerStateEnded) {
+            overlayType = PlayerOverlayType.ended;
+          } else if (state is PlayerStateIdle && _streamUrl == null) {
+            overlayType = PlayerOverlayType.idle;
+          }
 
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                _buildVideoView(_fitMode.boxFit),
-                PlayerGestureLayer(
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              _buildVideoView(_fitMode.boxFit),
+              PlayerGestureLayer(
+                uiContext: uiContext,
+                fitMode: _fitMode,
+                onFitModeChanged: (m) => setState(() => _fitMode = m),
+                onShowOverlays: _showOverlays,
+                brightness: _brightness,
+                onBrightnessChanged: (v) => setState(() => _brightness = v),
+                onSeek: (target) => _playerBloc?.add(PlayerEventSeek(target)),
+              ),
+              IgnorePointer(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 50),
+                  color: Colors.black.withValues(
+                    alpha: (1.0 - _brightness).clamp(0.0, 1.0),
+                  ),
+                ),
+              ),
+              if (overlayType != null)
+                PlayerStateOverlay(
+                  type: overlayType,
                   uiContext: uiContext,
-                  fitMode: _fitMode,
-                  onFitModeChanged: (m) => setState(() => _fitMode = m),
-                  onShowOverlays: _showOverlays,
-                  brightness: _brightness,
-                  onBrightnessChanged: (v) => setState(() => _brightness = v),
-                  onSeek: (target) =>
-                      _playerBloc?.add(PlayerEventSeek(target)),
+                  errorMessage: errorMessage,
+                  onRetry: _streamUrl != null
+                      ? () => context.read<PlayerBloc>().add(
+                            PlayerEventInitialize(_streamUrl!, source: 'retry'),
+                          )
+                      : null,
+                  onBack: () => Navigator.pop(context),
                 ),
-                IgnorePointer(
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 50),
-                    color: Colors.black.withValues(
-                      alpha: (1.0 - _brightness).clamp(0.0, 1.0),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: AnimatedOpacity(
+                  opacity: (!isFullscreen || _topBarVisible) ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 250),
+                  child: IgnorePointer(
+                    ignoring: isFullscreen && !_topBarVisible,
+                    child: PlayerTopBar(
+                      uiContext: uiContext,
+                      onBack: () => Navigator.pop(context),
                     ),
                   ),
                 ),
-                if (overlayType != null)
-                  PlayerStateOverlay(
-                    type: overlayType,
-                    uiContext: uiContext,
-                    errorMessage: errorMessage,
-                    onRetry: _streamUrl != null
-                        ? () => context.read<PlayerBloc>().add(
-                              PlayerEventInitialize(_streamUrl!,
-                                  source: 'retry'),
-                            )
-                        : null,
-                    onBack: () => Navigator.pop(context),
-                  ),
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: AnimatedOpacity(
-                    opacity: (!isFullscreen || _topBarVisible) ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 250),
-                    child: IgnorePointer(
-                      ignoring: isFullscreen && !_topBarVisible,
-                      child: PlayerTopBar(
-                        uiContext: uiContext,
-                        onBack: () => Navigator.pop(context),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: _buildSmartControls(context, state, uiContext),
-                ),
-              ],
-            );
-          },
-        ),
+              ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: _buildSmartControls(context, state, uiContext),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

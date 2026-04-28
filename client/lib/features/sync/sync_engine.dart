@@ -201,7 +201,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   int _clockOffsetMs = 0;
 
   bool _localStallSent = false;
-  bool _wasPlayingBeforeBuffering = false;
 
   bool _playerReady = false;
   String? _playerContentKey;
@@ -632,7 +631,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
 
     if (!_localStallSent) {
       _localStallSent = true;
-      _wasPlayingBeforeBuffering = _playerController.isPlaying;
       final positionMs = _playerController.currentPosition.inMilliseconds;
 
       if (_lastStallPositionMs != null &&
@@ -718,7 +716,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     }
 
     _currentEpisodeId = event.episodeId;
-    _wasPlayingBeforeBuffering = _playerController.isPlaying;
     await _playerController.pause();
     if (isClosed) return;
     _logger.i(
@@ -907,6 +904,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     bool shouldPlay = false;
     int serverTimestampMs = 0;
     int bestHostRttMs = 0;
+    double bestPlaybackRate = _playbackRate;
     bool hasIntent = false;
 
     for (final event in _deferredQueue) {
@@ -926,6 +924,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         serverTimestampMs = ts;
         targetPositionMs = event.positionMs;
         bestHostRttMs = event.hostRttMs;
+        bestPlaybackRate = event.playbackRate;
         shouldPlay = true;
         hasIntent = true;
       } else if (event is SyncEventPauseReceived) {
@@ -944,6 +943,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         bestSeqNo = seqNo > 0 ? seqNo : bestSeqNo;
         serverTimestampMs = ts;
         targetPositionMs = event.hostPositionMs;
+        bestPlaybackRate = event.playbackRate;
         shouldPlay = event.isPlaying;
         hasIntent = true;
       }
@@ -968,6 +968,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     final elapsedMs = (shouldPlay && serverTimestampMs > 0)
         ? (now - serverTimestampMs).clamp(0, 30000)
         : 0;
+    _playbackRate = bestPlaybackRate;
+    await _playerController.setPlaybackSpeed(_playbackRate);
+
     final adjustedPositionMs =
         targetPositionMs + (elapsedMs * _playbackRate).toInt() + (bestHostRttMs ~/ 2);
 

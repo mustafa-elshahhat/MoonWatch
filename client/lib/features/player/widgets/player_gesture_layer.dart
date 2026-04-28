@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../../core/player/player_controller.dart';
 import '../../../core/services/brightness_service.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../models/player_ui_context.dart';
 import '../models/video_fit_mode.dart';
@@ -39,7 +38,6 @@ class _PlayerGestureLayerState extends State<PlayerGestureLayer> {
   String? _feedbackText;
   IconData? _feedbackIcon;
   Timer? _feedbackTimer;
-  double _baseScale = 1.0;
 
   void _showFeedback(String text, IconData icon) {
     _feedbackTimer?.cancel();
@@ -134,7 +132,14 @@ class _PlayerGestureLayerState extends State<PlayerGestureLayer> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _bs.initialize();
+  }
+
+  @override
   void dispose() {
+    _bs.restore();
     _feedbackTimer?.cancel();
     super.dispose();
   }
@@ -145,24 +150,48 @@ class _PlayerGestureLayerState extends State<PlayerGestureLayer> {
       behavior: HitTestBehavior.translucent,
       onTap: widget.onShowOverlays,
       onDoubleTap: _toggleFitMode,
-      onVerticalDragUpdate: _onVerticalDrag,
-      onHorizontalDragStart: _onHorizontalDragStart,
-      onHorizontalDragUpdate: _onHorizontalDragUpdate,
-      onHorizontalDragEnd: _onHorizontalDragEnd,
-      onScaleStart: (_) {
-        _baseScale = 1.0;
+      onScaleStart: (details) {
         widget.onShowOverlays();
+        if (details.pointerCount == 1) {
+          _onHorizontalDragStart(DragStartDetails(
+            globalPosition: details.focalPoint,
+            localPosition: details.localFocalPoint,
+          ));
+        }
       },
       onScaleUpdate: (details) {
-        final scale = details.scale;
-        if (scale > 1.05 && widget.fitMode != VideoFitMode.cover) {
-          widget.onFitModeChanged(VideoFitMode.cover);
-          _showFeedback('Fill Screen', VideoFitMode.cover.icon);
-        } else if (scale < 0.95 && widget.fitMode != VideoFitMode.contain) {
-          widget.onFitModeChanged(VideoFitMode.contain);
-          _showFeedback('Fit to Screen', VideoFitMode.contain.icon);
-        }
         widget.onShowOverlays();
+        if (details.pointerCount == 1) {
+          // Handle Drag
+          if (details.focalPointDelta.dy.abs() > details.focalPointDelta.dx.abs() * 1.5) {
+            _onVerticalDrag(DragUpdateDetails(
+              delta: details.focalPointDelta,
+              globalPosition: details.focalPoint,
+              localPosition: details.localFocalPoint,
+            ));
+          } else {
+            _onHorizontalDragUpdate(DragUpdateDetails(
+              delta: details.focalPointDelta,
+              globalPosition: details.focalPoint,
+              localPosition: details.localFocalPoint,
+            ));
+          }
+        } else if (details.pointerCount >= 2) {
+          // Handle Pinch
+          final scale = details.scale;
+          if (scale > 1.1 && widget.fitMode != VideoFitMode.cover) {
+            widget.onFitModeChanged(VideoFitMode.cover);
+            _showFeedback('Fill Screen', VideoFitMode.cover.icon);
+          } else if (scale < 0.9 && widget.fitMode != VideoFitMode.contain) {
+            widget.onFitModeChanged(VideoFitMode.contain);
+            _showFeedback('Fit to Screen', VideoFitMode.contain.icon);
+          }
+        }
+      },
+      onScaleEnd: (details) {
+        _onHorizontalDragEnd(DragEndDetails(
+          velocity: details.velocity,
+        ));
       },
       child: Stack(
         children: [

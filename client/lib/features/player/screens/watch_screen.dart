@@ -408,45 +408,44 @@ class WatchScreenContentState extends State<WatchScreenContent> {
               ),
             ),
           ),
-            BlocBuilder<RoomBloc, RoomState>(
-              builder: (context, roomState) =>
-                  BlocBuilder<PlayerBloc, PlayerState>(
-                builder: (context, playerState) =>
-                    _buildStateOverlay(playerState, roomState),
-              ),
+          BlocBuilder<RoomBloc, RoomState>(
+            builder: (context, roomState) =>
+                BlocBuilder<PlayerBloc, PlayerState>(
+              builder: (context, playerState) =>
+                  _buildStateOverlay(playerState, roomState),
             ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: AnimatedOpacity(
-                opacity: (!isFullscreen || _topBarVisible) ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 250),
-                child: IgnorePointer(
-                  ignoring: isFullscreen && !_topBarVisible,
-                  child: PlayerTopBar(
-                    uiContext: uiContext,
-                    roomCode: roomCode,
-                    peerStatus: peerStatus,
-                    onBack: () => _confirmLeave(context),
-                    onBrowseContent: uiContext.canChangeContent
-                        ? () => _browseContentInRoom(context)
-                        : null,
-                  ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: AnimatedOpacity(
+              opacity: (!isFullscreen || _topBarVisible) ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 250),
+              child: IgnorePointer(
+                ignoring: isFullscreen && !_topBarVisible,
+                child: PlayerTopBar(
+                  uiContext: uiContext,
+                  roomCode: roomCode,
+                  peerStatus: peerStatus,
+                  onBack: () => _confirmLeave(context),
+                  onBrowseContent: uiContext.canChangeContent
+                      ? () => _browseContentInRoom(context)
+                      : null,
                 ),
               ),
             ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: BlocBuilder<PlayerBloc, PlayerState>(
-                builder: (context, playerState) =>
-                    _buildSmartControls(context, playerState, uiContext),
-              ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BlocBuilder<PlayerBloc, PlayerState>(
+              builder: (context, playerState) =>
+                  _buildSmartControls(context, playerState, uiContext),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -7,6 +7,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:watch_party/core/network/signalr_client.dart';
 import 'package:watch_party/core/player/player_controller.dart' as pc;
 import 'package:watch_party/core/protocol/payloads.dart';
+import 'package:watch_party/core/services/brightness_service.dart';
 import 'package:watch_party/features/iptv/repository/iptv_repository.dart';
 import 'package:watch_party/features/player/bloc/player_bloc.dart';
 import 'package:watch_party/features/player/bloc/player_event.dart';
@@ -66,6 +67,12 @@ class _FakePlayerController extends Fake implements pc.PlayerController {
   Stream<double> get playbackSpeedStream => const Stream<double>.empty();
 
   @override
+  double get volume => 1.0;
+
+  @override
+  Stream<double> get volumeStream => const Stream<double>.empty();
+
+  @override
   Widget? get nativeView => null;
 
   @override
@@ -108,6 +115,15 @@ class MockSignalRClient extends Mock implements SignalRClient {}
 class MockRoomRepository extends Mock implements RoomRepository {}
 
 class MockIptvRepository extends Mock implements IptvRepository {}
+
+class MockBrightnessService extends Mock implements BrightnessService {
+  @override
+  Future<void> initialize() async {}
+  @override
+  Future<void> setBrightness(double value) async {}
+  @override
+  Future<void> restore() async {}
+}
 
 class MockRoomBloc extends MockBloc<RoomEvent, RoomState> implements RoomBloc {}
 
@@ -183,6 +199,7 @@ void main() {
     getIt.registerSingleton<RoomRepository>(roomRepository);
     getIt.registerSingleton<LatencyEstimator>(_FakeLatencyEstimator());
     getIt.registerSingleton<IptvRepository>(iptvRepository);
+    getIt.registerSingleton<BrightnessService>(MockBrightnessService());
     getIt.registerFactory<PlayerBloc>(() => playerBloc);
     getIt.registerFactory<SyncBloc>(() => syncBloc);
   });
