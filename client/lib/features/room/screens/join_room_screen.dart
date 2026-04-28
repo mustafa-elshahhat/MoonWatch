@@ -329,17 +329,32 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
                     spacing: AppSpacing.sm,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.refresh_rounded,
-                      size: 18,
-                      color: AppColors.accentPrimary,
-                    ),
-                    onPressed: () => context
-                        .read<RoomListBloc>()
-                        .add(const RoomListFetch()),
-                    tooltip: 'Refresh',
-                  ),
+                      TextButton.icon(
+                        onPressed: () => Navigator.pushNamed(
+                          context,
+                          '/create',
+                        ),
+                        icon: const Icon(Icons.add_rounded, size: 18),
+                        label: const Text('Create Room'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.accentPrimary,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: AppSpacing.sm,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.refresh_rounded,
+                          size: 18,
+                          color: AppColors.accentPrimary,
+                        ),
+                        onPressed: () => context
+                            .read<RoomListBloc>()
+                            .add(const RoomListFetch()),
+                        tooltip: 'Refresh',
+                      ),
                     ],
                   ),
                 ],
@@ -404,6 +419,22 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
             runSpacing: AppSpacing.sm,
             alignment: WrapAlignment.center,
             children: [
+              FilledButton.icon(
+                onPressed: () => Navigator.pushNamed(context, '/create'),
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: const Text('Create Room'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.accentPrimary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                  ),
+                ),
+              ),
               OutlinedButton.icon(
                 onPressed: () =>
                     context.read<RoomListBloc>().add(const RoomListFetch()),
