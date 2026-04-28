@@ -41,7 +41,10 @@ void main() {
 
   Widget buildTestWidget() {
     return MaterialApp(
-      routes: {'/watch': (_) => const Scaffold(body: Text('WatchScreen'))},
+      routes: {
+        '/watch': (_) => const Scaffold(body: Text('WatchScreen')),
+        '/create': (_) => const Scaffold(body: Text('CreateRoomScreen')),
+      },
       home: MultiBlocProvider(
         providers: [
           BlocProvider<RoomBloc>.value(value: mockRoomBloc),
@@ -105,6 +108,52 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('No active rooms'), findsOneWidget);
+    expect(
+      find.text('No active rooms. Start one or join with a code.'),
+      findsOneWidget,
+    );
+    expect(find.text('Create Room'), findsOneWidget);
+    expect(find.text('Refresh'), findsOneWidget);
+  });
+
+  testWidgets('does not poll rooms while inactive, then polls when active', (
+    tester,
+  ) async {
+    when(() => mockRoomRepository.listRooms()).thenAnswer((_) async => []);
+    await tester.binding.setSurfaceSize(const Size(1200, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    Widget host({required bool active}) {
+      return MaterialApp(
+        routes: {
+          '/watch': (_) => const Scaffold(body: Text('WatchScreen')),
+          '/create': (_) => const Scaffold(body: Text('CreateRoomScreen')),
+        },
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<RoomBloc>.value(value: mockRoomBloc),
+            BlocProvider<RoomListBloc>(
+              create: (_) => RoomListBloc(repository: mockRoomRepository),
+            ),
+          ],
+          child: JoinRoomScreen(isActive: active),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(host(active: false));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 16));
+
+    verifyNever(() => mockRoomRepository.listRooms());
+
+    await tester.pumpWidget(host(active: true));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 16));
+    await tester.pump();
+
+    verify(() => mockRoomRepository.listRooms())
+        .called(greaterThanOrEqualTo(2));
   });
 
   testWidgets('shows retry on room list failure and can recover', (

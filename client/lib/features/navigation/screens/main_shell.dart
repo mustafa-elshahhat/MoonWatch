@@ -61,7 +61,7 @@ class MainShellState extends State<MainShell> {
               )
             : const SizedBox.shrink(),
         _visitedIndices.contains(2)
-            ? const JoinRoomScreen()
+            ? JoinRoomScreen(isActive: index == 2)
             : const SizedBox.shrink(),
       ],
     );
@@ -124,6 +124,29 @@ class MainShellState extends State<MainShell> {
     );
   }
 
+  Widget _buildMobileCreateAction() {
+    return Semantics(
+      button: true,
+      label: 'Create Room',
+      child: FloatingActionButton.extended(
+        heroTag: 'main-shell-create-room',
+        tooltip: 'Create Room',
+        onPressed: () => Navigator.pushNamed(context, '/create'),
+        backgroundColor: AppColors.accentPrimary,
+        foregroundColor: Colors.white,
+        elevation: 10,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+        ),
+        icon: const Icon(Icons.add_rounded, size: 22),
+        label: Text(
+          'Create',
+          style: AppTypography.buttonSmall.copyWith(color: Colors.white),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSideNavigation() {
     return Container(
       width: 88,
@@ -144,6 +167,7 @@ class MainShellState extends State<MainShell> {
           _buildSideNavItem(0, Icons.home_rounded, 'Home'),
           _buildSideNavItem(1, Icons.explore_rounded, 'Browse'),
           _buildSideNavItem(2, Icons.meeting_room_rounded, 'Rooms'),
+          const SizedBox(height: AppSpacing.md),
           const Spacer(),
           IconButton(
             onPressed: () {
@@ -169,6 +193,40 @@ class MainShellState extends State<MainShell> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSideCreateButton() {
+    return Tooltip(
+      message: 'Create Room',
+      preferBelow: false,
+      child: InkWell(
+        onTap: () => Navigator.pushNamed(context, '/create'),
+        hoverColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        child: Container(
+          width: 48,
+          height: 48,
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.accentPrimaryHover, AppColors.accentPrimary],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.accentPrimary.withValues(alpha: 0.35),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: const Icon(Icons.add_rounded, color: Colors.white, size: 22),
+        ),
       ),
     );
   }

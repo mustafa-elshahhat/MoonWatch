@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/logging/app_logger.dart';
@@ -22,7 +21,6 @@ class _CreateRoomScreenState extends State<CreateRoomScreen>
   late final String _correlationId;
   late final DateTime _enterTime;
   bool _creating = false;
-  Timer? _timeoutTimer;
 
   late final AnimationController _entryCtrl;
   late final AnimationController _pulseCtrl;
@@ -58,19 +56,6 @@ class _CreateRoomScreenState extends State<CreateRoomScreen>
 
   void _startCreation() {
     setState(() => _creating = true);
-    _timeoutTimer?.cancel();
-    _timeoutTimer = Timer(const Duration(seconds: 15), () {
-      if (mounted && _creating) {
-        setState(() => _creating = false);
-        context.read<RoomBloc>().add(
-              const RoomEventError(
-                code: 'timeout',
-                message:
-                    'Room creation timed out. The server might be waking up.',
-              ),
-            );
-      }
-    });
     _logger.i('[$_correlationId] Dispatching RoomEventCreateRoom');
     context.read<RoomBloc>().add(
           RoomEventCreateRoom(correlationId: _correlationId),
@@ -79,7 +64,6 @@ class _CreateRoomScreenState extends State<CreateRoomScreen>
 
   @override
   void dispose() {
-    _timeoutTimer?.cancel();
     _entryCtrl.dispose();
     _pulseCtrl.dispose();
 
@@ -108,7 +92,6 @@ class _CreateRoomScreenState extends State<CreateRoomScreen>
           Navigator.pushReplacementNamed(context, '/watch');
         } else if (state is RoomStateError) {
           _logger.w('[$_correlationId] Room creation failed: ${state.message}');
-          _timeoutTimer?.cancel();
           setState(() => _creating = false);
         }
       },

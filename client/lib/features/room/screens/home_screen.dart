@@ -222,13 +222,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           children: [
             Expanded(
               child: _RoomCard(
-                type: _RoomCardType.create,
-                onTap: () => Navigator.pushNamed(context, '/create'),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.lg),
-            Expanded(
-              child: _RoomCard(
                 type: _RoomCardType.join,
                 onTap: () {
                   final shell =
@@ -287,11 +280,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               const SectionEyebrow(
                 'A—02  -  Watch Together',
                 color: AppColors.textMuted,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              _RoomCard(
-                type: _RoomCardType.create,
-                onTap: () => Navigator.pushNamed(context, '/create'),
               ),
               const SizedBox(height: AppSpacing.md),
               _RoomCard(

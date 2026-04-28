@@ -9,6 +9,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/app_components.dart';
 import '../bloc/room_bloc.dart';
 import '../bloc/room_event.dart';
+import '../bloc/room_list_bloc.dart';
 import '../bloc/room_state.dart';
 import '../../reconnect/reconnect_bloc.dart';
 import '../../iptv/service/iptv_navigation_memory.dart';
@@ -29,6 +30,7 @@ class _WaitingScreenState extends State<WaitingScreen>
   late final Animation<double> _fadeAnim;
   late final Animation<double> _orbitAnim;
   bool _copied = false;
+  bool _isLeaving = false;
 
   @override
   void initState() {
@@ -62,112 +64,145 @@ class _WaitingScreenState extends State<WaitingScreen>
     super.dispose();
   }
 
+  Future<void> _confirmLeave() async {
+    if (_isLeaving) return;
+
+    final roomState = context.read<RoomBloc>().state;
+    final isHost =
+        roomState is RoomStateWaiting ? roomState.role == 'host' : true;
+
+    final confirmed = await AppConfirmDialog.show(
+      context,
+      title: 'Leave Room?',
+      message: isHost
+          ? 'Leaving will close this room for everyone.'
+          : 'Leaving will disconnect you from this room.',
+      confirmLabel: 'Leave',
+      cancelLabel: 'Stay',
+      confirmColor: AppColors.error,
+      icon: Icons.exit_to_app_rounded,
+    );
+
+    if (confirmed != true || !mounted) return;
+    if (_isLeaving) return;
+    _isLeaving = true;
+    context.read<RoomBloc>().add(const RoomEventLeaveRoom());
+  }
+
   @override
   Widget build(BuildContext context) {
     final sw = MediaQuery.of(context).size.width;
     final isDesktop = sw > AppBreakpoint.desktop;
 
-    return BlocListener<RoomBloc, RoomState>(
-      listener: (context, state) {
-        if (state is RoomStateJoined || state is RoomStateActive) {
-          final pending = ModalRoute.of(context)?.settings.arguments
-              as IptvContentDescriptor?;
-          if (pending != null) {
-            context.read<RoomBloc>().add(RoomEventSetContent(pending));
-          }
-          Navigator.pushReplacementNamed(context, '/watch');
-        } else if (state is RoomStateClosed || state is RoomStateError) {
-          context.read<ReconnectBloc>().add(const ReconnectEventReset());
-          GetIt.I<IptvNavigationMemory>().clear();
-          Navigator.popUntil(context, (route) => route.isFirst);
-        }
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _confirmLeave();
       },
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            _buildAtmosphere(sw),
-            SafeArea(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xxl,
-                      vertical: AppSpacing.md,
-                    ),
-                    child: Row(
-                      children: [
-                        const AppLogo(size: 18),
-                        const Spacer(),
-                        TextButton.icon(
-                          onPressed: () => context.read<RoomBloc>().add(
-                                const RoomEventLeaveRoom(),
-                              ),
-                          icon: const Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            size: 12,
-                            color: AppColors.textMuted,
-                          ),
-                          label: Text(
-                            'LEAVE',
-                            style: AppTypography.mono.copyWith(
-                              fontSize: 10,
-                              letterSpacing: 1.5,
+      child: BlocListener<RoomBloc, RoomState>(
+        listener: (context, state) {
+          if (state is RoomStateJoined || state is RoomStateActive) {
+            final pending = ModalRoute.of(context)?.settings.arguments
+                as IptvContentDescriptor?;
+            if (pending != null) {
+              context.read<RoomBloc>().add(RoomEventSetContent(pending));
+            }
+            Navigator.pushReplacementNamed(context, '/watch');
+          } else if (state is RoomStateClosed || state is RoomStateError) {
+            _isLeaving = false;
+            context.read<ReconnectBloc>().add(const ReconnectEventReset());
+            context.read<RoomListBloc>().add(
+                  const RoomListFetch(silent: true),
+                );
+            GetIt.I<IptvNavigationMemory>().clear();
+            Navigator.popUntil(context, (route) => route.isFirst);
+          }
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              _buildAtmosphere(sw),
+              SafeArea(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.xxl,
+                        vertical: AppSpacing.md,
+                      ),
+                      child: Row(
+                        children: [
+                          const AppLogo(size: 18),
+                          const Spacer(),
+                          TextButton.icon(
+                            onPressed: _confirmLeave,
+                            icon: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 12,
                               color: AppColors.textMuted,
                             ),
+                            label: Text(
+                              'LEAVE',
+                              style: AppTypography.mono.copyWith(
+                                fontSize: 10,
+                                letterSpacing: 1.5,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: FadeTransition(
-                      opacity: _fadeAnim,
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxWidth: isDesktop ? 460 : sw * 0.9,
-                          ),
-                          child: BlocBuilder<RoomBloc, RoomState>(
-                            builder: (context, state) {
-                              final roomCode = state is RoomStateWaiting
-                                  ? state.roomCode
-                                  : '------';
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _buildCinematicWaiting(),
-                                  const SizedBox(height: AppSpacing.huge),
-                                  Text(
-                                    'Almost showtime.',
-                                    style: AppTypography.display.copyWith(
-                                      fontSize: 42,
-                                      letterSpacing: -1.2,
+                    Expanded(
+                      child: FadeTransition(
+                        opacity: _fadeAnim,
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: isDesktop ? 460 : sw * 0.9,
+                            ),
+                            child: BlocBuilder<RoomBloc, RoomState>(
+                              builder: (context, state) {
+                                final roomCode = state is RoomStateWaiting
+                                    ? state.roomCode
+                                    : '------';
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _buildCinematicWaiting(),
+                                    const SizedBox(height: AppSpacing.huge),
+                                    Text(
+                                      'Almost showtime.',
+                                      style: AppTypography.display.copyWith(
+                                        fontSize: 42,
+                                        letterSpacing: -1.2,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: AppSpacing.md),
-                                  Text(
-                                    'Share this code with your guests. Playback starts soon.',
-                                    style: AppTypography.bodySmall.copyWith(
-                                      color: AppColors.textSecondary,
+                                    const SizedBox(height: AppSpacing.md),
+                                    Text(
+                                      'Share this code with your guests. Playback starts soon.',
+                                      style: AppTypography.bodySmall.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: AppSpacing.xxl),
-                                  _buildRoomCodeCard(roomCode),
-                                ],
-                              );
-                            },
+                                    const SizedBox(height: AppSpacing.xxl),
+                                    _buildRoomCodeCard(roomCode),
+                                  ],
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

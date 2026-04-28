@@ -14,17 +14,22 @@ import '../widgets/room_card.dart';
 import '../widgets/premium_error_state.dart';
 
 class JoinRoomScreen extends StatefulWidget {
-  const JoinRoomScreen({super.key});
+  final bool isActive;
+
+  const JoinRoomScreen({super.key, this.isActive = true});
 
   @override
   State<JoinRoomScreen> createState() => _JoinRoomScreenState();
 }
 
 class _JoinRoomScreenState extends State<JoinRoomScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  static const Duration _roomPollInterval = Duration(seconds: 15);
+
   final _codeCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   Timer? _refreshTimer;
+  AppLifecycleState _lifecycleState = AppLifecycleState.resumed;
 
   String? _joiningCode;
   bool get _joining => _joiningCode != null;
@@ -37,6 +42,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _entryCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
@@ -45,32 +51,68 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
     _entryCtrl.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RoomListBloc>().add(const RoomListFetch());
+      if (!mounted) return;
+      _startRoomPolling(fetchNow: true);
     });
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final isVisible = TickerMode.valuesOf(context).enabled;
-    if (isVisible) {
-      _refreshTimer ??= Timer.periodic(
-        const Duration(seconds: 10),
-        (_) =>
-            context.read<RoomListBloc>().add(const RoomListFetch(silent: true)),
-      );
+  void didUpdateWidget(covariant JoinRoomScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isActive == widget.isActive) return;
+
+    if (widget.isActive) {
+      _startRoomPolling(fetchNow: true);
     } else {
-      _refreshTimer?.cancel();
-      _refreshTimer = null;
+      _stopRoomPolling();
     }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _refreshTimer?.cancel();
     _codeCtrl.dispose();
     _entryCtrl.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _lifecycleState = state;
+    if (_shouldPollRooms) {
+      _startRoomPolling(fetchNow: true);
+    } else {
+      _stopRoomPolling();
+    }
+  }
+
+  bool get _shouldPollRooms =>
+      mounted &&
+      widget.isActive &&
+      _lifecycleState == AppLifecycleState.resumed;
+
+  void _startRoomPolling({required bool fetchNow}) {
+    if (!_shouldPollRooms) return;
+
+    if (fetchNow) {
+      final current = context.read<RoomListBloc>().state;
+      context.read<RoomListBloc>().add(
+            RoomListFetch(silent: current is RoomListLoaded),
+          );
+    }
+
+    _refreshTimer ??= Timer.periodic(
+      _roomPollInterval,
+      (_) => context.read<RoomListBloc>().add(
+            const RoomListFetch(silent: true),
+          ),
+    );
+  }
+
+  void _stopRoomPolling() {
+    _refreshTimer?.cancel();
+    _refreshTimer = null;
   }
 
   void _joinRoom(String code) {
@@ -91,6 +133,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
             state is RoomStateWaiting) {
           if (_navigatedToWatch) return;
           _navigatedToWatch = true;
+          _stopRoomPolling();
           Navigator.pushReplacementNamed(context, '/watch');
         } else if (state is RoomStateError) {
           setState(() => _joiningCode = null);
@@ -282,15 +325,22 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
                       style: AppTypography.caption,
                     ),
                   ),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
                   IconButton(
                     icon: const Icon(
                       Icons.refresh_rounded,
                       size: 18,
                       color: AppColors.accentPrimary,
                     ),
-                    onPressed: () =>
-                        context.read<RoomListBloc>().add(const RoomListFetch()),
+                    onPressed: () => context
+                        .read<RoomListBloc>()
+                        .add(const RoomListFetch()),
                     tooltip: 'Refresh',
+                  ),
+                    ],
                   ),
                 ],
               ),
@@ -344,39 +394,34 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Ask a host to create one, or enter a code below',
+            'No active rooms. Start one or join with a code.',
             style: AppTypography.caption,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.lg),
-          GestureDetector(
-            onTap: () =>
-                context.read<RoomListBloc>().add(const RoomListFetch()),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.refresh_rounded,
-                    size: 16,
-                    color: AppColors.textSecondary,
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            alignment: WrapAlignment.center,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () =>
+                    context.read<RoomListBloc>().add(const RoomListFetch()),
+                icon: const Icon(Icons.refresh_rounded, size: 16),
+                label: const Text('Refresh'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.textSecondary,
+                  side: const BorderSide(color: AppColors.border),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Refresh',
-                    style: AppTypography.buttonSmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),

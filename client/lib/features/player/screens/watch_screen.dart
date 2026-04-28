@@ -14,6 +14,7 @@ import '../../../core/utils/playback_utils.dart';
 import '../../../shared/widgets/app_components.dart';
 import '../../room/bloc/room_bloc.dart';
 import '../../room/bloc/room_event.dart';
+import '../../room/bloc/room_list_bloc.dart';
 import '../../room/bloc/room_state.dart';
 import '../../room/domain/peer_status.dart';
 import '../../room/repository/room_repository.dart';
@@ -64,6 +65,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
 
   bool _roomWired = false;
   bool _isRoomClosed = false;
+  bool _isLeavingRoom = false;
 
   late final PlayerBloc _playerBloc;
   late final PlayerController _playerController;
@@ -367,6 +369,9 @@ class WatchScreenContentState extends State<WatchScreenContent> {
               context.read<PlayerBloc>().add(const PlayerEventDispose());
 
               context.read<ReconnectBloc>().add(const ReconnectEventReset());
+              context.read<RoomListBloc>().add(
+                    const RoomListFetch(silent: true),
+                  );
               GetIt.I<IptvNavigationMemory>().clear();
 
               _latencyEstimator.stop();
@@ -695,7 +700,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
   }
 
   void _confirmLeave(BuildContext context) {
-    if (_isRoomClosed) return;
+    if (_isRoomClosed || _isLeavingRoom) return;
 
     final roomState = context.read<RoomBloc>().state;
     final role = _roleOf(roomState);
@@ -715,6 +720,8 @@ class WatchScreenContentState extends State<WatchScreenContent> {
       icon: Icons.exit_to_app_rounded,
     ).then((confirmed) {
       if (confirmed == true && context.mounted) {
+        if (_isLeavingRoom) return;
+        _isLeavingRoom = true;
         context.read<PlayerBloc>().add(const PlayerEventDispose());
         _latencyEstimator.stop();
         context.read<RoomBloc>().add(const RoomEventLeaveRoom());
