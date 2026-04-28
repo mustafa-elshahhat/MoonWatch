@@ -250,7 +250,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  'Drop right in.',
+                  'Connect or Create.',
                   style: AppTypography.display.copyWith(
                     fontSize: 48,
                     letterSpacing: -1.5,
@@ -258,7 +258,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Six letters from the host is all it takes. Your player will match their playhead within milliseconds.',
+                  'Join an existing room with a 6-letter code or start your own synchronized session in seconds.',
                   style: AppTypography.bodySmall.copyWith(
                     color: AppColors.textSecondary,
                     fontSize: 14,
@@ -646,6 +646,31 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
                             letterSpacing: 0.5,
                           ),
                         ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 320),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, '/create'),
+                  icon: const Icon(Icons.add_rounded, size: 20),
+                  label: Text(
+                    'Create New Room',
+                    style: AppTypography.button.copyWith(
+                      color: AppColors.accentPrimary,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.accentPrimary, width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
+                  ),
                 ),
               ),
             ),

@@ -124,28 +124,7 @@ class MainShellState extends State<MainShell> {
     );
   }
 
-  Widget _buildMobileCreateAction() {
-    return Semantics(
-      button: true,
-      label: 'Create Room',
-      child: FloatingActionButton.extended(
-        heroTag: 'main-shell-create-room',
-        tooltip: 'Create Room',
-        onPressed: () => Navigator.pushNamed(context, '/create'),
-        backgroundColor: AppColors.accentPrimary,
-        foregroundColor: Colors.white,
-        elevation: 10,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.pill),
-        ),
-        icon: const Icon(Icons.add_rounded, size: 22),
-        label: Text(
-          'Create',
-          style: AppTypography.buttonSmall.copyWith(color: Colors.white),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildSideNavigation() {
     return Container(
@@ -197,39 +176,7 @@ class MainShellState extends State<MainShell> {
     );
   }
 
-  Widget _buildSideCreateButton() {
-    return Tooltip(
-      message: 'Create Room',
-      preferBelow: false,
-      child: InkWell(
-        onTap: () => Navigator.pushNamed(context, '/create'),
-        hoverColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        splashColor: Colors.transparent,
-        child: Container(
-          width: 48,
-          height: 48,
-          margin: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.accentPrimaryHover, AppColors.accentPrimary],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.accentPrimary.withValues(alpha: 0.35),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Icon(Icons.add_rounded, color: Colors.white, size: 22),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildNavItem(int index, IconData icon, String label) {
     final isSelected = _currentIndex == index;

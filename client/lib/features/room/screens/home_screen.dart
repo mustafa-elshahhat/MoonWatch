@@ -222,7 +222,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           children: [
             Expanded(
               child: _RoomCard(
-                type: _RoomCardType.join,
                 onTap: () {
                   final shell =
                       context.findAncestorStateOfType<MainShellState>();
@@ -283,7 +282,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               const SizedBox(height: AppSpacing.md),
               _RoomCard(
-                type: _RoomCardType.join,
                 onTap: () {
                   final shell =
                       context.findAncestorStateOfType<MainShellState>();
@@ -494,12 +492,9 @@ class _WatchSoloCardState extends State<_WatchSoloCard> {
       );
 }
 
-enum _RoomCardType { create, join }
-
 class _RoomCard extends StatefulWidget {
-  final _RoomCardType type;
   final VoidCallback onTap;
-  const _RoomCard({required this.type, required this.onTap});
+  const _RoomCard({required this.onTap});
   @override
   State<_RoomCard> createState() => _RoomCardState();
 }
@@ -507,19 +502,11 @@ class _RoomCard extends StatefulWidget {
 class _RoomCardState extends State<_RoomCard> {
   bool _h = false;
 
-  Color get _accent => widget.type == _RoomCardType.create
-      ? AppColors.accentSecondary
-      : AppColors.success;
-  IconData get _icon => widget.type == _RoomCardType.create
-      ? Icons.add_circle_rounded
-      : Icons.login_rounded;
-  String get _title =>
-      widget.type == _RoomCardType.create ? 'Create a Room' : 'Join a Room';
-  String get _sub => widget.type == _RoomCardType.create
-      ? 'Host a synchronized session for your friends'
-      : 'Enter a code to join someone\'s stream';
-  String get _label =>
-      widget.type == _RoomCardType.create ? 'NEW ROOM' : 'JOIN';
+  Color get _accent => AppColors.success;
+  IconData get _icon => Icons.login_rounded;
+  String get _title => 'Join a Room';
+  String get _sub => 'Enter a code to join someone\'s stream';
+  String get _label => 'JOIN';
 
   @override
   Widget build(BuildContext context) => MouseRegion(
@@ -628,9 +615,7 @@ class _RoomCardState extends State<_RoomCard> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        _h
-                            ? 'Tap to continue'
-                            : 'Tap to ${widget.type == _RoomCardType.create ? 'create' : 'join'}',
+                        _h ? 'Tap to continue' : 'Tap to join',
                         style: TextStyle(
                           color: _accent,
                           fontSize: 12,
