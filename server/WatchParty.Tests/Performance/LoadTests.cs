@@ -28,6 +28,7 @@ public class LoadTestFactory : WebApplicationFactory<Program>
 
 
 
+[Trait("Category", "Performance")]
 public class LoadTests : IClassFixture<LoadTestFactory>
 {
     private readonly LoadTestFactory _factory;

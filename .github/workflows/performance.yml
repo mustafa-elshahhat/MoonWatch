@@ -1,0 +1,24 @@
+name: Performance Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore server/WatchParty.slnx
+
+    - name: Build
+      run: dotnet build server/WatchParty.slnx -c Release --no-restore
+
+    - name: Performance tests
+      run: dotnet test server/WatchParty.slnx -c Release --no-build --filter "Category=Performance|Category=Benchmark"

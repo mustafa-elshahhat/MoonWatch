@@ -24,7 +24,7 @@ jobs:
       run: dotnet build server/WatchParty.slnx -c Release --no-restore
 
     - name: Test
-      run: dotnet test server/WatchParty.slnx -c Release --no-build
+      run: dotnet test server/WatchParty.slnx -c Release --no-build --filter "Category!=Performance&Category!=Benchmark"
 
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
