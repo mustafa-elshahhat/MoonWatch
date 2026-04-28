@@ -58,5 +58,18 @@ void main() {
 
       verify(() => mockCredentialStore.readIptvCredentials()).called(1);
     });
+
+    test('getConfiguredConfig initializes config from stored credentials',
+        () async {
+      when(() => mockCredentialStore.readIptvCredentials()).thenAnswer(
+          (_) async => IptvCredentials(username: 'user', password: 'pass'));
+
+      final config = await apiService.getConfiguredConfig();
+
+      expect(config.username, 'user');
+      expect(config.password, 'pass');
+      expect(config.baseUrl, 'http://api.test');
+      verify(() => mockCredentialStore.readIptvCredentials()).called(1);
+    });
   });
 }

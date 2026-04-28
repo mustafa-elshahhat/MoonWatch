@@ -23,6 +23,7 @@ import '../../reconnect/reconnect_bloc.dart';
 import '../../../core/services/episode_nav_service.dart';
 import '../../iptv/bloc/iptv_state.dart';
 import '../../iptv/repository/iptv_repository.dart';
+import '../../iptv/service/iptv_api_service.dart';
 import '../../iptv/service/iptv_navigation_memory.dart';
 import '../bloc/player_bloc.dart';
 import '../bloc/player_event.dart';
@@ -59,6 +60,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
   static final AppLogger _logger = AppLogger('WatchScreen');
 
   String? _lastContentKey;
+  String? _resolvingContentKey;
 
   bool _roomWired = false;
   bool _isRoomClosed = false;
@@ -98,7 +100,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
       if (!mounted) return;
       final roomState = context.read<RoomBloc>().state;
       if (roomState is RoomStateActive) {
-        _handleNewContent(roomState);
+        unawaited(_handleNewContent(roomState));
       }
     });
   }
@@ -111,6 +113,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     FullscreenService().exitFullscreen();
     _brightnessService.restore();
 
+    _playerBloc.add(const PlayerEventDispose());
     _playerBloc.setRoomMode(false);
 
     _latencyEstimator.stop();
@@ -210,20 +213,69 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     context.read<RoomBloc>().add(RoomEventSetContent(next.toDescriptor()));
   }
 
-  void _handleNewContent(RoomStateActive state) {
+  Future<void> _handleNewContent(
+    RoomStateActive state, {
+    String source = 'room_active',
+  }) async {
     final contentKey = _contentKeyOf(state.contentDescriptor);
 
     if (contentKey == _lastContentKey) {
       _logger.i('[CONTENT_SET_DUPLICATE_IGNORED] key=$contentKey');
       return;
     }
-    _lastContentKey = contentKey;
 
-    final localUrl = _iptvRepository.resolvePlaybackUrl(
-      state.contentDescriptor,
-    );
+    if (contentKey == _resolvingContentKey) {
+      _logger.i('[CONTENT_SET_RESOLUTION_IN_FLIGHT] key=$contentKey');
+      return;
+    }
 
-    _logger.i('[PLAYER_INIT_SOURCE] source=room_active, key=$contentKey');
+    _resolvingContentKey = contentKey;
+
+    late final String localUrl;
+    try {
+      localUrl = await _iptvRepository.resolvePlaybackUrl(
+        state.contentDescriptor,
+      );
+    } catch (e, st) {
+      _logger.e(
+        '[PLAYER_URL_RESOLVE_FAILED] key=$contentKey error=$e',
+        error: e,
+        stackTrace: st,
+      );
+      if (mounted) {
+        final currentRoomState = context.read<RoomBloc>().state;
+        if (currentRoomState is RoomStateActive &&
+            currentRoomState.contentKey == contentKey) {
+          _lastContentKey = null;
+          _emitPlaybackResolutionError(e);
+        } else {
+          _logger.i('[PLAYER_URL_RESOLVE_FAILED_STALE] key=$contentKey');
+        }
+      }
+      if (_resolvingContentKey == contentKey) {
+        _resolvingContentKey = null;
+      }
+      return;
+    }
+
+    if (!mounted) {
+      if (_resolvingContentKey == contentKey) {
+        _resolvingContentKey = null;
+      }
+      return;
+    }
+
+    final currentRoomState = context.read<RoomBloc>().state;
+    if (currentRoomState is! RoomStateActive ||
+        currentRoomState.contentKey != contentKey) {
+      _logger.i('[PLAYER_INIT_SKIPPED_STALE_CONTENT] key=$contentKey');
+      if (_resolvingContentKey == contentKey) {
+        _resolvingContentKey = null;
+      }
+      return;
+    }
+
+    _logger.i('[PLAYER_INIT_SOURCE] source=$source, key=$contentKey');
 
     if (!_roomWired) {
       _roomWired = true;
@@ -251,13 +303,49 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     context.read<PlayerBloc>().add(
           PlayerEventInitialize(
             localUrl,
-            source: 'room_active',
+            source: source,
             isRoomMode: true,
             role: state.role,
             roomCode: state.roomCode,
             contentKey: contentKey,
           ),
         );
+    _lastContentKey = contentKey;
+    if (_resolvingContentKey == contentKey) {
+      _resolvingContentKey = null;
+    }
+  }
+
+  void _emitPlaybackResolutionError(Object error) {
+    if (!mounted) return;
+
+    context.read<PlayerBloc>().add(
+          PlayerEventErrorOccurred(
+            _playbackResolutionErrorMessage(error),
+            recoverable: true,
+          ),
+        );
+  }
+
+  String _playbackResolutionErrorMessage(Object error) {
+    if (error is IptvApiException) {
+      final lower = error.message.toLowerCase();
+      if (lower.contains('credential') || lower.contains('config')) {
+        return 'IPTV login is required on this device before joining playback.';
+      }
+      return error.message;
+    }
+    return 'Could not prepare playback on this device. Please try again.';
+  }
+
+  Future<void> _retryActiveContent() async {
+    final roomState = context.read<RoomBloc>().state;
+    if (roomState is! RoomStateActive) return;
+
+    _lastContentKey = null;
+    _resolvingContentKey = null;
+    context.read<PlayerBloc>().clearDedupState();
+    await _handleNewContent(roomState, source: 'retry');
   }
 
   @override
@@ -286,10 +374,11 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                 _isRoomClosed = true;
                 _roomWired = false;
                 _lastContentKey = null;
+                _resolvingContentKey = null;
               });
               _showCloseMessageThenNavigate(context, state.reason);
             } else if (state is RoomStateActive) {
-              _handleNewContent(state);
+              unawaited(_handleNewContent(state));
             }
           },
         ),
@@ -305,6 +394,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
 
               if (playerState is PlayerStateError) {
                 _lastContentKey = null;
+                _resolvingContentKey = null;
               }
             }
 
@@ -529,29 +619,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 TextButton.icon(
-                  onPressed: () {
-                    final roomState = context.read<RoomBloc>().state;
-                    if (roomState is RoomStateActive) {
-                      final localUrl = _iptvRepository.resolvePlaybackUrl(
-                        roomState.contentDescriptor,
-                      );
-
-                      _lastContentKey = null;
-                      context.read<PlayerBloc>().clearDedupState();
-                      context.read<PlayerBloc>().add(
-                            PlayerEventInitialize(
-                              localUrl,
-                              source: 'retry',
-                              isRoomMode: true,
-                              role: roomState.role,
-                              roomCode: roomState.roomCode,
-                              contentKey: _contentKeyOf(
-                                roomState.contentDescriptor,
-                              ),
-                            ),
-                          );
-                    }
-                  },
+                  onPressed: () => unawaited(_retryActiveContent()),
                   icon: const Icon(Icons.refresh_rounded, size: 18),
                   label: const Text('Retry'),
                   style: TextButton.styleFrom(
@@ -647,6 +715,8 @@ class WatchScreenContentState extends State<WatchScreenContent> {
       icon: Icons.exit_to_app_rounded,
     ).then((confirmed) {
       if (confirmed == true && context.mounted) {
+        context.read<PlayerBloc>().add(const PlayerEventDispose());
+        _latencyEstimator.stop();
         context.read<RoomBloc>().add(const RoomEventLeaveRoom());
       }
     });

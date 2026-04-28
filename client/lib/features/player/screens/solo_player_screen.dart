@@ -154,15 +154,29 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
     );
   }
 
-  void _handleNextEpisode() {
+  Future<void> _handleNextEpisode() async {
     final navCtx = EpisodeNavService().current;
     final next = navCtx?.nextEpisode;
     if (next == null || !mounted) return;
 
-    final url = GetIt.instance<IptvRepository>().getEpisodePlaybackUrl(
-      next.id,
-      next.containerExtension,
-    );
+    late final String url;
+    try {
+      url = await GetIt.instance<IptvRepository>().getEpisodePlaybackUrl(
+        next.id,
+        next.containerExtension,
+      );
+    } catch (e, st) {
+      _logger.e('Next episode URL resolution failed', error: e, stackTrace: st);
+      _playerBloc?.add(
+        const PlayerEventErrorOccurred(
+          'Could not prepare the next episode. Please try again.',
+          recoverable: true,
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
 
     EpisodeNavService().advanceTo(next.id);
 
@@ -301,7 +315,7 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
       onPause: (_) => context.read<PlayerBloc>().add(const PlayerEventPause()),
       onSeek: (target) =>
           context.read<PlayerBloc>().add(PlayerEventSeek(target)),
-      onNextEpisode: _handleNextEpisode,
+      onNextEpisode: () => unawaited(_handleNextEpisode()),
     );
   }
 

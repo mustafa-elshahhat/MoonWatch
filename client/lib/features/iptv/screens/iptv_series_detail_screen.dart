@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -47,11 +49,11 @@ class _IptvSeriesDetailScreenState extends State<IptvSeriesDetailScreen> {
         );
   }
 
-  void _handleSelection({
+  Future<void> _handleSelection({
     required IptvContentDescriptor descriptor,
     required String title,
     required SeriesInfo info,
-  }) {
+  }) async {
     final allEpisodes = <EpisodeRef>[];
     for (final s in info.seasonNumbers) {
       final eps = info.seasons[s] ?? [];
@@ -78,9 +80,16 @@ class _IptvSeriesDetailScreenState extends State<IptvSeriesDetailScreen> {
     );
 
     if (widget.mode == 'solo') {
-      final url = GetIt.instance<IptvRepository>().resolvePlaybackUrl(
-        descriptor,
-      );
+      late final String url;
+      try {
+        url = await GetIt.instance<IptvRepository>().resolvePlaybackUrl(
+          descriptor,
+        );
+      } catch (_) {
+        if (mounted) _showPlaybackUrlError();
+        return;
+      }
+      if (!mounted) return;
       Navigator.of(context, rootNavigator: true).pushNamed(
         '/solo-player',
         arguments: {
@@ -94,6 +103,14 @@ class _IptvSeriesDetailScreenState extends State<IptvSeriesDetailScreen> {
       context.read<RoomBloc>().add(RoomEventSetContent(descriptor));
       Navigator.of(context).popUntil(ModalRoute.withName('/watch'));
     }
+  }
+
+  void _showPlaybackUrlError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Could not prepare playback. Please log in again.'),
+      ),
+    );
   }
 
   @override
@@ -206,18 +223,20 @@ class _IptvSeriesDetailScreenState extends State<IptvSeriesDetailScreen> {
                       (context, index) => _EpisodeCard(
                         episode: episodes[index],
                         seriesName: info.name,
-                        onTap: () => _handleSelection(
-                          descriptor: IptvContentDescriptor(
-                            contentType: IptvDescriptorType.episode,
-                            streamId: episodes[index].id,
-                            containerExtension:
-                                episodes[index].containerExtension,
+                        onTap: () => unawaited(
+                          _handleSelection(
+                            descriptor: IptvContentDescriptor(
+                              contentType: IptvDescriptorType.episode,
+                              streamId: episodes[index].id,
+                              containerExtension:
+                                  episodes[index].containerExtension,
+                              title:
+                                  '${info.name} - S$_selectedSeason E${episodes[index].episodeNum}',
+                            ),
                             title:
                                 '${info.name} - S$_selectedSeason E${episodes[index].episodeNum}',
+                            info: info,
                           ),
-                          title:
-                              '${info.name} - S$_selectedSeason E${episodes[index].episodeNum}',
-                          info: info,
                         ),
                       ),
                       childCount: episodes.length,
@@ -230,18 +249,20 @@ class _IptvSeriesDetailScreenState extends State<IptvSeriesDetailScreen> {
                         child: _EpisodeCard(
                           episode: episodes[index],
                           seriesName: info.name,
-                          onTap: () => _handleSelection(
-                            descriptor: IptvContentDescriptor(
-                              contentType: IptvDescriptorType.episode,
-                              streamId: episodes[index].id,
-                              containerExtension:
-                                  episodes[index].containerExtension,
+                          onTap: () => unawaited(
+                            _handleSelection(
+                              descriptor: IptvContentDescriptor(
+                                contentType: IptvDescriptorType.episode,
+                                streamId: episodes[index].id,
+                                containerExtension:
+                                    episodes[index].containerExtension,
+                                title:
+                                    '${info.name} - S$_selectedSeason E${episodes[index].episodeNum}',
+                              ),
                               title:
                                   '${info.name} - S$_selectedSeason E${episodes[index].episodeNum}',
+                              info: info,
                             ),
-                            title:
-                                '${info.name} - S$_selectedSeason E${episodes[index].episodeNum}',
-                            info: info,
                           ),
                         ),
                       ),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:window_manager/window_manager.dart';
 import 'core/di/injection.dart';
@@ -15,6 +16,7 @@ void main() {
     () async {
       WidgetsFlutterBinding.ensureInitialized();
       GoogleFonts.config.allowRuntimeFetching = false;
+      await _configureAndroidSystemBars();
       final startTime = DateTime.now();
       debugPrint('[PROFILER] app_start: ${startTime.toIso8601String()}');
 
@@ -73,5 +75,21 @@ void main() {
         'ZoneError',
       ).e('Uncaught zone error', error: error, stackTrace: stack);
     },
+  );
+}
+
+Future<void> _configureAndroidSystemBars() async {
+  if (!Platform.isAndroid) return;
+
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarContrastEnforced: false,
+      statusBarIconBrightness: Brightness.light,
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
   );
 }

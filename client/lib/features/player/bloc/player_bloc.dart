@@ -311,24 +311,33 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     PlayerEventDispose event,
     Emitter<PlayerState> emit,
   ) async {
-    if (state is PlayerStateIdle) return;
+    await _disposePlayerResources();
+    emit(const PlayerStateIdle());
+  }
+
+  @override
+  Future<void> close() async {
+    await _disposePlayerResources();
+    return super.close();
+  }
+
+  Future<void> _disposePlayerResources() async {
     _bufferingTimer?.cancel();
+    _bufferingTimer = null;
     await _playerSubscription?.cancel();
-    await _playerController.dispose();
+    _playerSubscription = null;
+
+    try {
+      await _playerController.dispose();
+    } catch (e, st) {
+      _logger.e('player.dispose failed', error: e, stackTrace: st);
+    }
 
     _isInitializing = false;
     _activeUrl = null;
     _pendingUrl = null;
     _processedContentKeys.clear();
     _readyUrl = null;
-    emit(const PlayerStateIdle());
-  }
-
-  @override
-  Future<void> close() {
-    _bufferingTimer?.cancel();
-    _playerSubscription?.cancel();
-    return super.close();
   }
 
   static String _humanizeError(String raw) {

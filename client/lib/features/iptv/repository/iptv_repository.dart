@@ -135,10 +135,16 @@ class IptvRepository {
     }
   }
 
-  String getLivePlaybackUrl(int streamId) =>
-      config.livePlaybackUrl(streamId.toString());
+  Future<String> getLivePlaybackUrl(int streamId) async {
+    final config = await _apiService.getConfiguredConfig();
+    return config.livePlaybackUrl(streamId.toString());
+  }
 
-  String getVodPlaybackUrl(int streamId, String containerExtension) {
+  Future<String> getVodPlaybackUrl(
+    int streamId,
+    String containerExtension,
+  ) async {
+    final config = await _apiService.getConfiguredConfig();
     final url = config.vodPlaybackUrl(streamId.toString(), containerExtension);
     final strategy = containerExtension.toLowerCase() == 'm3u8'
         ? 'HLS Playlist'
@@ -151,7 +157,11 @@ class IptvRepository {
     return url;
   }
 
-  String getEpisodePlaybackUrl(String episodeId, String containerExtension) {
+  Future<String> getEpisodePlaybackUrl(
+    String episodeId,
+    String containerExtension,
+  ) async {
+    final config = await _apiService.getConfiguredConfig();
     final url = config.episodePlaybackUrl(episodeId, containerExtension);
     final strategy = containerExtension.toLowerCase() == 'm3u8'
         ? 'HLS Playlist'
@@ -164,7 +174,8 @@ class IptvRepository {
     return url;
   }
 
-  String resolvePlaybackUrl(IptvContentDescriptor descriptor) {
+  Future<String> resolvePlaybackUrl(IptvContentDescriptor descriptor) async {
+    final config = await _apiService.getConfiguredConfig();
     final String url = switch (descriptor.contentType) {
       IptvDescriptorType.live => config.livePlaybackUrl(descriptor.streamId),
       IptvDescriptorType.movie => config.vodPlaybackUrl(

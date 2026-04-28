@@ -32,6 +32,8 @@ class FullscreenService extends ChangeNotifier {
             systemNavigationBarDividerColor: Colors.transparent,
             systemNavigationBarContrastEnforced: false,
             statusBarBrightness: Brightness.dark,
+            statusBarIconBrightness: Brightness.light,
+            systemNavigationBarIconBrightness: Brightness.light,
           ),
         );
       } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -59,6 +61,16 @@ class FullscreenService extends ChangeNotifier {
         await SystemChrome.setEnabledSystemUIMode(
           SystemUiMode.edgeToEdge,
           overlays: SystemUiOverlay.values,
+        );
+        SystemChrome.setSystemUIOverlayStyle(
+          const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: Colors.transparent,
+            systemNavigationBarDividerColor: Colors.transparent,
+            systemNavigationBarContrastEnforced: false,
+            statusBarIconBrightness: Brightness.light,
+            systemNavigationBarIconBrightness: Brightness.light,
+          ),
         );
         await SystemChrome.setPreferredOrientations([
           DeviceOrientation.portraitUp,

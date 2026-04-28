@@ -1,14 +1,19 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:watch_party/core/config/app_config.dart';
 import 'package:watch_party/core/network/signalr_client.dart';
 import 'package:watch_party/core/player/player_controller.dart' as pc;
 import 'package:watch_party/core/protocol/payloads.dart';
+import 'package:watch_party/core/security/credential_store.dart';
 import 'package:watch_party/core/services/brightness_service.dart';
 import 'package:watch_party/features/iptv/repository/iptv_repository.dart';
+import 'package:watch_party/features/iptv/service/iptv_api_service.dart';
 import 'package:watch_party/features/player/bloc/player_bloc.dart';
 import 'package:watch_party/features/player/bloc/player_event.dart';
 import 'package:watch_party/features/player/bloc/player_state.dart';
@@ -116,6 +121,8 @@ class MockRoomRepository extends Mock implements RoomRepository {}
 
 class MockIptvRepository extends Mock implements IptvRepository {}
 
+class MockCredentialStore extends Mock implements CredentialStore {}
+
 class MockBrightnessService extends Mock implements BrightnessService {
   @override
   Future<void> initialize() async {}
@@ -170,7 +177,7 @@ void main() {
 
     when(() => iptvRepository.resolvePlaybackUrl(any())).thenAnswer((
       invocation,
-    ) {
+    ) async {
       final descriptor =
           invocation.positionalArguments.first as IptvContentDescriptor;
       return 'https://example.com/${descriptor.streamId}.m3u8';
@@ -256,6 +263,145 @@ void main() {
     expect(initializeEvents, hasLength(1));
     expect(initializeEvents.single.contentKey, _contentA.contentKey);
   });
+
+  testWidgets(
+    'guest active room initializes IPTV config from stored credentials before playback URL resolution',
+    (tester) async {
+      const active = RoomStateActive(
+        roomCode: 'ABC123',
+        role: 'guest',
+        contentDescriptor: _contentA,
+      );
+      final credentialStore = MockCredentialStore();
+      when(() => credentialStore.readIptvCredentials()).thenAnswer(
+        (_) async => IptvCredentials(username: 'guest', password: 'secret'),
+      );
+
+      final apiService = IptvApiService(
+        appConfig: AppConfig(
+          serverBaseUrl: 'http://server.test',
+          iptvBaseUrl: 'http://iptv.test',
+        ),
+        credentialStore: credentialStore,
+      );
+      await getIt.unregister<IptvRepository>();
+      getIt.registerSingleton<IptvRepository>(
+        IptvRepository(apiService: apiService),
+      );
+
+      when(() => roomBloc.state).thenReturn(active);
+      whenListen(
+        roomBloc,
+        const Stream<RoomState>.empty(),
+        initialState: active,
+      );
+      whenListen(
+        playerBloc,
+        const Stream<PlayerState>.empty(),
+        initialState: const PlayerStateIdle(),
+      );
+      whenListen(
+        syncBloc,
+        const Stream<SyncState>.empty(),
+        initialState: const SyncStateIdle(),
+      );
+      whenListen(
+        reconnectBloc,
+        const Stream<ReconnectState>.empty(),
+        initialState: const ReconnectStateIdle(),
+      );
+
+      await tester.pumpWidget(buildWidget());
+      await tester.pump();
+      await tester.pump();
+
+      verify(() => credentialStore.readIptvCredentials()).called(1);
+      final captured = verify(() => playerBloc.add(captureAny())).captured;
+      final initializeEvents =
+          captured.whereType<PlayerEventInitialize>().toList();
+      expect(initializeEvents, hasLength(1));
+      expect(
+        initializeEvents.single.streamUrl,
+        'http://iptv.test/series/guest/secret/197312.m3u8',
+      );
+      expect(initializeEvents.single.contentKey, _contentA.contentKey);
+    },
+  );
+
+  testWidgets(
+    'failed playback URL resolution does not block retrying the same content',
+    (tester) async {
+      const active = RoomStateActive(
+        roomCode: 'ABC123',
+        role: 'guest',
+        contentDescriptor: _contentA,
+      );
+      final playerStates = StreamController<PlayerState>.broadcast();
+      addTearDown(playerStates.close);
+      var resolveCalls = 0;
+      when(() => iptvRepository.resolvePlaybackUrl(any())).thenAnswer((
+        _,
+      ) async {
+        resolveCalls++;
+        if (resolveCalls == 1) {
+          throw const IptvApiException(
+            'IPTV credentials missing. Login required.',
+          );
+        }
+        return 'https://example.com/retry.m3u8';
+      });
+
+      when(() => roomBloc.state).thenReturn(active);
+      whenListen(
+        roomBloc,
+        const Stream<RoomState>.empty(),
+        initialState: active,
+      );
+      whenListen(
+        playerBloc,
+        playerStates.stream,
+        initialState: const PlayerStateIdle(),
+      );
+      whenListen(
+        syncBloc,
+        const Stream<SyncState>.empty(),
+        initialState: const SyncStateIdle(),
+      );
+      whenListen(
+        reconnectBloc,
+        const Stream<ReconnectState>.empty(),
+        initialState: const ReconnectStateIdle(),
+      );
+
+      await tester.pumpWidget(buildWidget());
+      await tester.pump();
+      await tester.pump();
+      expect(resolveCalls, 1);
+
+      playerStates.add(
+        const PlayerStateError(
+          'IPTV login is required on this device before joining playback.',
+          recoverable: true,
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('Retry'), findsOneWidget);
+
+      await tester.tap(find.text('Retry'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(resolveCalls, 2);
+      final captured = verify(() => playerBloc.add(captureAny())).captured;
+      expect(captured.whereType<PlayerEventErrorOccurred>(), hasLength(1));
+      final initializeEvents =
+          captured.whereType<PlayerEventInitialize>().toList();
+      expect(initializeEvents, hasLength(1));
+      expect(initializeEvents.single.source, 'retry');
+      expect(initializeEvents.single.contentKey, _contentA.contentKey);
+    },
+  );
 
   testWidgets(
     'repeated identical active states do not dispatch a duplicate initialize',

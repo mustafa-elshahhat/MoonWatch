@@ -70,6 +70,11 @@ class IptvApiService {
     return _currentConfig!;
   }
 
+  Future<IptvConfig> getConfiguredConfig() async {
+    await _ensureConfigured();
+    return config;
+  }
+
   Future<void> _ensureConfigured() async {
     if (_currentConfig != null) return;
 

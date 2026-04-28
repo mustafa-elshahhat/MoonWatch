@@ -97,6 +97,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onLogoutRequested(
       AuthLogoutRequested event, Emitter<AuthState> emit) async {
     await _credentialStore.clearIptvCredentials();
+    _iptvApiService.clearConfig();
     emit(AuthUnauthenticated());
   }
 }

@@ -80,6 +80,7 @@ void main() {
       setUp: () {
         when(() => mockCredentialStore.clearIptvCredentials())
             .thenAnswer((_) async => {});
+        when(() => mockIptvApiService.clearConfig()).thenReturn(null);
       },
       build: () => AuthBloc(
         credentialStore: mockCredentialStore,
@@ -89,6 +90,7 @@ void main() {
       expect: () => [AuthUnauthenticated()],
       verify: (_) {
         verify(() => mockCredentialStore.clearIptvCredentials()).called(1);
+        verify(() => mockIptvApiService.clearConfig()).called(1);
       },
     );
   });

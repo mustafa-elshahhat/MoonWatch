@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -279,13 +281,13 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
         return _LiveChannelCard(
           stream: stream,
           index: index,
-          onTap: () => _handleLive(stream),
+          onTap: () => unawaited(_handleLive(stream)),
         );
       case VodStream stream:
         return _MovieCard(
           stream: stream,
           index: index,
-          onTap: () => _handleVod(stream),
+          onTap: () => unawaited(_handleVod(stream)),
         );
       case SeriesItem series:
         return _SeriesCard(
@@ -298,9 +300,7 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
     }
   }
 
-  void _handleLive(LiveStream s) {
-    final repo = GetIt.instance<IptvRepository>();
-    final url = repo.getLivePlaybackUrl(s.streamId);
+  Future<void> _handleLive(LiveStream s) async {
     if (widget.mode == 'room') {
       Navigator.of(context, rootNavigator: true).pop(
         IptvContentSelected(
@@ -313,6 +313,15 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
         ),
       );
     } else {
+      final repo = GetIt.instance<IptvRepository>();
+      late final String url;
+      try {
+        url = await repo.getLivePlaybackUrl(s.streamId);
+      } catch (_) {
+        if (mounted) _showPlaybackUrlError();
+        return;
+      }
+      if (!mounted) return;
       Navigator.of(context, rootNavigator: true).pushNamed(
         '/solo-player',
         arguments: {'title': s.name, 'url': url, 'contentType': 'live'},
@@ -320,9 +329,7 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
     }
   }
 
-  void _handleVod(VodStream s) {
-    final repo = GetIt.instance<IptvRepository>();
-    final url = repo.getVodPlaybackUrl(s.streamId, s.containerExtension);
+  Future<void> _handleVod(VodStream s) async {
     if (widget.mode == 'room') {
       Navigator.of(context, rootNavigator: true).pop(
         IptvContentSelected(
@@ -336,11 +343,28 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
         ),
       );
     } else {
+      final repo = GetIt.instance<IptvRepository>();
+      late final String url;
+      try {
+        url = await repo.getVodPlaybackUrl(s.streamId, s.containerExtension);
+      } catch (_) {
+        if (mounted) _showPlaybackUrlError();
+        return;
+      }
+      if (!mounted) return;
       Navigator.of(context, rootNavigator: true).pushNamed(
         '/solo-player',
         arguments: {'title': s.name, 'url': url, 'contentType': 'movie'},
       );
     }
+  }
+
+  void _showPlaybackUrlError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Could not prepare playback. Please log in again.'),
+      ),
+    );
   }
 
   void _handleSeries(SeriesItem s) async {
