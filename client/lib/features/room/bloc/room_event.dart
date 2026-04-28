@@ -30,16 +30,19 @@ class RoomEventRoomJoined extends RoomEvent {
   final String role;
   final bool guestPresent;
   final IptvContentDescriptor? contentDescriptor;
+  final double playbackRate;
 
   const RoomEventRoomJoined({
     required this.roomCode,
     required this.role,
     required this.guestPresent,
     this.contentDescriptor,
+    this.playbackRate = 1.0,
   });
 
   @override
-  List<Object?> get props => [roomCode, role, guestPresent, contentDescriptor];
+  List<Object?> get props =>
+      [roomCode, role, guestPresent, contentDescriptor, playbackRate];
 }
 
 class RoomEventSetContent extends RoomEvent {

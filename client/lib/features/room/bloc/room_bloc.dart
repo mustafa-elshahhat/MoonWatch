@@ -8,6 +8,9 @@ import '../repository/room_repository.dart';
 import 'room_event.dart';
 import 'room_state.dart';
 
+import '../domain/room_repository_event.dart';
+import '../domain/peer_status.dart';
+
 class RoomBloc extends Bloc<RoomEvent, RoomState> {
   final RoomRepository _roomRepository;
   final SignalRClient _signalRClient;
@@ -52,9 +55,35 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
 
   void startListening() {
     _repoSubscription?.cancel();
-    _repoSubscription = _roomRepository.events.listen((event) {
-      if (!isClosed) add(event);
+    _repoSubscription = _roomRepository.events.listen((repoEvent) {
+      if (!isClosed) {
+        final blocEvent = _mapRepoEvent(repoEvent);
+        if (blocEvent != null) add(blocEvent);
+      }
     });
+  }
+
+  RoomEvent? _mapRepoEvent(RoomRepositoryEvent repoEvent) {
+    return switch (repoEvent) {
+      RepoEventRoomJoined() => RoomEventRoomJoined(
+          roomCode: repoEvent.roomCode,
+          role: repoEvent.role,
+          guestPresent: repoEvent.guestPresent,
+          contentDescriptor: repoEvent.contentDescriptor,
+          playbackRate: repoEvent.playbackRate,
+        ),
+      RepoEventGuestJoined() => const RoomEventGuestJoined(),
+      RepoEventGuestLeft() => const RoomEventGuestLeft(),
+      RepoEventGuestReconnected() => const RoomEventGuestReconnected(),
+      RepoEventContentSet() => RoomEventContentSet(repoEvent.descriptor),
+      RepoEventPlayerReady() => RoomEventPlayerReady(repoEvent.payload),
+      RepoEventRoomClosed() => RoomEventRoomClosed(repoEvent.reason),
+      RepoEventError() => RoomEventError(
+          code: repoEvent.code,
+          message: repoEvent.message,
+        ),
+      RepoEventLocalReady() => RoomEventLocalReady(repoEvent.contentKey),
+    };
   }
 
   Future<void> _onCreateRoom(
@@ -178,12 +207,19 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
           roomCode: event.roomCode,
           role: event.role,
           contentDescriptor: event.contentDescriptor!,
+          playbackRate: event.playbackRate,
         ),
       );
     } else if (event.guestPresent) {
-      emit(RoomStateJoined(roomCode: event.roomCode, role: event.role));
+      emit(RoomStateJoined(
+          roomCode: event.roomCode,
+          role: event.role,
+          playbackRate: event.playbackRate));
     } else {
-      emit(RoomStateWaiting(roomCode: event.roomCode, role: event.role));
+      emit(RoomStateWaiting(
+          roomCode: event.roomCode,
+          role: event.role,
+          playbackRate: event.playbackRate));
     }
   }
 
@@ -341,11 +377,12 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
       _roomRepository.unregisterHandlers();
       await _signalRClient.disconnect();
     } catch (e) {
-      _logger.e('Error leaving room: ');
+      _logger.e('Error leaving room: $e');
     }
     _repoSubscription?.cancel();
     _repoSubscription = null;
     _timeoutTimer?.cancel();
+    _timeoutTimer = null;
     if (!isClosed) emit(const RoomStateClosed('user_left'));
   }
 
@@ -367,8 +404,10 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
 
   @override
   Future<void> close() {
-    _timeoutTimer?.cancel();
+    _completePendingRoomOperation();
     _repoSubscription?.cancel();
+    _repoSubscription = null;
+    _roomRepository.unregisterHandlers();
     return super.close();
   }
 }

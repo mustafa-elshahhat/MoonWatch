@@ -10,6 +10,8 @@ import 'package:watch_party/features/room/bloc/room_state.dart';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 import 'package:watch_party/core/network/http_client.dart';
 
+import 'package:watch_party/features/room/domain/room_repository_event.dart';
+
 class MockSignalRClient extends Mock implements SignalRClient {}
 
 class MockRoomRepository extends Mock implements RoomRepository {}
@@ -20,7 +22,7 @@ void main() {
   late MockSignalRClient mockSignalRClient;
   late MockRoomRepository mockRoomRepository;
   late StreamController<SignalRConnectionState> connectionStateController;
-  late StreamController<RoomEvent> repoEventsController;
+  late StreamController<RoomRepositoryEvent> repoEventsController;
   late ReconnectBloc reconnectBloc;
   late RoomBloc roomBloc;
 
@@ -29,7 +31,7 @@ void main() {
     mockRoomRepository = MockRoomRepository();
     connectionStateController =
         StreamController<SignalRConnectionState>.broadcast();
-    repoEventsController = StreamController<RoomEvent>.broadcast();
+    repoEventsController = StreamController<RoomRepositoryEvent>.broadcast();
 
     when(
       () => mockSignalRClient.connectionState,
@@ -43,6 +45,7 @@ void main() {
       () => mockRoomRepository.events,
     ).thenAnswer((_) => repoEventsController.stream);
     when(() => mockRoomRepository.registerHandlers()).thenReturn(null);
+    when(() => mockRoomRepository.unregisterHandlers()).thenReturn(null);
 
     reconnectBloc = ReconnectBloc(
       signalRClient: mockSignalRClient,
@@ -88,7 +91,7 @@ void main() {
         ).called(1);
 
         repoEventsController.add(
-          const RoomEventRoomJoined(
+          const RepoEventRoomJoined(
             roomCode: 'ABC123',
             role: 'guest',
             guestPresent: true,
@@ -131,7 +134,7 @@ void main() {
       await Future.delayed(const Duration(milliseconds: 100));
 
       repoEventsController.add(
-        const RoomEventError(
+        const RepoEventError(
           code: 'room_closed',
           message: 'Room has been closed.',
         ),
@@ -153,7 +156,7 @@ void main() {
       );
       await Future.delayed(const Duration(milliseconds: 50));
 
-      repoEventsController.add(const RoomEventRoomClosed('host_disconnected'));
+      repoEventsController.add(const RepoEventRoomClosed('host_disconnected'));
       await Future.delayed(const Duration(milliseconds: 100));
 
       expect(roomBloc.state, const RoomStateClosed('host_disconnected'));

@@ -206,6 +206,23 @@ void main() {
     );
   });
 
+  group('SyncBloc — speed received', () {
+    blocTest<SyncBloc, SyncState>(
+      'applies received playback speed to player',
+      build: () {
+        syncBloc.setRole('guest');
+        return syncBloc;
+      },
+      act: (bloc) {
+        bloc.add(const SyncEventSpeedReceived(speed: 1.5, serverTimestampMs: 0));
+      },
+      expect: () => <SyncState>[],
+      verify: (_) {
+        expect(mockPlayer.playbackSpeed, 1.5);
+      },
+    );
+  });
+
   group('SyncBloc — pause received', () {
     blocTest<SyncBloc, SyncState>(
       'pauses and seeks to specified position',

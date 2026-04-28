@@ -90,7 +90,7 @@ public class RoomService : IRoomService
         _logger.LogInformation("Host joined {Event} {RoomId} {ConnectionId} {Role}",
             "room.joined", room.RoomCode, connectionId, "host");
 
-        return new JoinResult(room.RoomCode, "host", GuestPresent: false, room.ContentDescriptor, IsNewGuest: false);
+        return new JoinResult(room.RoomCode, "host", GuestPresent: false, room.ContentDescriptor, IsNewGuest: false, PlaybackRate: room.PlaybackRate);
     }
 
     private JoinResult HandleGuestJoin(Room room, string connectionId)
@@ -161,7 +161,8 @@ public class RoomService : IRoomService
             HostPositionMs: (isReconnect || hostHasPlaybackState) ? room.HostPositionMs : null,
             HostIsPlaying: (isReconnect || hostHasPlaybackState) ? room.HostIsPlaying : null,
             HostPlaybackSeqNo: (isReconnect || hostHasPlaybackState) ? room.HostPlaybackSeqNo : null,
-            HostPositionUpdatedAtMs: (isReconnect || hostHasPlaybackState) ? room.HostPositionUpdatedAtMs : null);
+            HostPositionUpdatedAtMs: (isReconnect || hostHasPlaybackState) ? room.HostPositionUpdatedAtMs : null,
+            PlaybackRate: room.PlaybackRate);
     }
 
     
@@ -378,7 +379,7 @@ public class RoomService : IRoomService
             _logger.LogInformation("Playback play {Event} {RoomId} {ConnectionId} {Role} {PositionMs} {SeqNo}",
                 "playback.play", room.RoomCode, connectionId, "host", positionMs, room.HostPlaybackSeqNo);
 
-            return new PlayBroadcast(room.RoomCode, positionMs, serverTimestampMs, room.HostRttMs, room.HostPlaybackSeqNo);
+            return new PlayBroadcast(room.RoomCode, positionMs, serverTimestampMs, room.HostRttMs, room.HostPlaybackSeqNo, room.PlaybackRate);
         }
         finally
         {
@@ -548,8 +549,22 @@ public class RoomService : IRoomService
                 return new BufferingStallResult(room.RoomCode, role, null, positionMs);
             }
 
+            
+            if (!room.IsBuffering)
+            {
+                room.WasPlayingBeforeBuffering = room.HostIsPlaying;
+            }
+
             participant.BufferingState = BufferingState.Stalled;
             room.LastActivityAt = DateTimeOffset.UtcNow;
+
+            
+            if (role == "host")
+            {
+                room.HostPositionMs = positionMs;
+                room.HostPositionUpdatedAtMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                room.HostIsPlaying = false; 
+            }
 
             var peer = role == "host" ? room.Guest : room.Host;
             var peerConnectionId = peer?.ConnectionId;
@@ -579,7 +594,7 @@ public class RoomService : IRoomService
             if (participant.BufferingState == BufferingState.Ready)
             {
                 _logger.LogDebug("Out-of-sequence buffering ready ignored {RoomId} {Role}", room.RoomCode, role);
-                return new BufferingReadyResult(room.RoomCode, role, GateOpened: false, ResumePositionMs: 0);
+                return new BufferingReadyResult(room.RoomCode, role, GateOpened: false, ResumePositionMs: 0, IsPlaying: false);
             }
 
             participant.BufferingState = BufferingState.Ready;
@@ -592,8 +607,12 @@ public class RoomService : IRoomService
 
             if (gateOpened)
             {
-                _logger.LogInformation("Buffering gate opened, resume {Event} {RoomId} {ResumePositionMs}",
-                    "buffering.resume", room.RoomCode, room.HostPositionMs);
+                
+                room.HostIsPlaying = room.WasPlayingBeforeBuffering;
+                room.HostPositionUpdatedAtMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+                _logger.LogInformation("Buffering gate opened, resume {Event} {RoomId} {ResumePositionMs} {IsPlaying}",
+                    "buffering.resume", room.RoomCode, room.HostPositionMs, room.HostIsPlaying);
             }
             else
             {
@@ -601,7 +620,7 @@ public class RoomService : IRoomService
                     "buffering.ready", room.RoomCode, role);
             }
 
-            return new BufferingReadyResult(room.RoomCode, role, gateOpened, room.HostPositionMs);
+            return new BufferingReadyResult(room.RoomCode, role, gateOpened, room.HostPositionMs, room.HostIsPlaying);
         }
         finally
         {
@@ -675,6 +694,30 @@ public class RoomService : IRoomService
         if (room.Guest?.ConnectionId == connectionId)
             return (room.Guest, "guest");
         throw new ConnectionNotInRoomException(connectionId);
+    }
+
+    public async Task<PlaybackSpeedBroadcast> HandleSetPlaybackSpeed(string connectionId, double speed)
+    {
+        var room = FindRoom(connectionId);
+        await room.Lock.WaitAsync();
+        try
+        {
+            var (participant, role) = FindParticipant(room, connectionId);
+            if (role != "host")
+                throw new RoleUnauthorizedException(room.RoomCode, role);
+
+            room.PlaybackRate = speed;
+            room.LastActivityAt = DateTimeOffset.UtcNow;
+
+            _logger.LogInformation("Playback speed changed {Event} {RoomId} {Speed}",
+                "playback.speed", room.RoomCode, speed);
+
+            return new PlaybackSpeedBroadcast(room.RoomCode, speed, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+        }
+        finally
+        {
+            room.Lock.Release();
+        }
     }
 
     private Room FindRoom(string connectionId)

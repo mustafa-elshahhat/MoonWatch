@@ -123,6 +123,7 @@ void main() {
           const SyncEventBufferingResumeReceived(
             resumePositionMs: 6000,
             episodeId: 1,
+            isPlaying: true,
           ),
         );
         await Future.delayed(const Duration(milliseconds: 50));

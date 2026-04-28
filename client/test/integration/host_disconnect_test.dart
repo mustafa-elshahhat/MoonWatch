@@ -9,6 +9,8 @@ import 'package:watch_party/features/room/bloc/room_event.dart';
 import 'package:watch_party/features/room/bloc/room_state.dart';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 import 'package:watch_party/core/network/http_client.dart';
+import 'package:watch_party/features/room/domain/room_repository_event.dart';
+import 'package:watch_party/features/room/domain/peer_status.dart';
 
 const _testDescriptor = IptvContentDescriptor(
   contentType: IptvDescriptorType.live,
@@ -26,7 +28,7 @@ void main() {
   late MockSignalRClient mockSignalRClient;
   late MockRoomRepository mockRoomRepository;
   late StreamController<SignalRConnectionState> connectionStateController;
-  late StreamController<RoomEvent> repoEventsController;
+  late StreamController<RoomRepositoryEvent> repoEventsController;
   late ReconnectBloc reconnectBloc;
   late RoomBloc roomBloc;
 
@@ -35,7 +37,7 @@ void main() {
     mockRoomRepository = MockRoomRepository();
     connectionStateController =
         StreamController<SignalRConnectionState>.broadcast();
-    repoEventsController = StreamController<RoomEvent>.broadcast();
+    repoEventsController = StreamController<RoomRepositoryEvent>.broadcast();
 
     when(
       () => mockSignalRClient.connectionState,
@@ -49,6 +51,7 @@ void main() {
       () => mockRoomRepository.events,
     ).thenAnswer((_) => repoEventsController.stream);
     when(() => mockRoomRepository.registerHandlers()).thenReturn(null);
+    when(() => mockRoomRepository.unregisterHandlers()).thenReturn(null);
 
     reconnectBloc = ReconnectBloc(
       signalRClient: mockSignalRClient,
@@ -91,7 +94,7 @@ void main() {
         ),
       );
 
-      repoEventsController.add(const RoomEventRoomClosed('host_disconnected'));
+      repoEventsController.add(const RepoEventRoomClosed('host_disconnected'));
       await Future.delayed(const Duration(milliseconds: 50));
 
       expect(roomBloc.state, const RoomStateClosed('host_disconnected'));
@@ -191,5 +194,31 @@ void main() {
         );
       },
     );
+   group('host_disconnect integration', () {
+      test('guest disconnects with grace period', () async {
+        roomBloc.startListening();
+        roomBloc.add(
+          const RoomEventRoomJoined(
+            roomCode: 'ABC123',
+            role: 'host',
+            guestPresent: true,
+            contentDescriptor: _testDescriptor,
+          ),
+        );
+        await Future.delayed(const Duration(milliseconds: 50));
+
+        repoEventsController.add(const RepoEventGuestLeft());
+        await Future.delayed(const Duration(milliseconds: 50));
+
+        final state = roomBloc.state as RoomStateActive;
+        expect(state.peerStatus, PeerStatus.away);
+
+        repoEventsController.add(const RepoEventGuestReconnected());
+        await Future.delayed(const Duration(milliseconds: 50));
+
+        final state2 = roomBloc.state as RoomStateActive;
+        expect(state2.peerStatus, PeerStatus.connected);
+      });
+    });
   });
 }

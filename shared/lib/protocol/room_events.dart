@@ -14,6 +14,7 @@ class RoomEvents {
   static const String playbackPause = 'playback:pause';
   static const String playbackSeek = 'playback:seek';
   static const String playbackStateSync = 'playback:state_sync';
+  static const String playbackSpeed = 'playback:speed';
 
   static const String bufferingStall = 'buffering:stall';
   static const String bufferingReady = 'buffering:ready';
@@ -28,6 +29,7 @@ class RoomEvents {
   static const String hubPlay = 'Play';
   static const String hubPause = 'Pause';
   static const String hubSeek = 'Seek';
+  static const String hubSetPlaybackSpeed = 'SetPlaybackSpeed';
   static const String hubNotifyBufferingStall = 'NotifyBufferingStall';
   static const String hubNotifyPlayerReady = 'NotifyPlayerReady';
   static const String hubNotifyBufferingReady = 'NotifyBufferingReady';

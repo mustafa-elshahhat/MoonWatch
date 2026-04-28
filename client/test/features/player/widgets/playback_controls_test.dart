@@ -40,6 +40,18 @@ class _FakePlayerController extends Fake implements pc.PlayerController {
   bool get isInitialized => false;
 
   @override
+  double get playbackSpeed => 1.0;
+
+  @override
+  Stream<double> get playbackSpeedStream => const Stream<double>.empty();
+
+  @override
+  Stream<Duration> get durationStream => const Stream<Duration>.empty();
+
+  @override
+  Stream<Duration> get positionStream => const Stream<Duration>.empty();
+
+  @override
   Widget? get nativeView => null;
 
   @override
@@ -56,6 +68,9 @@ class _FakePlayerController extends Fake implements pc.PlayerController {
 
   @override
   Future<void> setVolume(double volume) async {}
+
+  @override
+  Future<void> setPlaybackSpeed(double speed) async {}
 
   @override
   Future<void> dispose() async {}

@@ -18,6 +18,10 @@ class MediaKitPlayerImpl implements PlayerController {
       StreamController<Duration>.broadcast();
   final StreamController<Duration> _durationController =
       StreamController<Duration>.broadcast();
+  final StreamController<double> _speedController =
+      StreamController<double>.broadcast();
+  final StreamController<double> _volumeController =
+      StreamController<double>.broadcast();
 
   final AppLogger _logger = AppLogger('MediaKitPlayer');
 
@@ -91,6 +95,18 @@ class MediaKitPlayerImpl implements PlayerController {
   @override
   bool get isInitialized =>
       _videoController != null && _player != null && _initialized;
+
+  @override
+  double get playbackSpeed => _player?.state.rate ?? 1.0;
+
+  @override
+  Stream<double> get playbackSpeedStream => _speedController.stream;
+
+  @override
+  double get volume => (_player?.state.volume ?? 100.0) / 100.0;
+
+  @override
+  Stream<double> get volumeStream => _volumeController.stream;
 
   BoxFit _cachedFit = BoxFit.contain;
 
@@ -398,8 +414,23 @@ class MediaKitPlayerImpl implements PlayerController {
 
     _subscriptions.add(
       _player!.stream.duration.listen((d) {
-        if (_disposed || sessionId != _mediaSessionId) return;
         if (!_durationController.isClosed) _durationController.add(d);
+      }),
+    );
+
+    _subscriptions.add(
+      _player!.stream.rate.listen((rate) {
+        if (_disposed || sessionId != _mediaSessionId) return;
+        if (!_speedController.isClosed) _speedController.add(rate);
+      }),
+    );
+
+    _subscriptions.add(
+      _player!.stream.volume.listen((volume) {
+        if (_disposed || sessionId != _mediaSessionId) return;
+        if (!_volumeController.isClosed) {
+          _volumeController.add(volume / 100.0);
+        }
       }),
     );
 
@@ -563,6 +594,12 @@ class MediaKitPlayerImpl implements PlayerController {
   }
 
   @override
+  Future<void> setPlaybackSpeed(double speed) async {
+    if (_disposed || _disposing) return;
+    await _player?.setRate(speed);
+  }
+
+  @override
   Future<void> dispose() async {
     _logger.d('MediaKitPlayerImpl.dispose');
     _logger.i('MediaKitPlayerImpl.dispose');
@@ -598,5 +635,6 @@ class MediaKitPlayerImpl implements PlayerController {
 
     if (!_positionController.isClosed) _positionController.add(Duration.zero);
     if (!_durationController.isClosed) _durationController.add(Duration.zero);
+    if (!_volumeController.isClosed) _volumeController.add(1.0);
   }
 }

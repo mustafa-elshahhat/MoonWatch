@@ -42,6 +42,12 @@ public class Room
     public bool HostIsPlaying { get; set; }
 
     
+    public bool WasPlayingBeforeBuffering { get; set; }
+
+    
+    public bool IsBuffering => (Host?.BufferingState == BufferingState.Stalled) || (Guest?.BufferingState == BufferingState.Stalled);
+
+    
     public int HostRttMs { get; set; }
 
     
@@ -59,6 +65,8 @@ public class Room
 
     
     public bool GuestAway { get; set; }
+    
+    public double PlaybackRate { get; set; } = 1.0;
 
     public Room(string roomCode)
     {

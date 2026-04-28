@@ -113,7 +113,8 @@ public class StateSyncTimerService : IHostedService, IDisposable
                     estimatedPositionMs = hostPositionMs;
                     if (room.HostPositionUpdatedAtMs > 0)
                     {
-                        estimatedPositionMs += serverTimestampMs - room.HostPositionUpdatedAtMs;
+                        var elapsedMs = serverTimestampMs - room.HostPositionUpdatedAtMs;
+                        estimatedPositionMs += (long)(elapsedMs * room.PlaybackRate);
                     }
                 }
             }
@@ -132,7 +133,8 @@ public class StateSyncTimerService : IHostedService, IDisposable
                     estimatedPositionMs,
                     hostIsPlaying,
                     serverTimestampMs,
-                    hostPlaybackSeqNo));
+                    hostPlaybackSeqNo,
+                    room.PlaybackRate));
 
             _logger.LogDebug("State sync emitted {Event} {RoomId} {HostPositionMs} {EstimatedPositionMs} {IsPlaying}",
                 "playback.state_sync", roomCode, hostPositionMs, estimatedPositionMs, hostIsPlaying);

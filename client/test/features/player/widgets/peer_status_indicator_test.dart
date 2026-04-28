@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:watch_party/core/theme/app_colors.dart';
 import 'package:watch_party/features/player/widgets/peer_status_indicator.dart';
-import 'package:watch_party/features/room/bloc/room_state.dart';
+import 'package:watch_party/features/room/domain/peer_status.dart';
 
 void main() {
   Widget buildTestWidget(PeerStatus status) {

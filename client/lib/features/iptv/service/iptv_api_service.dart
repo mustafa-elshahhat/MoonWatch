@@ -28,18 +28,20 @@ class IptvApiService {
   IptvApiService({
     required AppConfig appConfig,
     required CredentialStore credentialStore,
+    Dio? dio,
     IptvConfig? initialConfig,
     AppLogger? logger,
   })  : _appConfig = appConfig,
         _credentialStore = credentialStore,
         _currentConfig = initialConfig,
         _logger = logger ?? AppLogger('IptvApiService'),
-        _dio = Dio(
-          BaseOptions(
-            connectTimeout: const Duration(seconds: 15),
-            receiveTimeout: const Duration(seconds: 30),
-          ),
-        ) {
+        _dio = dio ??
+            Dio(
+              BaseOptions(
+                connectTimeout: const Duration(seconds: 15),
+                receiveTimeout: const Duration(seconds: 30),
+              ),
+            ) {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -94,11 +96,7 @@ class IptvApiService {
         password: password,
         baseUrl: _appConfig.iptvBaseUrl,
       );
-      final dio = Dio(BaseOptions(
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-      ));
-      final response = await dio.getUri(config.authUrl);
+      final response = await _dio.getUri(config.authUrl);
       final data = response.data as Map<String, dynamic>;
       final userInfo = data['user_info'] as Map<String, dynamic>?;
       return userInfo?['auth']?.toString() == '1';

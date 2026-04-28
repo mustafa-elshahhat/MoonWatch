@@ -8,6 +8,8 @@ import 'package:watch_party/features/reconnect/reconnect_bloc.dart';
 import 'package:watch_party/features/room/bloc/room_event.dart';
 import 'package:watch_party/features/room/repository/room_repository.dart';
 
+import 'package:watch_party/features/room/domain/room_repository_event.dart';
+
 class MockSignalRClient extends Mock implements SignalRClient {}
 
 class MockRoomRepository extends Mock implements RoomRepository {}
@@ -16,14 +18,14 @@ void main() {
   late MockSignalRClient mockSignalRClient;
   late MockRoomRepository mockRoomRepository;
   late StreamController<SignalRConnectionState> connectionStateController;
-  late StreamController<RoomEvent> roomEventsController;
+  late StreamController<RoomRepositoryEvent> roomEventsController;
 
   setUp(() {
     mockSignalRClient = MockSignalRClient();
     mockRoomRepository = MockRoomRepository();
     connectionStateController =
         StreamController<SignalRConnectionState>.broadcast();
-    roomEventsController = StreamController<RoomEvent>.broadcast();
+    roomEventsController = StreamController<RoomRepositoryEvent>.broadcast();
 
     when(
       () => mockSignalRClient.connectionState,
@@ -116,7 +118,7 @@ void main() {
         return bloc;
       },
       act: (bloc) => bloc.add(const ReconnectEventAttemptRejoin()),
-      wait: const Duration(seconds: 4),
+      wait: const Duration(seconds: 6),
       expect: () => [const ReconnectStateFailed('rejoin_error')],
     );
   });
@@ -293,7 +295,7 @@ void main() {
       seed: () => const ReconnectStateAttempting(attemptNumber: 1),
       act: (bloc) {
         roomEventsController.add(
-          const RoomEventRoomJoined(
+          const RepoEventRoomJoined(
             roomCode: 'ABC123',
             role: 'guest',
             guestPresent: true,
@@ -315,7 +317,7 @@ void main() {
       seed: () => const ReconnectStateAttempting(attemptNumber: 1),
       act: (bloc) {
         roomEventsController.add(
-          const RoomEventError(
+          const RepoEventError(
             code: 'room_closed',
             message: 'Room has been closed.',
           ),
@@ -336,7 +338,7 @@ void main() {
       seed: () => const ReconnectStateAttempting(attemptNumber: 1),
       act: (bloc) {
         roomEventsController.add(
-          const RoomEventError(
+          const RepoEventError(
             code: 'room_full',
             message: 'Room is already full.',
           ),
@@ -355,7 +357,7 @@ void main() {
       },
       act: (bloc) {
         roomEventsController.add(
-          const RoomEventRoomJoined(
+          const RepoEventRoomJoined(
             roomCode: 'ABC123',
             role: 'guest',
             guestPresent: true,
@@ -377,7 +379,7 @@ void main() {
       seed: () => const ReconnectStateAttempting(attemptNumber: 1),
       act: (bloc) {
         roomEventsController.add(
-          const RoomEventError(
+          const RepoEventError(
             code: 'stream_url_invalid',
             message: 'Invalid URL.',
           ),

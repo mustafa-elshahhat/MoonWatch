@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import '../../../core/protocol/payloads.dart';
 import '../domain/room_error_code.dart';
 
-enum PeerStatus { connected, buffering, away }
+import '../domain/peer_status.dart';
 
 sealed class RoomState extends Equatable {
   const RoomState();
@@ -26,26 +26,33 @@ class RoomStateCreating extends RoomState {
 class RoomStateWaiting extends RoomState {
   final String roomCode;
   final String role;
+  final double playbackRate;
 
-  const RoomStateWaiting({required this.roomCode, required this.role});
+  const RoomStateWaiting({
+    required this.roomCode,
+    required this.role,
+    this.playbackRate = 1.0,
+  });
 
   @override
-  List<Object?> get props => [roomCode, role];
+  List<Object?> get props => [roomCode, role, playbackRate];
 }
 
 class RoomStateJoined extends RoomState {
   final String roomCode;
   final String role;
   final bool contentSet;
+  final double playbackRate;
 
   const RoomStateJoined({
     required this.roomCode,
     required this.role,
     this.contentSet = false,
+    this.playbackRate = 1.0,
   });
 
   @override
-  List<Object?> get props => [roomCode, role, contentSet];
+  List<Object?> get props => [roomCode, role, contentSet, playbackRate];
 }
 
 class RoomStateActive extends RoomState {
@@ -55,6 +62,7 @@ class RoomStateActive extends RoomState {
   final PeerStatus peerStatus;
   final bool localReady;
   final bool peerReady;
+  final double playbackRate;
 
   bool get bothReady => localReady && peerReady;
   String get contentKey => contentDescriptor.contentKey;
@@ -66,6 +74,7 @@ class RoomStateActive extends RoomState {
     this.peerStatus = PeerStatus.connected,
     this.localReady = false,
     this.peerReady = false,
+    this.playbackRate = 1.0,
   });
 
   RoomStateActive copyWith({
@@ -73,6 +82,7 @@ class RoomStateActive extends RoomState {
     PeerStatus? peerStatus,
     bool? localReady,
     bool? peerReady,
+    double? playbackRate,
   }) =>
       RoomStateActive(
         roomCode: roomCode,
@@ -81,6 +91,7 @@ class RoomStateActive extends RoomState {
         peerStatus: peerStatus ?? this.peerStatus,
         localReady: localReady ?? this.localReady,
         peerReady: peerReady ?? this.peerReady,
+        playbackRate: playbackRate ?? this.playbackRate,
       );
 
   @override
@@ -91,6 +102,7 @@ class RoomStateActive extends RoomState {
         peerStatus,
         localReady,
         peerReady,
+        playbackRate,
       ];
 }
 

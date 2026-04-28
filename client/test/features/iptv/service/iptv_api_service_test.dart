@@ -10,19 +10,31 @@ class MockAppConfig extends Mock implements AppConfig {}
 class MockCredentialStore extends Mock implements CredentialStore {}
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(Uri());
+  });
+
   late MockAppConfig mockAppConfig;
   late MockCredentialStore mockCredentialStore;
+  late MockDio mockDio;
   late IptvApiService apiService;
 
   setUp(() {
     mockAppConfig = MockAppConfig();
     mockCredentialStore = MockCredentialStore();
-    
+    mockDio = MockDio();
+
     when(() => mockAppConfig.iptvBaseUrl).thenReturn('http://api.test');
-    
+    when(() => mockDio.interceptors).thenReturn(Interceptors());
+    when(() => mockDio.getUri(any())).thenAnswer((_) async => Response(
+          data: [],
+          requestOptions: RequestOptions(path: ''),
+        ));
+
     apiService = IptvApiService(
       appConfig: mockAppConfig,
       credentialStore: mockCredentialStore,
+      dio: mockDio,
     );
   });
 

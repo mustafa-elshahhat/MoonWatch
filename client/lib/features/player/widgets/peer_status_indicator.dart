@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../room/bloc/room_state.dart';
+import '../../room/domain/peer_status.dart';
 
 class PeerStatusIndicator extends StatelessWidget {
   final PeerStatus status;

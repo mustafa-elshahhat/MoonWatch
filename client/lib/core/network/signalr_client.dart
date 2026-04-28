@@ -66,28 +66,37 @@ class SignalRClient {
   }
 
   Future<void> _doConnect() async {
-    if (_hubConnection.state == HubConnectionState.Connected) {
+    final hubState = _hubConnection.state;
+
+    if (hubState == HubConnectionState.Connected) {
       _updateState(SignalRConnectionState.connected);
       return;
     }
 
-    if (_hubConnection.state == HubConnectionState.Connecting ||
-        _hubConnection.state == HubConnectionState.Reconnecting) {
-      _updateState(SignalRConnectionState.connecting);
-      return;
+    if (hubState == HubConnectionState.Connecting ||
+        hubState == HubConnectionState.Reconnecting ||
+        _currentState == SignalRConnectionState.reconnecting) {
+      _logger.d('SignalR already connecting/reconnecting, waiting...');
+      await connectionState
+          .firstWhere((s) => s == SignalRConnectionState.connected)
+          .timeout(const Duration(seconds: 15), onTimeout: () {
+        _logger.w('Timed out waiting for SignalR connection');
+        return SignalRConnectionState.disconnected;
+      });
+
+      if (_currentState == SignalRConnectionState.connected) return;
+      throw Exception('SignalR connection/reconnection timed out');
     }
 
-    if (_hubConnection.state == HubConnectionState.Disconnected) {
-      _updateState(SignalRConnectionState.connecting);
-      try {
-        await _hubConnection.start();
-        _updateState(SignalRConnectionState.connected);
-        _logger.i('SignalR connected');
-      } catch (e) {
-        _updateState(SignalRConnectionState.disconnected);
-        _logger.e('SignalR connect failed: $e');
-        rethrow;
-      }
+    _updateState(SignalRConnectionState.connecting);
+    try {
+      await _hubConnection.start();
+      _updateState(SignalRConnectionState.connected);
+      _logger.i('SignalR connected');
+    } catch (e) {
+      _updateState(SignalRConnectionState.disconnected);
+      _logger.e('SignalR connect failed: $e');
+      rethrow;
     }
   }
 
@@ -95,18 +104,20 @@ class SignalRClient {
     await ensureConnected();
   }
 
-  Future<void> safeStart() async {
-    if (_hubConnection.state != HubConnectionState.Disconnected) return;
-    await _hubConnection.start();
-  }
-
   Future<void> disconnect() async {
-    await _hubConnection.stop();
+    if (_hubConnection.state != HubConnectionState.Disconnected) {
+      try {
+        await _hubConnection.stop();
+      } catch (e) {
+        _logger.w('Error during SignalR disconnect: $e');
+      }
+    }
     _updateState(SignalRConnectionState.disconnected);
     _logger.i('SignalR disconnected');
   }
 
   Future<Object?> invoke(String method, {List<Object>? args}) async {
+    await ensureConnected();
     _logger.d('SignalR invoke: $method');
     return _hubConnection.invoke(method, args: args);
   }
@@ -120,12 +131,15 @@ class SignalRClient {
   }
 
   void _updateState(SignalRConnectionState state) {
+    if (_currentState == state) return;
     _currentState = state;
-    _connectionStateController.add(state);
+    if (!_connectionStateController.isClosed) {
+      _connectionStateController.add(state);
+    }
   }
 
   Future<void> dispose() async {
-    await _hubConnection.stop();
+    await disconnect();
     await _connectionStateController.close();
   }
 }

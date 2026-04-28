@@ -11,6 +11,8 @@ import 'package:watch_party/features/room/bloc/room_event.dart';
 import 'package:watch_party/features/room/bloc/room_state.dart';
 import 'package:watch_party/features/room/domain/room_error_code.dart';
 import 'package:watch_party/features/room/repository/room_repository.dart';
+import 'package:watch_party/features/room/domain/room_repository_event.dart';
+import 'package:watch_party/features/room/domain/peer_status.dart';
 
 const _testDescriptor = IptvContentDescriptor(
   contentType: IptvDescriptorType.live,
@@ -34,17 +36,18 @@ class MockRoomRepository extends Mock implements RoomRepository {}
 void main() {
   late MockSignalRClient mockSignalRClient;
   late MockRoomRepository mockRoomRepository;
-  late StreamController<RoomEvent> repoEventsController;
+  late StreamController<RoomRepositoryEvent> repoEventsController;
 
   setUp(() {
     mockSignalRClient = MockSignalRClient();
     mockRoomRepository = MockRoomRepository();
-    repoEventsController = StreamController<RoomEvent>.broadcast();
+    repoEventsController = StreamController<RoomRepositoryEvent>.broadcast();
 
     when(
       () => mockRoomRepository.events,
     ).thenAnswer((_) => repoEventsController.stream);
     when(() => mockRoomRepository.registerHandlers()).thenReturn(null);
+    when(() => mockRoomRepository.unregisterHandlers()).thenReturn(null);
     when(() => mockSignalRClient.connect()).thenAnswer((_) async {});
     when(() => mockSignalRClient.ensureConnected()).thenAnswer((_) async {});
     when(() => mockSignalRClient.disconnect()).thenAnswer((_) async {});
@@ -78,7 +81,7 @@ void main() {
         bloc.add(const RoomEventCreateRoom());
         await Future.delayed(const Duration(milliseconds: 50));
         repoEventsController.add(
-          const RoomEventRoomJoined(
+          const RepoEventRoomJoined(
             roomCode: 'ABC123',
             role: 'host',
             guestPresent: false,
@@ -117,7 +120,7 @@ void main() {
         bloc.add(const RoomEventJoinRoom('ABC123'));
         await Future.delayed(const Duration(milliseconds: 50));
         repoEventsController.add(
-          const RoomEventRoomJoined(
+          const RepoEventRoomJoined(
             roomCode: 'ABC123',
             role: 'guest',
             guestPresent: true,
@@ -139,7 +142,7 @@ void main() {
         bloc.add(const RoomEventJoinRoom('ABC123'));
         await Future.delayed(const Duration(milliseconds: 50));
         repoEventsController.add(
-          const RoomEventRoomJoined(
+          const RepoEventRoomJoined(
             roomCode: 'ABC123',
             role: 'guest',
             guestPresent: true,

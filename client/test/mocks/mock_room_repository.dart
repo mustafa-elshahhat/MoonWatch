@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:watch_party/features/room/repository/room_repository.dart';
-import 'package:watch_party/features/room/bloc/room_event.dart';
+import 'package:watch_party/features/room/domain/room_repository_event.dart';
 
 class MockRoomRepository implements RoomRepository {
-  final _eventController = StreamController<RoomEvent>.broadcast();
+  final _eventController = StreamController<RoomRepositoryEvent>.broadcast();
 
   final List<int> notifyBufferingStallCalls = [];
 
@@ -28,7 +28,21 @@ class MockRoomRepository implements RoomRepository {
   PlaybackStateSyncCallback? onPlaybackStateSync;
 
   @override
-  Stream<RoomEvent> get events => _eventController.stream;
+  PlaybackSpeedCallback? onPlaybackSpeed;
+
+  @override
+  Stream<RoomRepositoryEvent> get events => _eventController.stream;
+
+  @override
+  void clearCallbacks() {
+    onBufferingStall = null;
+    onBufferingResume = null;
+    onPlaybackPlay = null;
+    onPlaybackPause = null;
+    onPlaybackSeek = null;
+    onPlaybackStateSync = null;
+    onPlaybackSpeed = null;
+  }
 
   @override
   void registerHandlers() {}
@@ -59,6 +73,8 @@ class MockRoomRepository implements RoomRepository {
 
   final List<int> invokeSeekCalls = [];
 
+  final List<double> invokeSetPlaybackSpeedCalls = [];
+
   @override
   Future<void> invokePlay(int positionMs, int clientTimestampMs) async {
     invokePlayCalls.add([positionMs, clientTimestampMs]);
@@ -74,7 +90,12 @@ class MockRoomRepository implements RoomRepository {
     invokeSeekCalls.add(targetPositionMs);
   }
 
-  void injectEvent(RoomEvent event) {
+  @override
+  Future<void> invokeSetPlaybackSpeed(double speed) async {
+    invokeSetPlaybackSpeedCalls.add(speed);
+  }
+
+  void injectEvent(RoomRepositoryEvent event) {
     _eventController.add(event);
   }
 

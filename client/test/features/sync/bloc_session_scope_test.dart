@@ -35,11 +35,17 @@ void main() {
     when(() => playerController.isPlaying).thenReturn(false);
     when(() => playerController.isBuffering).thenReturn(false);
     when(() => playerController.isInitialized).thenReturn(true);
+    when(() => playerController.playbackSpeed).thenReturn(1.0);
+    when(
+      () => playerController.playbackSpeedStream,
+    ).thenAnswer((_) => const Stream.empty());
     when(() => playerController.initialize(any())).thenAnswer((_) async {});
     when(() => playerController.dispose()).thenAnswer((_) async {});
     when(() => playerController.play()).thenAnswer((_) async {});
     when(() => playerController.pause()).thenAnswer((_) async {});
     when(() => playerController.seekTo(any())).thenAnswer((_) async {});
+    when(() => playerController.setPlaybackSpeed(any()))
+        .thenAnswer((_) async {});
   });
 
   group('Bloc Session Scoping tests', () {

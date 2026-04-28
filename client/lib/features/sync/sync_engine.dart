@@ -19,16 +19,18 @@ class SyncEventPlayReceived extends SyncEvent {
   final int hostRttMs;
 
   final int seqNo;
+  final double playbackRate;
 
   const SyncEventPlayReceived({
     required this.positionMs,
     required this.serverTimestampMs,
     required this.hostRttMs,
     this.seqNo = 0,
+    this.playbackRate = 1.0,
   });
 
   @override
-  List<Object?> get props => [positionMs, serverTimestampMs, hostRttMs, seqNo];
+  List<Object?> get props => [positionMs, serverTimestampMs, hostRttMs, seqNo, playbackRate];
 }
 
 class SyncEventPauseReceived extends SyncEvent {
@@ -79,12 +81,14 @@ class SyncEventStateSyncReceived extends SyncEvent {
   final int serverTimestampMs;
 
   final int seqNo;
+  final double playbackRate;
 
   const SyncEventStateSyncReceived({
     required this.hostPositionMs,
     required this.isPlaying,
     required this.serverTimestampMs,
     this.seqNo = 0,
+    this.playbackRate = 1.0,
   });
 
   @override
@@ -93,7 +97,21 @@ class SyncEventStateSyncReceived extends SyncEvent {
         isPlaying,
         serverTimestampMs,
         seqNo,
+        playbackRate,
       ];
+}
+
+class SyncEventSpeedReceived extends SyncEvent {
+  final double speed;
+  final int serverTimestampMs;
+
+  const SyncEventSpeedReceived({
+    required this.speed,
+    required this.serverTimestampMs,
+  });
+
+  @override
+  List<Object?> get props => [speed, serverTimestampMs];
 }
 
 class SyncEventPlayerStalled extends SyncEvent {
@@ -119,13 +137,16 @@ class SyncEventPeerStalled extends SyncEvent {
 class SyncEventBufferingResumeReceived extends SyncEvent {
   final int resumePositionMs;
   final int episodeId;
+  final bool isPlaying;
+
   const SyncEventBufferingResumeReceived({
     required this.resumePositionMs,
     required this.episodeId,
+    required this.isPlaying,
   });
 
   @override
-  List<Object?> get props => [resumePositionMs, episodeId];
+  List<Object?> get props => [resumePositionMs, episodeId, isPlaying];
 }
 
 class SyncEventExcessiveDrift extends SyncEvent {
@@ -185,6 +206,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   bool _playerReady = false;
   String? _playerContentKey;
   String? _lastNotifiedReadyContentKey;
+  double _playbackRate = 1.0;
 
   final List<SyncEvent> _deferredQueue = [];
 
@@ -222,6 +244,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     on<SyncEventPlayerReady>(_onPlayerReady);
     on<SyncEventPeerStalled>(_onPeerStalled);
     on<SyncEventBufferingResumeReceived>(_onBufferingResumeReceived);
+    on<SyncEventSpeedReceived>(_onSpeedReceived);
     on<SyncEventExcessiveDrift>(_onExcessiveDrift);
     on<_SyncEventFlushDeferred>(_onFlushDeferred);
 
@@ -238,6 +261,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         SyncEventBufferingResumeReceived(
           resumePositionMs: payload.resumePositionMs,
           episodeId: payload.episodeId,
+          isPlaying: payload.isPlaying,
         ),
       );
     };
@@ -249,6 +273,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
           serverTimestampMs: payload.serverTimestampMs,
           hostRttMs: payload.hostRttMs,
           seqNo: payload.seqNo,
+          playbackRate: payload.playbackRate,
         ),
       );
     };
@@ -278,6 +303,15 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
           isPlaying: payload.isPlaying,
           serverTimestampMs: payload.serverTimestampMs,
           seqNo: payload.seqNo,
+          playbackRate: payload.playbackRate,
+        ),
+      );
+    };
+    _roomRepository.onPlaybackSpeed = (payload) {
+      add(
+        SyncEventSpeedReceived(
+          speed: payload.speed,
+          serverTimestampMs: payload.serverTimestampMs,
         ),
       );
     };
@@ -451,6 +485,11 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       return;
     }
 
+    if (state is SyncStateBuffering) {
+      _logger.d('SyncBloc: ignoring state_sync during buffering');
+      return;
+    }
+
     if (!_playerReady) {
       _logger.i(
         'SyncBloc: deferring playback:state_sync '
@@ -497,8 +536,14 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       'hostPositionMs=${event.hostPositionMs}, rawAgeMs=${rawAgeMs}ms, '
       'clampedAgeMs=${ageMs}ms, '
       'adjustedHostPositionMs=$adjustedHostPositionMs, '
-      'guestPositionMs=$currentGuestPositionMs, driftMs=$driftMs',
+      'guestPositionMs=$currentGuestPositionMs, driftMs=$driftMs, playbackRate=${event.playbackRate}',
     );
+
+    if (event.playbackRate != _playbackRate) {
+      _logger.i('SyncBloc: applying playback:speed from state_sync — speed=${event.playbackRate}');
+      _playbackRate = event.playbackRate;
+      await _playerController.setPlaybackSpeed(_playbackRate);
+    }
 
     if (driftMs.abs() > AppConstants.kDriftThresholdMs) {
       _consecutiveDriftHits++;
@@ -718,16 +763,28 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
 
     _lastAuthoritativeCommandAtMs = now;
 
-    if (_wasPlayingBeforeBuffering) {
+    if (event.isPlaying) {
       await _playerController.play();
       if (isClosed) return;
       emit(const SyncStateSyncing());
     } else {
+      await _playerController.pause();
       if (isClosed) return;
       emit(const SyncStatePaused());
     }
-    _wasPlayingBeforeBuffering = false;
-    _logger.i('[BUFFERING_RESUME_APPLIED] pos=${event.resumePositionMs}ms');
+    _logger.i(
+        '[BUFFERING_RESUME_APPLIED] pos=${event.resumePositionMs}ms isPlaying=${event.isPlaying}');
+  }
+
+  Future<void> _onSpeedReceived(
+    SyncEventSpeedReceived event,
+    Emitter<SyncState> emit,
+  ) async {
+    if (_role == 'host') return;
+
+    _logger.i('SyncBloc: applying playback:speed received — speed=${event.speed}');
+    _playbackRate = event.speed;
+    await _playerController.setPlaybackSpeed(_playbackRate);
   }
 
   void _onExcessiveDrift(
@@ -746,8 +803,11 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     final now = DateTime.now().millisecondsSinceEpoch + _clockOffsetMs;
     final elapsedMs = (now - event.serverTimestampMs).clamp(0, 30000);
 
+    _playbackRate = event.playbackRate;
+    await _playerController.setPlaybackSpeed(_playbackRate);
+
     final adjustedPositionMs =
-        event.positionMs + elapsedMs + (event.hostRttMs ~/ 2);
+        event.positionMs + (elapsedMs * _playbackRate).toInt() + (event.hostRttMs ~/ 2);
 
     _logger.i(
       'SyncBloc: applying playback:play — '
@@ -972,12 +1032,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
 
   @override
   Future<void> close() {
-    _roomRepository.onBufferingStall = null;
-    _roomRepository.onBufferingResume = null;
-    _roomRepository.onPlaybackPlay = null;
-    _roomRepository.onPlaybackPause = null;
-    _roomRepository.onPlaybackSeek = null;
-    _roomRepository.onPlaybackStateSync = null;
+    _roomRepository.clearCallbacks();
     return super.close();
   }
 }

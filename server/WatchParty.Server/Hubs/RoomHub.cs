@@ -42,7 +42,8 @@ public class RoomHub : Hub
                 result.Role,
                 result.GuestPresent,
                 result.ContentDescriptor,
-                serverTimestampMs));
+                serverTimestampMs,
+                result.PlaybackRate ?? 1.0));
         }
         catch (Exception ex)
         {
@@ -71,7 +72,8 @@ public class RoomHub : Hub
                 result.Role,
                 result.GuestPresent,
                 result.ContentDescriptor,
-                serverTimestampMs));
+                serverTimestampMs,
+                result.PlaybackRate ?? 1.0));
 
             
             if (result.Role == "guest" && result.IsNewGuest)
@@ -102,7 +104,8 @@ public class RoomHub : Hub
                         estimatedPositionMs,
                         result.HostIsPlaying.Value,
                         serverTimestampMs,
-                        result.HostPlaybackSeqNo ?? 0));
+                        result.HostPlaybackSeqNo ?? 0,
+                        result.PlaybackRate ?? 1.0));
                 }
             }
             else if (result.Role == "guest" && !result.IsNewGuest)
@@ -125,7 +128,8 @@ public class RoomHub : Hub
                         estimatedPositionMs,
                         result.HostIsPlaying.Value,
                         serverTimestampMs,
-                        result.HostPlaybackSeqNo ?? 0));
+                        result.HostPlaybackSeqNo ?? 0,
+                        result.PlaybackRate ?? 1.0));
                 }
             }
         }
@@ -222,7 +226,8 @@ public class RoomHub : Hub
                     result.PositionMs,
                     result.ServerTimestampMs,
                     result.HostRttMs,
-                    result.SeqNo));
+                    result.SeqNo,
+                    result.PlaybackRate));
 
             
             _stateSyncTimer.StartForRoom(result.RoomCode);
@@ -320,6 +325,35 @@ public class RoomHub : Hub
             await SendError("internal_error", "An unexpected error occurred.");
         }
     }
+    
+    public async Task SetPlaybackSpeed(double speed)
+    {
+        try
+        {
+            _logger.LogDebug("SetPlaybackSpeed invoked {ConnectionId} {Speed}", Context.ConnectionId, speed);
+
+            var result = await _roomService.HandleSetPlaybackSpeed(Context.ConnectionId, speed);
+
+            await Clients.Group(result.RoomCode)
+                .SendAsync(RoomEvents.PlaybackSpeed, new PlaybackSpeedPayload(
+                    result.Speed,
+                    result.ServerTimestampMs));
+        }
+        catch (RoleUnauthorizedException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized SetPlaybackSpeed attempt by {Role} in {RoomId}", ex.Role, ex.RoomId);
+            await SendError("role_unauthorized", "Only the host can control playback speed.");
+        }
+        catch (ConnectionNotInRoomException)
+        {
+            await SendError("room_not_found", "Not in a room.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error in SetPlaybackSpeed {ConnectionId}", Context.ConnectionId);
+            await SendError("internal_error", "An unexpected error occurred.");
+        }
+    }
 
     
     public async Task SetContent(IptvContentDescriptor descriptor)
@@ -391,6 +425,9 @@ public class RoomHub : Hub
             var result = await _roomService.HandleNotifyBufferingStall(Context.ConnectionId, positionMs, episodeId);
 
             
+            _stateSyncTimer.StopForRoom(result.RoomCode);
+
+            
             if (result.PeerConnectionId != null)
             {
                 var serverTimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -459,12 +496,19 @@ public class RoomHub : Hub
             if (result.GateOpened)
             {
                 
+                if (result.IsPlaying)
+                {
+                    _stateSyncTimer.StartForRoom(result.RoomCode);
+                }
+
+                
                 var serverTimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 await Clients.Group(result.RoomCode)
                     .SendAsync(RoomEvents.BufferingResume, new BufferingResumePayload(
                         serverTimestampMs,
                         result.ResumePositionMs,
-                        episodeId));
+                        episodeId,
+                        result.IsPlaying));
             }
         }
         catch (ConnectionNotInRoomException)

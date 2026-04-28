@@ -63,6 +63,7 @@ void main() {
         const SyncEventBufferingResumeReceived(
           resumePositionMs: 11000,
           episodeId: 1,
+          isPlaying: true,
         ),
       );
       await Future.delayed(const Duration(milliseconds: 50));
@@ -84,6 +85,7 @@ void main() {
         const SyncEventBufferingResumeReceived(
           resumePositionMs: 10000,
           episodeId: 1,
+          isPlaying: false,
         ),
       );
       await Future.delayed(const Duration(milliseconds: 50));
@@ -112,6 +114,7 @@ void main() {
         const SyncEventBufferingResumeReceived(
           resumePositionMs: 21000,
           episodeId: 1,
+          isPlaying: true,
         ),
       );
       await Future.delayed(const Duration(milliseconds: 50));

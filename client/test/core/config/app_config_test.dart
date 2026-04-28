@@ -7,17 +7,21 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('AppConfig', () {
-    void mockConfig(Map<String, dynamic> config) {
+    void mockConfig(Map<String, dynamic>? config) {
       const key = 'assets/config/appsettings.local.json';
-
       rootBundle.evict(key);
 
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMessageHandler('flutter/assets', (message) async {
+        if (config == null) return null;
         final Uint8List encoded = utf8.encoder.convert(jsonEncode(config));
         return encoded.buffer.asByteData();
       });
     }
+
+    tearDown(() {
+      mockConfig(null);
+    });
 
     test('loads valid config', () async {
       mockConfig({

@@ -54,12 +54,15 @@ class RoomJoinedPayload {
   final IptvContentDescriptor? contentDescriptor;
   final int serverTimestampMs;
 
+  final double playbackRate;
+
   const RoomJoinedPayload({
     required this.roomCode,
     required this.role,
     required this.guestPresent,
     this.contentDescriptor,
     required this.serverTimestampMs,
+    this.playbackRate = 1.0,
   });
 
   factory RoomJoinedPayload.fromJson(Map<String, dynamic> json) =>
@@ -73,6 +76,7 @@ class RoomJoinedPayload {
                 json['contentDescriptor'] as Map<String, dynamic>,
               ),
         serverTimestampMs: json['serverTimestampMs'] as int,
+        playbackRate: (json['playbackRate'] as num?)?.toDouble() ?? 1.0,
       );
 }
 
@@ -172,12 +176,14 @@ class PlaybackPlayPayload {
   final int hostRttMs;
 
   final int seqNo;
+  final double playbackRate;
 
   const PlaybackPlayPayload({
     required this.positionMs,
     required this.serverTimestampMs,
     required this.hostRttMs,
     this.seqNo = 0,
+    this.playbackRate = 1.0,
   });
 
   factory PlaybackPlayPayload.fromJson(Map<String, dynamic> json) =>
@@ -186,6 +192,7 @@ class PlaybackPlayPayload {
         serverTimestampMs: json['serverTimestampMs'] as int,
         hostRttMs: json['hostRttMs'] as int,
         seqNo: (json['seqNo'] as int?) ?? 0,
+        playbackRate: (json['playbackRate'] as num?)?.toDouble() ?? 1.0,
       );
 }
 
@@ -240,11 +247,14 @@ class PlaybackStateSyncPayload {
 
   final int seqNo;
 
+  final double playbackRate;
+
   const PlaybackStateSyncPayload({
     required this.hostPositionMs,
     required this.isPlaying,
     required this.serverTimestampMs,
     this.seqNo = 0,
+    this.playbackRate = 1.0,
   });
 
   factory PlaybackStateSyncPayload.fromJson(Map<String, dynamic> json) =>
@@ -253,6 +263,23 @@ class PlaybackStateSyncPayload {
         isPlaying: json['isPlaying'] as bool,
         serverTimestampMs: json['serverTimestampMs'] as int,
         seqNo: (json['seqNo'] as int?) ?? 0,
+        playbackRate: (json['playbackRate'] as num?)?.toDouble() ?? 1.0,
+      );
+}
+
+class PlaybackSpeedPayload {
+  final double speed;
+  final int serverTimestampMs;
+
+  const PlaybackSpeedPayload({
+    required this.speed,
+    required this.serverTimestampMs,
+  });
+
+  factory PlaybackSpeedPayload.fromJson(Map<String, dynamic> json) =>
+      PlaybackSpeedPayload(
+        speed: (json['speed'] as num).toDouble(),
+        serverTimestampMs: json['serverTimestampMs'] as int,
       );
 }
 
@@ -319,11 +346,13 @@ class BufferingResumePayload {
   final int episodeId;
   final int serverTimestampMs;
   final int resumePositionMs;
+  final bool isPlaying;
 
   const BufferingResumePayload({
     required this.episodeId,
     required this.serverTimestampMs,
     required this.resumePositionMs,
+    required this.isPlaying,
   });
 
   factory BufferingResumePayload.fromJson(Map<String, dynamic> json) =>
@@ -331,5 +360,6 @@ class BufferingResumePayload {
         episodeId: (json['episodeId'] as int?) ?? 0,
         serverTimestampMs: json['serverTimestampMs'] as int,
         resumePositionMs: json['resumePositionMs'] as int,
+        isPlaying: (json['isPlaying'] as bool?) ?? false,
       );
 }

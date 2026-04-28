@@ -34,8 +34,10 @@ abstract class PlayerController {
   bool get isPlaying;
 
   bool get isBuffering;
-
   bool get isInitialized;
+
+  double get playbackSpeed;
+  Stream<double> get playbackSpeedStream;
 
   Widget? get nativeView;
 
@@ -49,7 +51,12 @@ abstract class PlayerController {
 
   Future<void> seekTo(Duration position);
 
+  double get volume;
+  Stream<double> get volumeStream;
+
   Future<void> setVolume(double volume);
+
+  Future<void> setPlaybackSpeed(double speed);
 
   Future<void> dispose();
 }

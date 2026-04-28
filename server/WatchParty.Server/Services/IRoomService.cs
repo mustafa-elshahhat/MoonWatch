@@ -44,6 +44,8 @@ public interface IRoomService
 
     
     Task<PlayerReadyResult> HandleNotifyPlayerReady(string connectionId, string contentKey);
+    
+    Task<PlaybackSpeedBroadcast> HandleSetPlaybackSpeed(string connectionId, double speed);
 }
 
 
@@ -58,7 +60,8 @@ public record BufferingReadyResult(
     string RoomCode,
     string CallerRole,
     bool GateOpened,
-    long ResumePositionMs);
+    long ResumePositionMs,
+    bool IsPlaying);
 
 
 public record PlayerReadyResult(
@@ -78,7 +81,8 @@ public record JoinResult(
     long? HostPositionMs = null,
     bool? HostIsPlaying = null,
     int? HostPlaybackSeqNo = null,
-    long? HostPositionUpdatedAtMs = null);
+    long? HostPositionUpdatedAtMs = null,
+    double? PlaybackRate = null);
 
 
 public record LeaveResult(
@@ -102,7 +106,8 @@ public record PlayBroadcast(
     long PositionMs,
     long ServerTimestampMs,
     int HostRttMs,
-    int SeqNo);
+    int SeqNo,
+    double PlaybackRate);
 
 
 public record PauseBroadcast(
@@ -110,6 +115,11 @@ public record PauseBroadcast(
     long PositionMs,
     long ServerTimestampMs,
     int SeqNo);
+
+public record PlaybackSpeedBroadcast(
+    string RoomCode,
+    double Speed,
+    long ServerTimestampMs);
 
 
 public record SeekBroadcast(

@@ -6,9 +6,13 @@ class MockPlayerImpl implements PlayerController {
   final _eventController = StreamController<PlayerEvent>.broadcast();
   final _positionStreamController = StreamController<Duration>.broadcast();
   final _durationStreamController = StreamController<Duration>.broadcast();
+  final _speedStreamController = StreamController<double>.broadcast();
+  final _volumeStreamController = StreamController<double>.broadcast();
 
   Duration _position = Duration.zero;
   Duration _duration = const Duration(hours: 2);
+  double _playbackSpeed = 1.0;
+  double _volume = 1.0;
   bool _isPlaying = false;
   bool _isBuffering = false;
 
@@ -30,6 +34,18 @@ class MockPlayerImpl implements PlayerController {
 
   @override
   Stream<Duration> get durationStream => _durationStreamController.stream;
+
+  @override
+  double get playbackSpeed => _playbackSpeed;
+
+  @override
+  Stream<double> get playbackSpeedStream => _speedStreamController.stream;
+
+  @override
+  double get volume => _volume;
+
+  @override
+  Stream<double> get volumeStream => _volumeStreamController.stream;
 
   @override
   bool get isPlaying => _isPlaying;
@@ -82,7 +98,16 @@ class MockPlayerImpl implements PlayerController {
 
   @override
   Future<void> setVolume(double volume) async {
+    _volume = volume;
     actionHistory.add('setVolume:$volume');
+    _volumeStreamController.add(volume);
+  }
+
+  @override
+  Future<void> setPlaybackSpeed(double speed) async {
+    _playbackSpeed = speed;
+    actionHistory.add('setPlaybackSpeed:$speed');
+    _speedStreamController.add(speed);
   }
 
   void setPosition(Duration position) {
@@ -120,5 +145,7 @@ class MockPlayerImpl implements PlayerController {
     await _eventController.close();
     await _positionStreamController.close();
     await _durationStreamController.close();
+    await _speedStreamController.close();
+    await _volumeStreamController.close();
   }
 }

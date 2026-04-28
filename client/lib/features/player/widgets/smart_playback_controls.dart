@@ -12,6 +12,7 @@ import '../models/video_fit_mode.dart';
 typedef PlayCallback = void Function(Duration position);
 typedef PauseCallback = void Function(Duration position);
 typedef SeekCallback = void Function(Duration target);
+typedef SpeedCallback = void Function(double speed);
 
 class SmartPlaybackControls extends StatefulWidget {
   static SmartPlaybackControlsState? of(BuildContext context) =>
@@ -24,9 +25,12 @@ class SmartPlaybackControls extends StatefulWidget {
   final PlayCallback? onPlay;
   final PauseCallback? onPause;
   final SeekCallback? onSeek;
+  final SpeedCallback? onSpeedChanged;
   final VoidCallback? onNextEpisode;
   final VideoFitMode fitMode;
   final ValueChanged<VideoFitMode>? onFitModeChanged;
+  final double brightness;
+  final ValueChanged<double>? onBrightnessChanged;
 
   const SmartPlaybackControls({
     super.key,
@@ -39,7 +43,10 @@ class SmartPlaybackControls extends StatefulWidget {
     this.onPlay,
     this.onPause,
     this.onSeek,
+    this.onSpeedChanged,
     this.onNextEpisode,
+    this.brightness = 1.0,
+    this.onBrightnessChanged,
   });
 
   @override
@@ -48,7 +55,8 @@ class SmartPlaybackControls extends StatefulWidget {
 
 class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     with SingleTickerProviderStateMixin {
-  bool _isMuted = false;
+  double _volume = 1.0;
+  bool _showVolumeSlider = false;
   bool _visible = true;
   bool _isDragging = false;
   double? _dragValue;
@@ -64,6 +72,8 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
   Duration _currentDuration = Duration.zero;
   StreamSubscription? _posSub;
   StreamSubscription? _durSub;
+  StreamSubscription? _speedSub;
+  StreamSubscription? _volSub;
 
   late final AnimationController _controlsAnim;
 
@@ -96,6 +106,13 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     _durSub = _pc.durationStream.listen((d) {
       if (mounted) setState(() => _currentDuration = d);
     });
+    _speedSub = _pc.playbackSpeedStream.listen((s) {
+      if (mounted) setState(() {});
+    });
+    _volume = _pc.volume;
+    _volSub = _pc.volumeStream.listen((v) {
+      if (mounted) setState(() => _volume = v);
+    });
 
     if (_currentDuration == Duration.zero) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -115,23 +132,24 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     _focusNode.dispose();
     _posSub?.cancel();
     _durSub?.cancel();
+    _speedSub?.cancel();
+    _volSub?.cancel();
     _controlsAnim.dispose();
     super.dispose();
   }
 
   void _scheduleHide() {
     _hideTimer?.cancel();
-    if (!ctx.isRoomMode || ctx.isHost) {
-      _hideTimer = Timer(const Duration(seconds: 4), () {
-        if (mounted && widget.isPlaying && !_isDragging && !_hoveredTrack) {
-          _controlsAnim.reverse();
-          if (mounted) setState(() => _visible = false);
-        }
-      });
-    }
+    _hideTimer = Timer(const Duration(seconds: 4), () {
+      if (mounted && widget.isPlaying && !_isDragging && !_hoveredTrack) {
+        _controlsAnim.reverse();
+        if (mounted) setState(() => _visible = false);
+      }
+    });
   }
 
   void showControls() {
+    if (isClosed) return;
     if (!_visible) {
       _controlsAnim.forward();
       setState(() => _visible = true);
@@ -139,9 +157,19 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     _scheduleHide();
   }
 
+  bool get isClosed => !mounted;
+
   void _toggleMute() {
-    setState(() => _isMuted = !_isMuted);
-    _pc.setVolume(_isMuted ? 0.0 : 1.0);
+    if (_volume > 0) {
+      _pc.setVolume(0.0);
+    } else {
+      _pc.setVolume(1.0);
+    }
+  }
+
+  void _updateVolume(double value) {
+    _pc.setVolume(value.clamp(0.0, 1.0));
+    showControls();
   }
 
   void _toggleFullscreen() {
@@ -157,12 +185,15 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     final safe = _safeDuration;
     switch (event.logicalKey) {
       case LogicalKeyboardKey.space:
+      case LogicalKeyboardKey.keyK:
         widget.isPlaying
             ? widget.onPause?.call(_currentPosition)
             : widget.onPlay?.call(_currentPosition);
       case LogicalKeyboardKey.arrowLeft:
+      case LogicalKeyboardKey.keyJ:
         if (ctx.canSkip) _seekRelative(-10, safe);
       case LogicalKeyboardKey.arrowRight:
+      case LogicalKeyboardKey.keyL:
         if (ctx.canSkip) _seekRelative(10, safe);
       case LogicalKeyboardKey.keyM:
         _toggleMute();
@@ -170,8 +201,25 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
         _toggleFullscreen();
       case LogicalKeyboardKey.keyN:
         if (ctx.canShowNextEpisode) widget.onNextEpisode?.call();
+      case LogicalKeyboardKey.bracketLeft:
+        if (_isVOD && ctx.canControlPlayback) _adjustSpeed(-0.25);
+      case LogicalKeyboardKey.bracketRight:
+        if (_isVOD && ctx.canControlPlayback) _adjustSpeed(0.25);
       default:
         break;
+    }
+  }
+
+  void _adjustSpeed(double delta) {
+    final current = _pc.playbackSpeed;
+    final next = (current + delta).clamp(0.25, 2.0);
+    if (next != current) {
+      if (widget.onSpeedChanged != null) {
+        widget.onSpeedChanged!(next);
+      } else {
+        _pc.setPlaybackSpeed(next);
+      }
+      showControls();
     }
   }
 
@@ -234,12 +282,17 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
                   widget.onFitModeChanged?.call(m);
                 },
               ),
-              _ChromeBtn(
-                icon: _isMuted
-                    ? Icons.volume_off_rounded
-                    : Icons.volume_up_rounded,
-                tooltip: _isMuted ? 'Unmute' : 'Mute',
-                onTap: _toggleMute,
+              _VolumeControl(
+                volume: _volume,
+                onMuteToggle: _toggleMute,
+                onVolumeChanged: _updateVolume,
+              ),
+              _BrightnessControl(
+                value: widget.brightness,
+                onChanged: (v) {
+                  showControls();
+                  widget.onBrightnessChanged?.call(v);
+                },
               ),
               _ChromeBtn(
                 icon: _fullscreenService.isFullscreen
@@ -248,6 +301,19 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
                 tooltip: 'Fullscreen',
                 onTap: _toggleFullscreen,
               ),
+              if (_isVOD)
+                _SpeedBtn(
+                  speed: _pc.playbackSpeed,
+                  onChanged: (s) {
+                    showControls();
+                    if (widget.onSpeedChanged != null) {
+                      widget.onSpeedChanged!(s);
+                    } else {
+                      _pc.setPlaybackSpeed(s);
+                    }
+                  },
+                  enabled: ctx.canControlPlayback,
+                ),
               const _HostControlsBadge(),
             ],
           ),
@@ -324,12 +390,17 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
                       widget.onFitModeChanged?.call(m);
                     },
                   ),
-                  _ChromeBtn(
-                    icon: _isMuted
-                        ? Icons.volume_off_rounded
-                        : Icons.volume_up_rounded,
-                    tooltip: _isMuted ? 'Unmute (M)' : 'Mute (M)',
-                    onTap: _toggleMute,
+                  _VolumeControl(
+                    volume: _volume,
+                    onMuteToggle: _toggleMute,
+                    onVolumeChanged: _updateVolume,
+                  ),
+                  _BrightnessControl(
+                    value: widget.brightness,
+                    onChanged: (v) {
+                      showControls();
+                      widget.onBrightnessChanged?.call(v);
+                    },
                   ),
                   _ChromeBtn(
                     icon: _fullscreenService.isFullscreen
@@ -338,6 +409,19 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
                     tooltip: 'Fullscreen (F)',
                     onTap: _toggleFullscreen,
                   ),
+                  if (_isVOD)
+                    _SpeedBtn(
+                      speed: _pc.playbackSpeed,
+                      onChanged: (s) {
+                        showControls();
+                        if (widget.onSpeedChanged != null) {
+                          widget.onSpeedChanged!(s);
+                        } else {
+                          _pc.setPlaybackSpeed(s);
+                        }
+                      },
+                      enabled: ctx.canControlPlayback,
+                    ),
                 ],
               ),
             ],
@@ -750,17 +834,202 @@ class _HostControlsBadge extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
         ),
         child: Text(
-          'HOST CONTROLS',
+          'CONTROLLED BY HOST',
           style: TextStyle(
             color: Colors.white.withValues(
-              alpha: 0.6,
+              alpha: 0.8,
             ),
             fontSize: 9,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.0,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
       );
+}
+
+class _SpeedBtn extends StatelessWidget {
+  final double speed;
+  final ValueChanged<double>? onChanged;
+  final bool enabled;
+
+  const _SpeedBtn({
+    required this.speed,
+    this.onChanged,
+    this.enabled = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<double>(
+      initialValue: speed,
+      tooltip: 'Playback Speed',
+      enabled: enabled,
+      onSelected: onChanged,
+      offset: const Offset(0, -180),
+      color: const Color(0xFF1A1A1A),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      itemBuilder: (context) => [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0]
+          .map((s) => PopupMenuItem<double>(
+                value: s,
+                height: 36,
+                child: Center(
+                  child: Text(
+                    '${s}x',
+                    style: TextStyle(
+                      color: s == speed ? AppColors.accentPrimary : Colors.white,
+                      fontSize: 13,
+                      fontWeight: s == speed ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              ))
+          .toList(),
+      child: Container(
+        width: 48,
+        height: 36,
+        alignment: Alignment.center,
+        child: Text(
+          '${speed}x',
+          style: TextStyle(
+            color: enabled ? Colors.white : Colors.white.withValues(alpha: 0.3),
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VolumeControl extends StatefulWidget {
+  final double volume;
+  final VoidCallback onMuteToggle;
+  final ValueChanged<double> onVolumeChanged;
+
+  const _VolumeControl({
+    required this.volume,
+    required this.onMuteToggle,
+    required this.onVolumeChanged,
+  });
+
+  @override
+  State<_VolumeControl> createState() => _VolumeControlState();
+}
+
+class _VolumeControlState extends State<_VolumeControl> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = widget.volume <= 0
+        ? Icons.volume_off_rounded
+        : widget.volume < 0.5
+            ? Icons.volume_down_rounded
+            : Icons.volume_up_rounded;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _ChromeBtn(
+            icon: icon,
+            tooltip: widget.volume <= 0 ? 'Unmute (M)' : 'Mute (M)',
+            onTap: widget.onMuteToggle,
+          ),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: _hovered ? 100 : 0,
+            height: 36,
+            clipBehavior: Clip.antiAlias,
+            decoration: const BoxDecoration(),
+            child: _hovered
+                ? SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      trackHeight: 3,
+                      thumbShape:
+                          const RoundSliderThumbShape(enabledThumbRadius: 6),
+                      overlayShape:
+                          const RoundSliderOverlayShape(overlayRadius: 12),
+                      activeTrackColor: AppColors.accentPrimary,
+                      inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
+                      thumbColor: Colors.white,
+                    ),
+                    child: Slider(
+                      value: widget.volume,
+                      onChanged: widget.onVolumeChanged,
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BrightnessControl extends StatefulWidget {
+  final double value;
+  final ValueChanged<double> onChanged;
+
+  const _BrightnessControl({
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  State<_BrightnessControl> createState() => _BrightnessControlState();
+}
+
+class _BrightnessControlState extends State<_BrightnessControl> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _ChromeBtn(
+            icon: Icons.brightness_medium_rounded,
+            tooltip: 'Brightness',
+            onTap: () {}, // Icon only for now, hover shows slider
+          ),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: _hovered ? 100 : 0,
+            height: 36,
+            clipBehavior: Clip.antiAlias,
+            decoration: const BoxDecoration(),
+            child: _hovered
+                ? SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      trackHeight: 3,
+                      thumbShape:
+                          const RoundSliderThumbShape(enabledThumbRadius: 6),
+                      overlayShape:
+                          const RoundSliderOverlayShape(overlayRadius: 12),
+                      activeTrackColor: Colors.orangeAccent,
+                      inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
+                      thumbColor: Colors.white,
+                    ),
+                    child: Slider(
+                      value: widget.value,
+                      onChanged: widget.onChanged,
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
+    );
+  }
 }

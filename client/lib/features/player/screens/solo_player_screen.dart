@@ -48,6 +48,7 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
       GlobalKey<SmartPlaybackControlsState>();
 
   VideoFitMode _fitMode = VideoFitMode.contain;
+  double _brightness = 1.0;
 
   bool _topBarVisible = true;
   Timer? _topBarHideTimer;
@@ -192,6 +193,32 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _showOverlays,
+        onVerticalDragUpdate: (details) {
+          final width = MediaQuery.of(context).size.width;
+          final isLeft = details.localPosition.dx < width / 2;
+          final delta = -details.primaryDelta! / 200.0;
+          if (isLeft) {
+            setState(() {
+              _brightness = (_brightness + delta).clamp(0.1, 1.0);
+            });
+          } else {
+            final currentVol = _playerController.volume;
+            _playerController.setVolume((currentVol + delta).clamp(0.0, 1.0));
+          }
+          _showOverlays();
+        },
+        onHorizontalDragUpdate: (details) {
+          final delta = details.primaryDelta! * 100; // 100ms per pixel
+          final target = _playerController.currentPosition +
+              Duration(milliseconds: delta.toInt());
+          _playerBloc?.add(PlayerEventSeek(Duration(
+            milliseconds: target.inMilliseconds.clamp(
+              0,
+              _playerController.duration.inMilliseconds,
+            ),
+          )));
+          _showOverlays();
+        },
         child: BlocBuilder<PlayerBloc, PlayerState>(
           builder: (context, state) {
             PlayerOverlayType? overlayType;
@@ -213,6 +240,14 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
               fit: StackFit.expand,
               children: [
                 _buildVideoView(_fitMode.boxFit),
+                IgnorePointer(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 50),
+                    color: Colors.black.withValues(
+                      alpha: (1.0 - _brightness).clamp(0.0, 1.0),
+                    ),
+                  ),
+                ),
                 if (overlayType != null)
                   PlayerStateOverlay(
                     type: overlayType,
@@ -271,6 +306,8 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
       canInteract: isPlaying || isPaused || state is PlayerStateReady,
       fitMode: _fitMode,
       onFitModeChanged: (mode) => setState(() => _fitMode = mode),
+      brightness: _brightness,
+      onBrightnessChanged: (v) => setState(() => _brightness = v),
       onPlay: (_) => context.read<PlayerBloc>().add(const PlayerEventPlay()),
       onPause: (_) => context.read<PlayerBloc>().add(const PlayerEventPause()),
       onSeek: (target) =>

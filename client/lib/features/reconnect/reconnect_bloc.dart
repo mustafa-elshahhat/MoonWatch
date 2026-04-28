@@ -6,6 +6,7 @@ import '../../core/network/signalr_client.dart';
 import '../../core/protocol/room_events.dart';
 import '../room/bloc/room_event.dart';
 import '../room/repository/room_repository.dart';
+import '../room/domain/room_repository_event.dart';
 
 sealed class ReconnectEvent extends Equatable {
   const ReconnectEvent();
@@ -87,7 +88,7 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
   final AppLogger _logger = AppLogger('ReconnectBloc');
 
   StreamSubscription<SignalRConnectionState>? _connectionSubscription;
-  StreamSubscription<RoomEvent>? _roomEventSubscription;
+  StreamSubscription<RoomRepositoryEvent>? _roomEventSubscription;
 
   String? _storedRoomCode;
   String? _storedRole;
@@ -148,9 +149,9 @@ class ReconnectBloc extends Bloc<ReconnectEvent, ReconnectState> {
     _roomEventSubscription = _roomRepository.events.listen((event) {
       if (state is! ReconnectStateAttempting) return;
 
-      if (event is RoomEventRoomJoined) {
+      if (event is RepoEventRoomJoined) {
         add(const ReconnectEventSucceeded());
-      } else if (event is RoomEventError &&
+      } else if (event is RepoEventError &&
           _fatalErrorCodes.contains(event.code)) {
         add(ReconnectEventFailed(event.code));
       }

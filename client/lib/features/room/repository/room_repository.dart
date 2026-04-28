@@ -4,7 +4,7 @@ import '../../../core/network/http_client.dart';
 import '../../../core/network/signalr_client.dart';
 import '../../../core/protocol/room_events.dart';
 import '../../../core/protocol/payloads.dart';
-import '../bloc/room_event.dart';
+import '../domain/room_repository_event.dart';
 
 typedef PlaybackEventCallback = void Function(Map<String, dynamic> json);
 typedef BufferingStallCallback = void Function(
@@ -15,12 +15,13 @@ typedef PlaybackPauseCallback = void Function(PlaybackPausePayload payload);
 typedef PlaybackSeekCallback = void Function(PlaybackSeekPayload payload);
 typedef PlaybackStateSyncCallback = void Function(
     PlaybackStateSyncPayload payload);
+typedef PlaybackSpeedCallback = void Function(PlaybackSpeedPayload payload);
 
 class RoomRepository {
   final SignalRClient _signalRClient;
   final HttpClient _httpClient;
   final AppLogger _logger = AppLogger('RoomRepository');
-  final _eventController = StreamController<RoomEvent>.broadcast();
+  final _eventController = StreamController<RoomRepositoryEvent>.broadcast();
 
   BufferingStallCallback? onBufferingStall;
 
@@ -30,8 +31,9 @@ class RoomRepository {
   PlaybackPauseCallback? onPlaybackPause;
   PlaybackSeekCallback? onPlaybackSeek;
   PlaybackStateSyncCallback? onPlaybackStateSync;
+  PlaybackSpeedCallback? onPlaybackSpeed;
 
-  Stream<RoomEvent> get events => _eventController.stream;
+  Stream<RoomRepositoryEvent> get events => _eventController.stream;
 
   RoomRepository({
     required SignalRClient signalRClient,
@@ -47,28 +49,29 @@ class RoomRepository {
       _logger.i('SignalR event room:joined — $json');
       final payload = RoomJoinedPayload.fromJson(json);
       _eventController.add(
-        RoomEventRoomJoined(
+        RepoEventRoomJoined(
           roomCode: payload.roomCode,
           role: payload.role,
           guestPresent: payload.guestPresent,
           contentDescriptor: payload.contentDescriptor,
+          playbackRate: payload.playbackRate,
         ),
       );
     });
 
     _signalRClient.on(RoomEvents.roomGuestJoined, (args) {
       _logger.i('SignalR event room:guest_joined');
-      _eventController.add(const RoomEventGuestJoined());
+      _eventController.add(const RepoEventGuestJoined());
     });
 
     _signalRClient.on(RoomEvents.roomGuestLeft, (args) {
       _logger.i('SignalR event room:guest_left');
-      _eventController.add(const RoomEventGuestLeft());
+      _eventController.add(const RepoEventGuestLeft());
     });
 
     _signalRClient.on(RoomEvents.roomGuestReconnected, (args) {
       _logger.i('SignalR event room:guest_reconnected');
-      _eventController.add(const RoomEventGuestReconnected());
+      _eventController.add(const RepoEventGuestReconnected());
     });
 
     _signalRClient.on(RoomEvents.roomClosed, (args) {
@@ -76,7 +79,7 @@ class RoomRepository {
       final json = args[0] as Map<String, dynamic>;
       _logger.i('SignalR event room:closed — $json');
       final payload = RoomClosedPayload.fromJson(json);
-      _eventController.add(RoomEventRoomClosed(payload.reason));
+      _eventController.add(RepoEventRoomClosed(payload.reason));
     });
 
     _signalRClient.on(RoomEvents.roomContentSet, (args) {
@@ -84,7 +87,7 @@ class RoomRepository {
       final json = args[0] as Map<String, dynamic>;
       _logger.i('SignalR event room:content_set');
       final payload = RoomContentSetPayload.fromJson(json);
-      _eventController.add(RoomEventContentSet(payload.descriptor));
+      _eventController.add(RepoEventContentSet(payload.descriptor));
     });
 
     _signalRClient.on(RoomEvents.roomError, (args) {
@@ -93,7 +96,7 @@ class RoomRepository {
       _logger.w('SignalR event room:error — $json');
       final payload = ErrorPayload.fromJson(json);
       _eventController.add(
-        RoomEventError(code: payload.code, message: payload.message),
+        RepoEventError(code: payload.code, message: payload.message),
       );
     });
 
@@ -102,7 +105,7 @@ class RoomRepository {
       final json = args[0] as Map<String, dynamic>;
       _logger.i('SignalR event player:ready — $json');
       final payload = PlayerReadyPayload.fromJson(json);
-      _eventController.add(RoomEventPlayerReady(payload));
+      _eventController.add(RepoEventPlayerReady(payload));
     });
 
     _signalRClient.on(RoomEvents.bufferingStall, (args) {
@@ -146,6 +149,13 @@ class RoomRepository {
       final payload = PlaybackStateSyncPayload.fromJson(json);
       onPlaybackStateSync?.call(payload);
     });
+
+    _signalRClient.on(RoomEvents.playbackSpeed, (args) {
+      if (args == null || args.isEmpty) return;
+      final json = args[0] as Map<String, dynamic>;
+      final payload = PlaybackSpeedPayload.fromJson(json);
+      onPlaybackSpeed?.call(payload);
+    });
   }
 
   void unregisterHandlers() {
@@ -163,6 +173,17 @@ class RoomRepository {
     _signalRClient.off(RoomEvents.playbackPause);
     _signalRClient.off(RoomEvents.playbackSeek);
     _signalRClient.off(RoomEvents.playbackStateSync);
+    _signalRClient.off(RoomEvents.playbackSpeed);
+  }
+
+  void clearCallbacks() {
+    onBufferingStall = null;
+    onBufferingResume = null;
+    onPlaybackPlay = null;
+    onPlaybackPause = null;
+    onPlaybackSeek = null;
+    onPlaybackStateSync = null;
+    onPlaybackSpeed = null;
   }
 
   Future<void> notifyBufferingStall(int positionMs, int episodeId) async {
@@ -184,7 +205,7 @@ class RoomRepository {
       RoomEvents.hubNotifyPlayerReady,
       args: [contentKey],
     );
-    _eventController.add(RoomEventLocalReady(contentKey));
+    _eventController.add(RepoEventLocalReady(contentKey));
   }
 
   Future<void> invokePlay(int positionMs, int clientTimestampMs) async {
@@ -205,10 +226,16 @@ class RoomRepository {
     await _signalRClient.invoke(RoomEvents.hubSeek, args: [targetPositionMs]);
   }
 
+  Future<void> invokeSetPlaybackSpeed(double speed) async {
+    _logger.i('RoomRepository.invokeSetPlaybackSpeed: speed=$speed');
+    await _signalRClient.invoke(RoomEvents.hubSetPlaybackSpeed, args: [speed]);
+  }
+
   Future<List<Map<String, dynamic>>> listRooms() => _httpClient.listRooms();
 
   Future<void> dispose() async {
     unregisterHandlers();
+    clearCallbacks();
     await _eventController.close();
   }
 }

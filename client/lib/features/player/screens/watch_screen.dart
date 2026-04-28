@@ -13,6 +13,7 @@ import '../../../shared/widgets/app_components.dart';
 import '../../room/bloc/room_bloc.dart';
 import '../../room/bloc/room_event.dart';
 import '../../room/bloc/room_state.dart';
+import '../../room/domain/peer_status.dart';
 import '../../room/repository/room_repository.dart';
 import '../../sync/sync_engine.dart';
 import '../../sync/latency_estimator.dart';
@@ -68,6 +69,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
       GlobalKey<SmartPlaybackControlsState>();
 
   VideoFitMode _fitMode = VideoFitMode.contain;
+  double _brightness = 1.0;
 
   bool _topBarVisible = true;
   Timer? _topBarHideTimer;
@@ -180,6 +182,12 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     _roomRepository.invokeSeek(targetPosition.inMilliseconds);
   }
 
+  void invokeSpeedAction(double speed) {
+    _logger.i('host.setPlaybackSpeed: speed=$speed');
+    _playerController.setPlaybackSpeed(speed);
+    _roomRepository.invokeSetPlaybackSpeed(speed);
+  }
+
   void invokeNextEpisode() {
     final navCtx = EpisodeNavService().current;
     final next = navCtx?.nextEpisode;
@@ -219,6 +227,12 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     }
 
     context.read<SyncBloc>().setRole(state.role);
+    context.read<SyncBloc>().add(
+          SyncEventSpeedReceived(
+            speed: state.playbackRate,
+            serverTimestampMs: 0,
+          ),
+        );
 
     context.read<PlayerBloc>().add(
           PlayerEventInitialize(
@@ -371,11 +385,46 @@ class WatchScreenContentState extends State<WatchScreenContent> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _showOverlays,
+        onVerticalDragUpdate: (details) {
+          final width = MediaQuery.of(context).size.width;
+          final isLeft = details.localPosition.dx < width / 2;
+          final delta = -details.primaryDelta! / 200.0;
+          if (isLeft) {
+            setState(() {
+              _brightness = (_brightness + delta).clamp(0.1, 1.0);
+            });
+          } else {
+            final currentVol = _playerController.volume;
+            _playerController.setVolume((currentVol + delta).clamp(0.0, 1.0));
+          }
+          _showOverlays();
+        },
+        onHorizontalDragUpdate: (details) {
+          if (!uiContext.canControlPlayback) return;
+          final delta = details.primaryDelta! * 100; // 100ms per pixel
+          final target = _playerController.currentPosition +
+              Duration(milliseconds: delta.toInt());
+          invokeSeekAction(Duration(
+            milliseconds: target.inMilliseconds.clamp(
+              0,
+              _playerController.duration.inMilliseconds,
+            ),
+          ));
+          _showOverlays();
+        },
         child: Stack(
           fit: StackFit.expand,
           children: [
             BlocBuilder<PlayerBloc, PlayerState>(
               builder: (context, _) => _buildVideoView(_fitMode.boxFit),
+            ),
+            IgnorePointer(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 50),
+                color: Colors.black.withValues(
+                  alpha: (1.0 - _brightness).clamp(0.0, 1.0),
+                ),
+              ),
             ),
             BlocBuilder<RoomBloc, RoomState>(
               builder: (context, roomState) =>
@@ -552,9 +601,12 @@ class WatchScreenContentState extends State<WatchScreenContent> {
       canInteract: canInteract,
       fitMode: _fitMode,
       onFitModeChanged: (mode) => setState(() => _fitMode = mode),
+      brightness: _brightness,
+      onBrightnessChanged: (v) => setState(() => _brightness = v),
       onPlay: (_) => invokePlay(_playerController.currentPosition),
       onPause: (_) => invokePauseAction(_playerController.currentPosition),
       onSeek: (pos) => invokeSeekAction(pos),
+      onSpeedChanged: invokeSpeedAction,
       onNextEpisode: invokeNextEpisode,
     );
   }
