@@ -11,6 +11,8 @@ build/
 **/android/*.jks
 **/android/*.keystore
 **/android/.gradle/
+**/.kotlin/
+*.salive
 **/android/app/build/
 **/android/build/
 

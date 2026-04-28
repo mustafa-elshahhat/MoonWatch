@@ -239,6 +239,7 @@ class _PlayerGestureLayerState extends State<PlayerGestureLayer> {
     if (_isCenterDoubleTap()) {
       _toggleFitMode();
     }
+    _doubleTapPosition = null;
   }
 
   @override
