@@ -124,8 +124,6 @@ class MainShellState extends State<MainShell> {
     );
   }
 
-
-
   Widget _buildSideNavigation() {
     return Container(
       width: 88,
@@ -175,8 +173,6 @@ class MainShellState extends State<MainShell> {
       ),
     );
   }
-
-
 
   Widget _buildNavItem(int index, IconData icon, String label) {
     final isSelected = _currentIndex == index;

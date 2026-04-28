@@ -666,7 +666,8 @@ class _JoinRoomScreenState extends State<JoinRoomScreen>
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.accentPrimary, width: 1.5),
+                    side: const BorderSide(
+                        color: AppColors.accentPrimary, width: 1.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppRadius.pill),
                     ),
