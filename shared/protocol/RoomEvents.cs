@@ -22,6 +22,7 @@ public static class RoomEvents
     public const string PlaybackPause = "playback:pause";
     public const string PlaybackSeek = "playback:seek";
     public const string PlaybackStateSync = "playback:state_sync";
+    public const string PlaybackSpeed = "playback:speed";
 
     
     public const string BufferingStall = "buffering:stall";
@@ -40,6 +41,7 @@ public static class RoomEvents
     public const string HubPlay = "Play";
     public const string HubPause = "Pause";
     public const string HubSeek = "Seek";
+    public const string HubSetPlaybackSpeed = "SetPlaybackSpeed";
     public const string HubNotifyBufferingStall = "NotifyBufferingStall";
     public const string HubNotifyBufferingReady = "NotifyBufferingReady";
     public const string HubNotifyPlayerReady = "NotifyPlayerReady";
