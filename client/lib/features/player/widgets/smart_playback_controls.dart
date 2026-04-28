@@ -173,6 +173,11 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     showControls();
   }
 
+  void _updateBrightness(double value) {
+    widget.onBrightnessChanged?.call(value.clamp(0.0, 1.0));
+    showControls();
+  }
+
   void _toggleFullscreen() {
     _fullscreenService.toggle().then((_) {
       if (mounted) setState(() {});
@@ -332,10 +337,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
               ),
               _BrightnessControl(
                 value: widget.brightness,
-                onChanged: (v) {
-                  showControls();
-                  widget.onBrightnessChanged?.call(v);
-                },
+                onChanged: _updateBrightness,
               ),
               _ChromeBtn(
                 icon: _fullscreenService.isFullscreen
@@ -440,10 +442,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
                   ),
                   _BrightnessControl(
                     value: widget.brightness,
-                    onChanged: (v) {
-                      showControls();
-                      widget.onBrightnessChanged?.call(v);
-                    },
+                    onChanged: _updateBrightness,
                   ),
                   _ChromeBtn(
                     icon: _fullscreenService.isFullscreen
@@ -924,9 +923,11 @@ class _SpeedBtn extends StatelessWidget {
                   child: Text(
                     '${s}x',
                     style: TextStyle(
-                      color: s == speed ? AppColors.accentPrimary : Colors.white,
+                      color:
+                          s == speed ? AppColors.accentPrimary : Colors.white,
                       fontSize: 13,
-                      fontWeight: s == speed ? FontWeight.bold : FontWeight.normal,
+                      fontWeight:
+                          s == speed ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                 ),

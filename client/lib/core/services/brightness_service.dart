@@ -17,7 +17,8 @@ class BrightnessService {
   Future<void> setBrightness(double value) async {
     if (kIsWeb || Platform.isWindows || Platform.isLinux) return;
     try {
-      await ScreenBrightness().setApplicationScreenBrightness(value.clamp(0.0, 1.0));
+      await ScreenBrightness()
+          .setApplicationScreenBrightness(value.clamp(0.0, 1.0));
     } catch (_) {
       // Fail silently
     }
@@ -27,7 +28,8 @@ class BrightnessService {
     if (kIsWeb || Platform.isWindows || Platform.isLinux) return;
     try {
       if (_originalBrightness != null) {
-        await ScreenBrightness().setApplicationScreenBrightness(_originalBrightness!);
+        await ScreenBrightness()
+            .setApplicationScreenBrightness(_originalBrightness!);
       } else {
         await ScreenBrightness().resetApplicationScreenBrightness();
       }

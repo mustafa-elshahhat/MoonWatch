@@ -21,6 +21,17 @@ void main() {
       expect(player.volume, 0.0);
     });
 
+    test('setVolume emits clamped values to volume stream', () async {
+      final emitted = <double>[];
+      final sub = player.volumeStream.listen(emitted.add);
+
+      await player.setVolume(1.5);
+      await player.setVolume(-0.5);
+
+      expect(emitted, [1.0, 0.0]);
+      await sub.cancel();
+    });
+
     test('Mute behavior should remember last non-zero volume', () async {
       await player.setVolume(0.7);
       expect(player.volume, 0.7);

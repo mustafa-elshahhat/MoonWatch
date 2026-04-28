@@ -2,10 +2,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../../core/player/player_controller.dart';
-import '../../../core/services/brightness_service.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../models/player_ui_context.dart';
 import '../models/video_fit_mode.dart';
+
+enum _GestureMode {
+  none,
+  verticalVolume,
+  verticalBrightness,
+  horizontalScrub,
+  pinchFit,
+}
 
 class PlayerGestureLayer extends StatefulWidget {
   final PlayerUIContext uiContext;
@@ -33,11 +40,15 @@ class PlayerGestureLayer extends StatefulWidget {
 
 class _PlayerGestureLayerState extends State<PlayerGestureLayer> {
   final _pc = GetIt.I<PlayerController>();
-  final _bs = GetIt.I<BrightnessService>();
 
   String? _feedbackText;
   IconData? _feedbackIcon;
   Timer? _feedbackTimer;
+  Offset? _doubleTapPosition;
+  _GestureMode _gestureMode = _GestureMode.none;
+  bool _gestureLocked = false;
+  Offset _gestureDelta = Offset.zero;
+  Offset _gestureStart = Offset.zero;
 
   void _showFeedback(String text, IconData icon) {
     _feedbackTimer?.cancel();
@@ -50,21 +61,18 @@ class _PlayerGestureLayerState extends State<PlayerGestureLayer> {
     });
   }
 
-  void _onVerticalDrag(DragUpdateDetails details) {
-    final width = MediaQuery.of(context).size.width;
-    final isLeft = details.localPosition.dx < width / 2;
-    final delta = -details.primaryDelta! / 200.0;
+  void _onVerticalDrag(Offset delta) {
+    final amount = -delta.dy / 200.0;
 
-    if (isLeft) {
-      final newBrightness = (widget.brightness + delta).clamp(0.0, 1.0);
+    if (_gestureMode == _GestureMode.verticalBrightness) {
+      final newBrightness = (widget.brightness + amount).clamp(0.0, 1.0);
       widget.onBrightnessChanged(newBrightness);
-      _bs.setBrightness(newBrightness);
       _showFeedback(
         'Brightness ${(newBrightness * 100).toInt()}%',
         Icons.brightness_medium_rounded,
       );
     } else {
-      final newVolume = (_pc.volume + delta).clamp(0.0, 1.0);
+      final newVolume = (_pc.volume + amount).clamp(0.0, 1.0);
       _pc.setVolume(newVolume);
       _showFeedback(
         'Volume ${(newVolume * 100).toInt()}%',
@@ -86,23 +94,20 @@ class _PlayerGestureLayerState extends State<PlayerGestureLayer> {
     widget.onShowOverlays();
   }
 
-  bool _isScrubbing = false;
   Duration _scrubPosition = Duration.zero;
 
-  void _onHorizontalDragStart(DragStartDetails details) {
-    if (!widget.uiContext.canControlPlayback) return;
+  void _startHorizontalScrub() {
     setState(() {
-      _isScrubbing = true;
       _scrubPosition = _pc.currentPosition;
     });
     widget.onShowOverlays();
   }
 
-  void _onHorizontalDragUpdate(DragUpdateDetails details) {
-    if (!_isScrubbing) return;
-    final delta = details.primaryDelta! * 100; // 100ms per pixel
+  void _onHorizontalDragUpdate(Offset delta) {
+    if (_gestureMode != _GestureMode.horizontalScrub) return;
+    final seekDelta = delta.dx * 100; // 100ms per pixel
     setState(() {
-      final newMs = _scrubPosition.inMilliseconds + delta.toInt();
+      final newMs = _scrubPosition.inMilliseconds + seekDelta.toInt();
       _scrubPosition = Duration(
         milliseconds: newMs.clamp(0, _pc.duration.inMilliseconds),
       );
@@ -114,14 +119,13 @@ class _PlayerGestureLayerState extends State<PlayerGestureLayer> {
     widget.onShowOverlays();
   }
 
-  void _onHorizontalDragEnd(DragEndDetails details) {
-    if (!_isScrubbing) return;
+  void _onHorizontalDragEnd() {
+    if (_gestureMode != _GestureMode.horizontalScrub) return;
     if (widget.onSeek != null) {
       widget.onSeek!(_scrubPosition);
     } else {
       _pc.seekTo(_scrubPosition);
     }
-    setState(() => _isScrubbing = false);
     widget.onShowOverlays();
   }
 
@@ -132,16 +136,109 @@ class _PlayerGestureLayerState extends State<PlayerGestureLayer> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _bs.initialize();
-  }
-
-  @override
   void dispose() {
-    _bs.restore();
     _feedbackTimer?.cancel();
     super.dispose();
+  }
+
+  void _onScaleStart(ScaleStartDetails details) {
+    widget.onShowOverlays();
+    _gestureMode =
+        details.pointerCount >= 2 ? _GestureMode.pinchFit : _GestureMode.none;
+    _gestureLocked = details.pointerCount >= 2;
+    _gestureDelta = Offset.zero;
+    _gestureStart = details.localFocalPoint;
+  }
+
+  void _onScaleUpdate(ScaleUpdateDetails details) {
+    widget.onShowOverlays();
+
+    if (_gestureMode == _GestureMode.pinchFit || details.pointerCount >= 2) {
+      _gestureMode = _GestureMode.pinchFit;
+      _gestureLocked = true;
+      _handlePinch(details.scale);
+      return;
+    }
+
+    if (details.pointerCount != 1) return;
+
+    final delta = details.focalPointDelta;
+    if (!_gestureLocked) {
+      _gestureDelta += delta;
+      if (_gestureDelta.distance < 8) return;
+
+      final dx = _gestureDelta.dx.abs();
+      final dy = _gestureDelta.dy.abs();
+      if (dy > dx * 1.25) {
+        final width = MediaQuery.of(context).size.width;
+        _gestureMode = _gestureStart.dx < width / 2
+            ? _GestureMode.verticalBrightness
+            : _GestureMode.verticalVolume;
+      } else if (dx > dy * 1.25) {
+        _gestureMode = widget.uiContext.canControlPlayback
+            ? _GestureMode.horizontalScrub
+            : _GestureMode.none;
+        if (_gestureMode == _GestureMode.horizontalScrub) {
+          _startHorizontalScrub();
+        }
+      } else {
+        return;
+      }
+      _gestureLocked = true;
+    }
+
+    switch (_gestureMode) {
+      case _GestureMode.verticalBrightness:
+      case _GestureMode.verticalVolume:
+        _onVerticalDrag(delta);
+        break;
+      case _GestureMode.horizontalScrub:
+        _onHorizontalDragUpdate(delta);
+        break;
+      case _GestureMode.pinchFit:
+      case _GestureMode.none:
+        break;
+    }
+  }
+
+  void _handlePinch(double scale) {
+    if (scale > 1.1 && widget.fitMode != VideoFitMode.cover) {
+      widget.onFitModeChanged(VideoFitMode.cover);
+      _showFeedback('Fill Screen', VideoFitMode.cover.icon);
+    } else if (scale < 0.9 && widget.fitMode != VideoFitMode.contain) {
+      widget.onFitModeChanged(VideoFitMode.contain);
+      _showFeedback('Fit to Screen', VideoFitMode.contain.icon);
+    }
+  }
+
+  void _onScaleEnd(ScaleEndDetails details) {
+    _onHorizontalDragEnd();
+    _gestureMode = _GestureMode.none;
+    _gestureLocked = false;
+    _gestureDelta = Offset.zero;
+  }
+
+  bool _isCenterDoubleTap() {
+    final position = _doubleTapPosition;
+    if (position == null) return false;
+    final size = context.size;
+    if (size == null || size.isEmpty) return false;
+
+    final left = size.width * 0.25;
+    final right = size.width * 0.75;
+    final top = size.height * 0.15;
+    final bottom = size.height * 0.75;
+
+    return position.dx >= left &&
+        position.dx <= right &&
+        position.dy >= top &&
+        position.dy <= bottom;
+  }
+
+  void _onDoubleTap() {
+    if (_isCenterDoubleTap()) {
+      _toggleFitMode();
+    }
   }
 
   @override
@@ -149,50 +246,11 @@ class _PlayerGestureLayerState extends State<PlayerGestureLayer> {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: widget.onShowOverlays,
-      onDoubleTap: _toggleFitMode,
-      onScaleStart: (details) {
-        widget.onShowOverlays();
-        if (details.pointerCount == 1) {
-          _onHorizontalDragStart(DragStartDetails(
-            globalPosition: details.focalPoint,
-            localPosition: details.localFocalPoint,
-          ));
-        }
-      },
-      onScaleUpdate: (details) {
-        widget.onShowOverlays();
-        if (details.pointerCount == 1) {
-          // Handle Drag
-          if (details.focalPointDelta.dy.abs() > details.focalPointDelta.dx.abs() * 1.5) {
-            _onVerticalDrag(DragUpdateDetails(
-              delta: details.focalPointDelta,
-              globalPosition: details.focalPoint,
-              localPosition: details.localFocalPoint,
-            ));
-          } else {
-            _onHorizontalDragUpdate(DragUpdateDetails(
-              delta: details.focalPointDelta,
-              globalPosition: details.focalPoint,
-              localPosition: details.localFocalPoint,
-            ));
-          }
-        } else if (details.pointerCount >= 2) {
-          // Handle Pinch
-          final scale = details.scale;
-          if (scale > 1.1 && widget.fitMode != VideoFitMode.cover) {
-            widget.onFitModeChanged(VideoFitMode.cover);
-            _showFeedback('Fill Screen', VideoFitMode.cover.icon);
-          } else if (scale < 0.9 && widget.fitMode != VideoFitMode.contain) {
-            widget.onFitModeChanged(VideoFitMode.contain);
-            _showFeedback('Fit to Screen', VideoFitMode.contain.icon);
-          }
-        }
-      },
-      onScaleEnd: (details) {
-        _onHorizontalDragEnd(DragEndDetails(
-          velocity: details.velocity,
-        ));
-      },
+      onDoubleTapDown: (details) => _doubleTapPosition = details.localPosition,
+      onDoubleTap: _onDoubleTap,
+      onScaleStart: _onScaleStart,
+      onScaleUpdate: _onScaleUpdate,
+      onScaleEnd: _onScaleEnd,
       child: Stack(
         children: [
           if (_feedbackText != null)

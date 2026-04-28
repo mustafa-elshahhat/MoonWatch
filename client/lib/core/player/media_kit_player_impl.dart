@@ -600,6 +600,9 @@ class MediaKitPlayerImpl implements PlayerController {
     } else if (this.volume > 0) {
       _lastNonZeroVolume = this.volume;
     }
+    if (!_volumeController.isClosed) {
+      _volumeController.add(clamped);
+    }
     await _player?.setVolume(clamped * 100.0);
   }
 

@@ -42,8 +42,9 @@ class IptvConfig {
 
   String livePlaybackUrl(String streamId, {String? extension}) {
     final uri = Uri.parse(baseUrl);
-    final fileName =
-        (extension != null && extension.isNotEmpty) ? '$streamId.$extension' : streamId;
+    final fileName = (extension != null && extension.isNotEmpty)
+        ? '$streamId.$extension'
+        : streamId;
 
     return uri.replace(
       pathSegments: [

@@ -171,7 +171,36 @@ public class RoomServiceTests
         Assert.Equal(RoomState.Active, room.State);
     }
 
-    
+    [Fact]
+    public async Task SetContent_ContentSwitch_ResetsPlaybackAndBufferingState()
+    {
+        var (_, room) = await SetupActiveRoom();
+        room.PlaybackRate = 1.5;
+        room.WasPlayingBeforeBuffering = true;
+        room.BufferingEpisodeId = 42;
+        room.Host!.BufferingState = BufferingState.Stalled;
+        room.Guest!.BufferingState = BufferingState.Stalled;
+        room.Host!.IsPlayerReady = true;
+        room.Guest!.IsPlayerReady = true;
+        room.HostPositionMs = 90000;
+        room.HostPositionUpdatedAtMs = 123456;
+        room.HostIsPlaying = true;
+
+        var nextDescriptor = new IptvContentDescriptor("episode", "928875", "m3u8", "Episode 2");
+        await _service.HandleSetContent("host-conn", nextDescriptor);
+
+        Assert.Equal(1.0, room.PlaybackRate);
+        Assert.False(room.WasPlayingBeforeBuffering);
+        Assert.Equal(0, room.BufferingEpisodeId);
+        Assert.Equal(BufferingState.Ready, room.Host.BufferingState);
+        Assert.Equal(BufferingState.Ready, room.Guest.BufferingState);
+        Assert.False(room.Host.IsPlayerReady);
+        Assert.False(room.Guest.IsPlayerReady);
+        Assert.Equal(0, room.HostPositionMs);
+        Assert.Equal(0, room.HostPositionUpdatedAtMs);
+        Assert.False(room.HostIsPlaying);
+    }
+
 
     [Fact]
     public async Task Play_HostPlays_UpdatesPositionAndReturnsData()
@@ -342,6 +371,7 @@ public class RoomServiceTests
     public async Task BufferingStall_GuestStalls_SetsGuestToStalled()
     {
         var (code, room) = await SetupActiveRoom();
+        room.HostPositionMs = 42000;
 
         var result = await _service.HandleNotifyBufferingStall("guest-conn", 42000, 1);
 
@@ -363,6 +393,38 @@ public class RoomServiceTests
         Assert.Equal("guest-conn", result.PeerConnectionId);
         Assert.Equal(BufferingState.Stalled, room.Host!.BufferingState);
         Assert.Equal(BufferingState.Ready, room.Guest!.BufferingState);
+    }
+
+    [Fact]
+    public async Task BufferingStall_HostStalls_UsesHostReportedPosition()
+    {
+        var (_, room) = await SetupActiveRoom();
+        room.HostIsPlaying = true;
+        room.HostPositionMs = 10000;
+        room.HostPositionUpdatedAtMs = DateTimeOffset.UtcNow.AddSeconds(-10).ToUnixTimeMilliseconds();
+        room.PlaybackRate = 2.0;
+
+        var result = await _service.HandleNotifyBufferingStall("host-conn", 50000, 1);
+
+        Assert.Equal(50000, result.PositionMs);
+        Assert.Equal(50000, room.HostPositionMs);
+        Assert.False(room.HostIsPlaying);
+        Assert.True(room.HostPositionUpdatedAtMs > 0);
+    }
+
+    [Fact]
+    public async Task BufferingStall_GuestStalls_EstimatesHostPositionUsingPlaybackRate()
+    {
+        var (_, room) = await SetupActiveRoom();
+        room.HostIsPlaying = true;
+        room.HostPositionMs = 10000;
+        room.HostPositionUpdatedAtMs = DateTimeOffset.UtcNow.AddSeconds(-1).ToUnixTimeMilliseconds();
+        room.PlaybackRate = 2.0;
+
+        var result = await _service.HandleNotifyBufferingStall("guest-conn", 42000, 1);
+
+        Assert.InRange(result.PositionMs, 11800, 13000);
+        Assert.Equal(result.PositionMs, room.HostPositionMs);
     }
 
     [Fact]
@@ -388,6 +450,18 @@ public class RoomServiceTests
 
         Assert.False(result.GateOpened);
         Assert.Equal(BufferingState.Ready, room.Guest!.BufferingState);
+    }
+
+    [Fact]
+    public async Task BufferingReady_StaleEpisode_IsIgnored()
+    {
+        var (_, room) = await SetupActiveRoom();
+        await _service.HandleNotifyBufferingStall("guest-conn", 42000, 2);
+
+        var result = await _service.HandleNotifyBufferingReady("guest-conn", 1);
+
+        Assert.False(result.GateOpened);
+        Assert.Equal(BufferingState.Stalled, room.Guest!.BufferingState);
     }
 
     
@@ -446,6 +520,42 @@ public class RoomServiceTests
         var readyResult = await _service.HandleNotifyBufferingReady("guest-conn", 1);
         Assert.True(readyResult.GateOpened);
         Assert.Equal(42000, readyResult.ResumePositionMs);
+    }
+
+    [Fact]
+    public async Task BufferingReady_WhenHostWasPlaying_RestartsSyncTimer()
+    {
+        var (_, room) = await SetupActiveRoom();
+        room.HostPositionMs = 42000;
+        room.HostIsPlaying = true;
+
+        await _service.HandleNotifyBufferingStall("guest-conn", 42000, 1);
+        var stalledAt = room.HostPositionUpdatedAtMs;
+        await Task.Delay(5);
+
+        var readyResult = await _service.HandleNotifyBufferingReady("guest-conn", 1);
+
+        Assert.True(readyResult.GateOpened);
+        Assert.True(readyResult.IsPlaying);
+        Assert.True(room.HostPositionUpdatedAtMs > stalledAt);
+    }
+
+    [Fact]
+    public async Task BufferingReady_WhenHostWasPaused_DoesNotRestartSyncTimer()
+    {
+        var (_, room) = await SetupActiveRoom();
+        room.HostPositionMs = 42000;
+        room.HostIsPlaying = false;
+        room.HostPositionUpdatedAtMs = 123456;
+
+        await _service.HandleNotifyBufferingStall("guest-conn", 42000, 1);
+        var stalledAt = room.HostPositionUpdatedAtMs;
+
+        var readyResult = await _service.HandleNotifyBufferingReady("guest-conn", 1);
+
+        Assert.True(readyResult.GateOpened);
+        Assert.False(readyResult.IsPlaying);
+        Assert.Equal(stalledAt, room.HostPositionUpdatedAtMs);
     }
 
     [Fact]

@@ -5,6 +5,7 @@ import '../../../core/logging/app_logger.dart';
 import 'package:get_it/get_it.dart';
 import '../../../core/player/player_controller.dart';
 import '../../../core/protocol/payloads.dart';
+import '../../../core/services/brightness_service.dart';
 import '../../../core/services/episode_nav_service.dart';
 import '../../../core/services/fullscreen_service.dart';
 import '../../../core/theme/app_colors.dart';
@@ -55,12 +56,15 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
 
   PlayerBloc? _playerBloc;
   late final PlayerController _playerController;
+  late final BrightnessService _brightnessService;
 
   @override
   void initState() {
     super.initState();
     _playerController = GetIt.instance<PlayerController>();
+    _brightnessService = GetIt.instance<BrightnessService>();
     FullscreenService().addListener(_onFullscreenChanged);
+    _brightnessService.initialize();
   }
 
   @override
@@ -101,6 +105,7 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
     FullscreenService().removeListener(_onFullscreenChanged);
     _topBarHideTimer?.cancel();
     FullscreenService().exitFullscreen();
+    _brightnessService.restore();
     _playerBloc?.add(const PlayerEventDispose());
     super.dispose();
   }
@@ -129,6 +134,12 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
         if (mounted) setState(() => _topBarVisible = false);
       });
     }
+  }
+
+  void _setBrightness(double value) {
+    final clamped = value.clamp(0.0, 1.0);
+    setState(() => _brightness = clamped);
+    unawaited(_brightnessService.setBrightness(clamped));
   }
 
   PlayerUIContext get _uiContext {
@@ -217,7 +228,7 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
                 onFitModeChanged: (m) => setState(() => _fitMode = m),
                 onShowOverlays: _showOverlays,
                 brightness: _brightness,
-                onBrightnessChanged: (v) => setState(() => _brightness = v),
+                onBrightnessChanged: _setBrightness,
                 onSeek: (target) => _playerBloc?.add(PlayerEventSeek(target)),
               ),
               IgnorePointer(
@@ -285,7 +296,7 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
       fitMode: _fitMode,
       onFitModeChanged: (mode) => setState(() => _fitMode = mode),
       brightness: _brightness,
-      onBrightnessChanged: (v) => setState(() => _brightness = v),
+      onBrightnessChanged: _setBrightness,
       onPlay: (_) => context.read<PlayerBloc>().add(const PlayerEventPlay()),
       onPause: (_) => context.read<PlayerBloc>().add(const PlayerEventPause()),
       onSeek: (target) =>

@@ -214,7 +214,8 @@ void main() {
         return syncBloc;
       },
       act: (bloc) {
-        bloc.add(const SyncEventSpeedReceived(speed: 1.5, serverTimestampMs: 0));
+        bloc.add(
+            const SyncEventSpeedReceived(speed: 1.5, serverTimestampMs: 0));
       },
       expect: () => <SyncState>[],
       verify: (_) {

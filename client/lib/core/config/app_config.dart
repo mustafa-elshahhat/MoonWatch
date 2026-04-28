@@ -1,6 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/services.dart'
-    show rootBundle;
+import 'package:flutter/services.dart' show rootBundle;
 
 class AppConfig {
   final String serverBaseUrl;
@@ -17,12 +16,10 @@ class AppConfig {
       jsonString =
           await rootBundle.loadString('assets/config/appsettings.local.json');
     } catch (e) {
-      throw Exception(
-        'Configuration file appsettings.local.json not found. '
-        'Copy appsettings.example.json to appsettings.local.json and '
-        'update with your server and IPTV provider URLs. '
-        'Details: $e'
-      );
+      throw Exception('Configuration file appsettings.local.json not found. '
+          'Copy appsettings.example.json to appsettings.local.json and '
+          'update with your server and IPTV provider URLs. '
+          'Details: $e');
     }
 
     final Map<String, dynamic> json = jsonDecode(jsonString);

@@ -194,7 +194,7 @@ void main() {
         );
       },
     );
-   group('host_disconnect integration', () {
+    group('host_disconnect integration', () {
       test('guest disconnects with grace period', () async {
         roomBloc.startListening();
         roomBloc.add(

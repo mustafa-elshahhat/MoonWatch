@@ -30,7 +30,8 @@ class SyncEventPlayReceived extends SyncEvent {
   });
 
   @override
-  List<Object?> get props => [positionMs, serverTimestampMs, hostRttMs, seqNo, playbackRate];
+  List<Object?> get props =>
+      [positionMs, serverTimestampMs, hostRttMs, seqNo, playbackRate];
 }
 
 class SyncEventPauseReceived extends SyncEvent {
@@ -524,7 +525,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     final adjustedNow = now + _clockOffsetMs;
     final rawAgeMs = adjustedNow - event.serverTimestampMs;
     final ageMs = rawAgeMs.clamp(0, 30000);
-    final adjustedHostPositionMs = event.hostPositionMs + (ageMs * event.playbackRate).toInt();
+    final adjustedHostPositionMs =
+        event.hostPositionMs + (ageMs * event.playbackRate).toInt();
 
     final currentGuestPositionMs =
         _playerController.currentPosition.inMilliseconds;
@@ -539,7 +541,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     );
 
     if (event.playbackRate != _playbackRate) {
-      _logger.i('SyncBloc: applying playback:speed from state_sync — speed=${event.playbackRate}');
+      _logger.i(
+          'SyncBloc: applying playback:speed from state_sync — speed=${event.playbackRate}');
       _playbackRate = event.playbackRate;
       await _playerController.setPlaybackSpeed(_playbackRate);
     }
@@ -779,7 +782,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   ) async {
     if (_role == 'host') return;
 
-    _logger.i('SyncBloc: applying playback:speed received — speed=${event.speed}');
+    _logger
+        .i('SyncBloc: applying playback:speed received — speed=${event.speed}');
     _playbackRate = event.speed;
     await _playerController.setPlaybackSpeed(_playbackRate);
   }
@@ -803,8 +807,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     _playbackRate = event.playbackRate;
     await _playerController.setPlaybackSpeed(_playbackRate);
 
-    final adjustedPositionMs =
-        event.positionMs + (elapsedMs * _playbackRate).toInt() + (event.hostRttMs ~/ 2);
+    final adjustedPositionMs = event.positionMs +
+        (elapsedMs * _playbackRate).toInt() +
+        (event.hostRttMs ~/ 2);
 
     _logger.i(
       'SyncBloc: applying playback:play — '
@@ -971,8 +976,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     _playbackRate = bestPlaybackRate;
     await _playerController.setPlaybackSpeed(_playbackRate);
 
-    final adjustedPositionMs =
-        targetPositionMs + (elapsedMs * _playbackRate).toInt() + (bestHostRttMs ~/ 2);
+    final adjustedPositionMs = targetPositionMs +
+        (elapsedMs * _playbackRate).toInt() +
+        (bestHostRttMs ~/ 2);
 
     _logger.i(
       'SyncBloc: deferred_flush_applying — '

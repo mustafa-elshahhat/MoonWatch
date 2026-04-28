@@ -1,4 +1,4 @@
-package com.example.watch_party
+package com.moonwatch.watchparty
 
 import android.os.Build
 import android.os.Bundle

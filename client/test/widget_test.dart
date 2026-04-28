@@ -4,12 +4,13 @@ import 'package:watch_party/core/di/injection.dart';
 import 'package:watch_party/core/config/app_config.dart';
 
 void main() {
-  testWidgets('App can be pumped with mock config', (WidgetTester tester) async {
+  testWidgets('App can be pumped with mock config',
+      (WidgetTester tester) async {
     final mockConfig = AppConfig(
       serverBaseUrl: 'http://localhost',
       iptvBaseUrl: 'http://iptv',
     );
-    
+
     await configureDependencies(appConfig: mockConfig);
 
     await tester.pumpWidget(const WatchPartyApp());

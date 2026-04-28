@@ -443,8 +443,6 @@ public class RoomService : IRoomService
             room.Lock.Release();
         }
     }
-
-    
     public async Task<SetContentResult> HandleSetContent(string connectionId, IptvContentDescriptor descriptor)
     {
         var room = FindRoom(connectionId);
@@ -456,8 +454,13 @@ public class RoomService : IRoomService
 
             room.ContentDescriptor = descriptor;
             room.LastActivityAt = DateTimeOffset.UtcNow;
+            room.PlaybackRate = 1.0;
+            room.WasPlayingBeforeBuffering = false;
+            room.BufferingEpisodeId = 0;
+            room.HostIsPlaying = false;
+            room.HostPositionMs = 0;
+            room.HostPositionUpdatedAtMs = 0;
 
-            
             if (room.Host != null)
             {
                 room.Host.IsPlayerReady = false;
@@ -470,10 +473,6 @@ public class RoomService : IRoomService
                 room.Guest.PlayerReadyContentKey = null;
                 room.Guest.BufferingState = BufferingState.Ready;
             }
-
-            room.HostIsPlaying = false;
-            room.HostPositionMs = 0;
-            room.HostPositionUpdatedAtMs = 0;
 
             bool transitioned = false;
             if (room.State == RoomState.Joined && room.Guest != null && !room.GuestAway)
@@ -496,8 +495,6 @@ public class RoomService : IRoomService
             room.Lock.Release();
         }
     }
-
-    
     public async Task<PingResult> HandlePing(string connectionId, long clientTimestampMs, int clientMeasuredRttMs = 0)
     {
         var room = _registry.FindByConnectionId(connectionId)
@@ -507,19 +504,14 @@ public class RoomService : IRoomService
         try
         {
             var serverTimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
-            
-            
             if (room.Host?.ConnectionId == connectionId && clientMeasuredRttMs > 0 && clientMeasuredRttMs < 10000)
             {
                 if (room.HostRttMs <= 0)
                 {
-                    
                     room.HostRttMs = clientMeasuredRttMs;
                 }
                 else
                 {
-                    
                     room.HostRttMs = (int)(0.3 * clientMeasuredRttMs + 0.7 * room.HostRttMs);
                 }
             }
@@ -531,8 +523,6 @@ public class RoomService : IRoomService
             room.Lock.Release();
         }
     }
-
-    
     public async Task<BufferingStallResult> HandleNotifyBufferingStall(string connectionId, long positionMs, int episodeId)
     {
         var room = FindRoom(connectionId);
@@ -542,24 +532,30 @@ public class RoomService : IRoomService
         {
             var (participant, role) = FindParticipant(room, connectionId);
 
-            
             if (participant.BufferingState == BufferingState.Stalled)
             {
                 _logger.LogDebug("Duplicate buffering stall ignored {RoomId} {Role}", room.RoomCode, role);
                 return new BufferingStallResult(room.RoomCode, role, null, positionMs);
             }
 
-            
+            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             if (!room.IsBuffering)
             {
                 room.WasPlayingBeforeBuffering = room.HostIsPlaying;
                 room.BufferingEpisodeId = episodeId;
-                
-                // Authoritative position update when buffering starts
-                var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                if (room.HostIsPlaying && room.HostPositionUpdatedAtMs > 0)
+            }
+
+            if (role == "host")
+            {
+                room.HostPositionMs = positionMs;
+                room.HostIsPlaying = false;
+                room.HostPositionUpdatedAtMs = now;
+            }
+            else if (room.HostIsPlaying && room.HostPositionUpdatedAtMs > 0)
+            {
+                var elapsed = now - room.HostPositionUpdatedAtMs;
+                if (elapsed > 0)
                 {
-                    long elapsed = now - room.HostPositionUpdatedAtMs;
                     room.HostPositionMs += (long)(elapsed * room.PlaybackRate);
                 }
                 room.HostPositionUpdatedAtMs = now;
@@ -567,11 +563,6 @@ public class RoomService : IRoomService
 
             participant.BufferingState = BufferingState.Stalled;
             room.LastActivityAt = DateTimeOffset.UtcNow;
-
-            if (role == "host")
-            {
-                room.HostIsPlaying = false; 
-            }
 
             var peer = role == "host" ? room.Guest : room.Host;
             var peerConnectionId = peer?.ConnectionId;
@@ -586,8 +577,6 @@ public class RoomService : IRoomService
             room.Lock.Release();
         }
     }
-
-    
     public async Task<BufferingReadyResult> HandleNotifyBufferingReady(string connectionId, int episodeId)
     {
         var room = FindRoom(connectionId);
@@ -597,7 +586,6 @@ public class RoomService : IRoomService
         {
             var (participant, role) = FindParticipant(room, connectionId);
 
-            
             if (participant.BufferingState == BufferingState.Ready || episodeId != room.BufferingEpisodeId)
             {
                 _logger.LogDebug("Stale/Duplicate buffering ready ignored {RoomId} {Role} {EpisodeId} (Room has {BufferingEpisodeId})", 
@@ -608,16 +596,17 @@ public class RoomService : IRoomService
             participant.BufferingState = BufferingState.Ready;
             room.LastActivityAt = DateTimeOffset.UtcNow;
 
-            
             var hostReady = room.Host?.BufferingState == BufferingState.Ready;
             var guestReady = room.Guest?.BufferingState == BufferingState.Ready;
             var gateOpened = hostReady && guestReady && room.Guest != null && !room.GuestAway;
 
             if (gateOpened)
             {
-                
                 room.HostIsPlaying = room.WasPlayingBeforeBuffering;
-                room.HostPositionUpdatedAtMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                if (room.HostIsPlaying)
+                {
+                    room.HostPositionUpdatedAtMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                }
 
                 _logger.LogInformation("Buffering gate opened, resume {Event} {RoomId} {ResumePositionMs} {IsPlaying}",
                     "buffering.resume", room.RoomCode, room.HostPositionMs, room.HostIsPlaying);

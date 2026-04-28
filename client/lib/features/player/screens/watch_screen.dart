@@ -5,6 +5,7 @@ import '../../../core/logging/app_logger.dart';
 import 'package:get_it/get_it.dart';
 import '../../../core/player/player_controller.dart';
 import '../../../core/protocol/payloads.dart';
+import '../../../core/services/brightness_service.dart';
 import '../../../core/services/fullscreen_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -64,6 +65,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
 
   late final PlayerBloc _playerBloc;
   late final PlayerController _playerController;
+  late final BrightnessService _brightnessService;
   late final RoomRepository _roomRepository;
   late final LatencyEstimator _latencyEstimator;
   late final IptvRepository _iptvRepository;
@@ -81,6 +83,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     super.initState();
 
     _playerController = GetIt.instance<PlayerController>();
+    _brightnessService = GetIt.instance<BrightnessService>();
     _roomRepository = GetIt.instance<RoomRepository>();
     _latencyEstimator = GetIt.instance<LatencyEstimator>();
     _iptvRepository = GetIt.instance<IptvRepository>();
@@ -89,6 +92,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     _playerBloc.setRoomMode(true);
 
     FullscreenService().addListener(_onFullscreenChanged);
+    _brightnessService.initialize();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -105,6 +109,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
     _topBarHideTimer?.cancel();
 
     FullscreenService().exitFullscreen();
+    _brightnessService.restore();
 
     _playerBloc.setRoomMode(false);
 
@@ -136,6 +141,12 @@ class WatchScreenContentState extends State<WatchScreenContent> {
         if (mounted) setState(() => _topBarVisible = false);
       });
     }
+  }
+
+  void _setBrightness(double value) {
+    final clamped = value.clamp(0.0, 1.0);
+    setState(() => _brightness = clamped);
+    unawaited(_brightnessService.setBrightness(clamped));
   }
 
   static String? _roleOf(RoomState s) => switch (s) {
@@ -397,7 +408,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
             onFitModeChanged: (m) => setState(() => _fitMode = m),
             onShowOverlays: _showOverlays,
             brightness: _brightness,
-            onBrightnessChanged: (v) => setState(() => _brightness = v),
+            onBrightnessChanged: _setBrightness,
             onSeek: uiContext.canControlPlayback
                 ? (target) => invokeSeekAction(target)
                 : null,
@@ -585,7 +596,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
       fitMode: _fitMode,
       onFitModeChanged: (mode) => setState(() => _fitMode = mode),
       brightness: _brightness,
-      onBrightnessChanged: (v) => setState(() => _brightness = v),
+      onBrightnessChanged: _setBrightness,
       onPlay: (_) => invokePlay(_playerController.currentPosition),
       onPause: (_) => invokePauseAction(_playerController.currentPosition),
       onSeek: (pos) => invokeSeekAction(pos),

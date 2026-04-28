@@ -36,18 +36,14 @@ void main() {
     });
 
     test('rejects missing serverBaseUrl', () async {
-      mockConfig({
-        'iptvBaseUrl': 'http://iptv.test'
-      });
+      mockConfig({'iptvBaseUrl': 'http://iptv.test'});
 
       expect(AppConfig.load(), throwsA(isA<Exception>()));
     });
 
     test('rejects invalid URL', () async {
-      mockConfig({
-        'serverBaseUrl': 'not-a-url',
-        'iptvBaseUrl': 'http://iptv.test'
-      });
+      mockConfig(
+          {'serverBaseUrl': 'not-a-url', 'iptvBaseUrl': 'http://iptv.test'});
 
       expect(AppConfig.load(), throwsA(isA<Exception>()));
     });
