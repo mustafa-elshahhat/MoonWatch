@@ -443,5 +443,22 @@ void main() {
         ]);
       },
     );
+
+    blocTest<SyncBloc, SyncState>(
+      'notifies ready again for same content after not-ready retry transition',
+      build: () => syncBloc,
+      act: (bloc) {
+        bloc.setPlayerReady(true, contentKey: 'movie|1|m3u8');
+        bloc.setPlayerReady(false, contentKey: 'movie|1|m3u8');
+        bloc.setPlayerReady(true, contentKey: 'movie|1|m3u8');
+      },
+      expect: () => <SyncState>[],
+      verify: (_) {
+        expect(mockRepo.notifyPlayerReadyCalls, [
+          'movie|1|m3u8',
+          'movie|1|m3u8',
+        ]);
+      },
+    );
   });
 }

@@ -63,7 +63,7 @@ class IptvApiService {
     return AppLogger.sanitizeUrl(uri.toString());
   }
 
-  IptvConfig get config {
+  IptvConfig get _config {
     if (_currentConfig == null) {
       throw const IptvApiException('IPTV config is not initialized.');
     }
@@ -72,7 +72,7 @@ class IptvApiService {
 
   Future<IptvConfig> getConfiguredConfig() async {
     await _ensureConfigured();
-    return config;
+    return _config;
   }
 
   Future<void> _ensureConfigured() async {
@@ -114,7 +114,7 @@ class IptvApiService {
   Future<Map<String, dynamic>> authenticate() async {
     await _ensureConfigured();
     try {
-      final response = await _dio.getUri(config.authUrl);
+      final response = await _dio.getUri(_config.authUrl);
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
       throw _mapError(e);
@@ -123,14 +123,14 @@ class IptvApiService {
 
   Future<List<IptvCategory>> getLiveCategories() async {
     await _ensureConfigured();
-    return _fetchCategories(config.liveCategoriesUrl);
+    return _fetchCategories(_config.liveCategoriesUrl);
   }
 
   Future<List<LiveStream>> getLiveStreams({String? categoryId}) async {
     await _ensureConfigured();
     try {
       final response = await _dio.getUri(
-        config.liveStreamsUrl(categoryId: categoryId),
+        _config.liveStreamsUrl(categoryId: categoryId),
       );
       final list = response.data as List<dynamic>? ?? [];
       return list
@@ -144,14 +144,14 @@ class IptvApiService {
 
   Future<List<IptvCategory>> getVodCategories() async {
     await _ensureConfigured();
-    return _fetchCategories(config.vodCategoriesUrl);
+    return _fetchCategories(_config.vodCategoriesUrl);
   }
 
   Future<List<VodStream>> getVodStreams({String? categoryId}) async {
     await _ensureConfigured();
     try {
       final response = await _dio.getUri(
-        config.vodStreamsUrl(categoryId: categoryId),
+        _config.vodStreamsUrl(categoryId: categoryId),
       );
       final list = response.data as List<dynamic>? ?? [];
       return list
@@ -165,14 +165,14 @@ class IptvApiService {
 
   Future<List<IptvCategory>> getSeriesCategories() async {
     await _ensureConfigured();
-    return _fetchCategories(config.seriesCategoriesUrl);
+    return _fetchCategories(_config.seriesCategoriesUrl);
   }
 
   Future<List<SeriesItem>> getSeriesList({String? categoryId}) async {
     await _ensureConfigured();
     try {
       final response = await _dio.getUri(
-        config.seriesListUrl(categoryId: categoryId),
+        _config.seriesListUrl(categoryId: categoryId),
       );
       final list = response.data as List<dynamic>? ?? [];
       return list
@@ -187,7 +187,7 @@ class IptvApiService {
   Future<Map<String, dynamic>> getSeriesInfo(String seriesId) async {
     await _ensureConfigured();
     try {
-      final response = await _dio.getUri(config.seriesInfoUrl(seriesId));
+      final response = await _dio.getUri(_config.seriesInfoUrl(seriesId));
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
       throw _mapError(e);

@@ -703,7 +703,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
 
     final message = isHost
         ? 'Leaving will end the room for everyone.'
-        : 'You will leave this session and can join again later.';
+        : 'Leaving will disconnect you from the room.';
 
     AppConfirmDialog.show(
       context,

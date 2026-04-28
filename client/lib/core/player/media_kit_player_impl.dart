@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import '../logging/app_logger.dart';
 import 'package:media_kit/media_kit.dart';
@@ -206,7 +207,7 @@ class MediaKitPlayerImpl implements PlayerController {
           _player = Player(
             configuration: const PlayerConfiguration(
               bufferSize: 32 * 1024 * 1024,
-              logLevel: MPVLogLevel.warn,
+              logLevel: kDebugMode ? MPVLogLevel.warn : MPVLogLevel.error,
             ),
           );
 
@@ -304,9 +305,10 @@ class MediaKitPlayerImpl implements PlayerController {
       final elapsed = DateTime.now().difference(initStartTime).inMilliseconds;
       _logger.i('[PROFILER] media_player_init_end: ${elapsed}ms');
     } catch (e, st) {
-      _logger.e('MediaKitPlayerImpl.initialize: failed — $e\n$st');
+      final safeError = _sanitizeNativeMessage(e.toString());
+      _logger.e('MediaKitPlayerImpl.initialize: failed — $safeError\n$st');
       await _disposeInternal();
-      rethrow;
+      throw Exception(safeError);
     }
   }
 
@@ -361,14 +363,15 @@ class MediaKitPlayerImpl implements PlayerController {
     final hasVideo = w != null && w > 0;
 
     if (initError != null) {
+      final safeInitError = _sanitizeNativeMessage(initError!);
       final isFatalPattern = _fatalLogPatterns.any(
         (p) => p.hasMatch(initError!),
       );
       if (isFatalPattern || (!hasDuration && !hasVideo)) {
-        _logger.e('_waitForReady: init failed — $initError');
-        throw Exception('Stream failed to load: $initError');
+        _logger.e('_waitForReady: init failed — $safeInitError');
+        throw Exception('Stream failed to load: $safeInitError');
       }
-      _logger.w('_waitForReady: init warning (media detected): $initError');
+      _logger.w('_waitForReady: init warning (media detected): $safeInitError');
     }
 
     if (hasVideo) {
@@ -513,32 +516,37 @@ class MediaKitPlayerImpl implements PlayerController {
             );
           } else {
             _logger.w(
-              'MediaKitPlayerImpl: transient error ($_transientErrorCount/$_maxTransientErrors) — $error',
+              'MediaKitPlayerImpl: transient error ($_transientErrorCount/$_maxTransientErrors) — ${_sanitizeNativeMessage(error)}',
             );
           }
         } else {
           _fatalErrorEmittedForSession = true;
+          final safeError = _sanitizeNativeMessage(error);
           _logger.e(
-            'MediaKitPlayerImpl: playback error — $error. '
+            'MediaKitPlayerImpl: playback error — $safeError. '
             'url=${AppLogger.sanitizeUrl(_currentStreamUrl ?? '')}, sessionId=$sessionId',
           );
           _eventController.add(
-            PlayerEvent(PlayerEventType.error, errorMessage: error),
+            PlayerEvent(PlayerEventType.error, errorMessage: safeError),
           );
         }
       }),
     );
 
+    // Native media logs can include provider credentials or HLS session tokens.
+    // Debug builds keep sanitized diagnostics; release builds reduce native
+    // backend verbosity and never write raw native log text through AppLogger.
     _subscriptions.add(
       _player!.stream.log.listen((log) {
         if (_disposed || sessionId != _mediaSessionId) return;
         if (_fatalErrorEmittedForSession) return;
 
+        final safeLogText = _sanitizeNativeMessage(log.text);
         final isTransientLog = _transientErrorPatterns.any(
           (p) => p.hasMatch(log.text),
         );
         if (!isTransientLog) {
-          _logger.d('MediaKitPlayerImpl [${log.prefix}]: ${log.text}');
+          _logger.d('MediaKitPlayerImpl [${log.prefix}]: $safeLogText');
         }
 
         final isFatal = _fatalLogPatterns.any((p) => p.hasMatch(log.text));
@@ -560,13 +568,16 @@ class MediaKitPlayerImpl implements PlayerController {
           } else {
             _logger.w(
               'MediaKitPlayerImpl: fatal log hit '
-              '($_fatalLogHitCount/$_fatalLogThreshold) — [${log.prefix}] ${log.text}',
+              '($_fatalLogHitCount/$_fatalLogThreshold) — [${log.prefix}] $safeLogText',
             );
           }
         }
       }),
     );
   }
+
+  static String _sanitizeNativeMessage(String message) =>
+      AppLogger.sanitizeMediaLog(message);
 
   @override
   Future<void> play() async {

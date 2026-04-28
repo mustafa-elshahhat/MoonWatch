@@ -43,6 +43,7 @@ class IptvCategoryContentScreen extends StatefulWidget {
 class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
   String _searchQuery = '';
   final TextEditingController _searchCtrl = TextEditingController();
+  static const Duration _maxCardStagger = Duration(milliseconds: 180);
 
   @override
   void initState() {
@@ -260,6 +261,10 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
     };
 
     return GridView.builder(
+      key: PageStorageKey<String>(
+        'category-${widget.contentType.name}-${widget.categoryId}',
+      ),
+      cacheExtent: 900,
       padding: EdgeInsets.fromLTRB(hPad, 0, hPad, AppSpacing.xl),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: cols,
@@ -275,24 +280,37 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
     );
   }
 
+  static Duration _cardDelay(int index, int stepMs) {
+    final ms = index * stepMs;
+    return Duration(
+      milliseconds: ms.clamp(0, _maxCardStagger.inMilliseconds),
+    );
+  }
+
   Widget _buildCard(dynamic item, int index) {
     switch (item) {
       case LiveStream stream:
         return _LiveChannelCard(
+          key: ValueKey('live-${stream.streamId}'),
           stream: stream,
           index: index,
+          animationDelay: _cardDelay(index, 20),
           onTap: () => unawaited(_handleLive(stream)),
         );
       case VodStream stream:
         return _MovieCard(
+          key: ValueKey('movie-${stream.streamId}'),
           stream: stream,
           index: index,
+          animationDelay: _cardDelay(index, 18),
           onTap: () => unawaited(_handleVod(stream)),
         );
       case SeriesItem series:
         return _SeriesCard(
+          key: ValueKey('series-${series.seriesId}'),
           series: series,
           index: index,
+          animationDelay: _cardDelay(index, 18),
           onTap: () => _handleSeries(series),
         );
       default:
@@ -389,10 +407,13 @@ class _IptvCategoryContentScreenState extends State<IptvCategoryContentScreen> {
 class _LiveChannelCard extends StatefulWidget {
   final LiveStream stream;
   final int index;
+  final Duration animationDelay;
   final VoidCallback onTap;
   const _LiveChannelCard({
+    super.key,
     required this.stream,
     required this.index,
+    required this.animationDelay,
     required this.onTap,
   });
   @override
@@ -413,7 +434,7 @@ class _LiveChannelCardState extends State<_LiveChannelCard>
       duration: const Duration(milliseconds: 400),
     );
     _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
-    Future.delayed(Duration(milliseconds: widget.index * 20), () {
+    Future.delayed(widget.animationDelay, () {
       if (mounted) _ctrl.forward();
     });
   }
@@ -572,10 +593,13 @@ class _LiveChannelCardState extends State<_LiveChannelCard>
 class _MovieCard extends StatefulWidget {
   final VodStream stream;
   final int index;
+  final Duration animationDelay;
   final VoidCallback onTap;
   const _MovieCard({
+    super.key,
     required this.stream,
     required this.index,
+    required this.animationDelay,
     required this.onTap,
   });
   @override
@@ -596,7 +620,7 @@ class _MovieCardState extends State<_MovieCard>
       duration: const Duration(milliseconds: 450),
     );
     _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
-    Future.delayed(Duration(milliseconds: widget.index * 18), () {
+    Future.delayed(widget.animationDelay, () {
       if (mounted) _ctrl.forward();
     });
   }
@@ -769,10 +793,13 @@ class _MovieCardState extends State<_MovieCard>
 class _SeriesCard extends StatefulWidget {
   final SeriesItem series;
   final int index;
+  final Duration animationDelay;
   final VoidCallback onTap;
   const _SeriesCard({
+    super.key,
     required this.series,
     required this.index,
+    required this.animationDelay,
     required this.onTap,
   });
   @override
@@ -793,7 +820,7 @@ class _SeriesCardState extends State<_SeriesCard>
       duration: const Duration(milliseconds: 450),
     );
     _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
-    Future.delayed(Duration(milliseconds: widget.index * 18), () {
+    Future.delayed(widget.animationDelay, () {
       if (mounted) _ctrl.forward();
     });
   }

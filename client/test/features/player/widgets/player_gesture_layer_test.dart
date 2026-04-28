@@ -135,7 +135,8 @@ void main() {
     expect(find.text('Fill Screen'), findsOneWidget);
   });
 
-  testWidgets('double tap edges does not toggle fit mode', (tester) async {
+  testWidgets('host double tap left and right seeks by ten seconds',
+      (tester) async {
     await tester.pumpWidget(buildLayer(hostContext()));
 
     await tester.tapAt(const Offset(40, 300));
@@ -143,8 +144,29 @@ void main() {
     await tester.tapAt(const Offset(40, 300));
     await tester.pump(const Duration(milliseconds: 50));
 
+    await tester.tapAt(const Offset(760, 300));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(const Offset(760, 300));
+    await tester.pump(const Duration(milliseconds: 50));
+
     expect(fitMode, VideoFitMode.contain);
-    expect(find.text('Fill Screen'), findsNothing);
+    expect(seekCalls, [
+      const Duration(seconds: 50),
+      const Duration(minutes: 1, seconds: 10),
+    ]);
+    expect(find.text('+10s'), findsOneWidget);
+  });
+
+  testWidgets('guest double tap edges does not seek', (tester) async {
+    await tester.pumpWidget(buildLayer(guestContext()));
+
+    await tester.tapAt(const Offset(760, 300));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(const Offset(760, 300));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(seekCalls, isEmpty);
+    expect(player.seekHistory, isEmpty);
   });
 
   testWidgets('brightness slider uses provided brightness update path',
@@ -217,5 +239,34 @@ void main() {
     expect(seekCalls, isEmpty);
     expect(speedCalls, isEmpty);
     expect(player.volume, greaterThan(0.5));
+  });
+
+  testWidgets('host timeline tap commits a single seek', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SmartPlaybackControls(
+            uiContext: hostContext(),
+            isPlaying: true,
+            isPaused: false,
+            canInteract: true,
+            onSeek: seekCalls.add,
+          ),
+        ),
+      ),
+    );
+
+    final track = find.byKey(const Key('playback_timeline_track'));
+    expect(track, findsOneWidget);
+
+    final rect = tester.getRect(track);
+    await tester.tapAt(Offset(rect.left + rect.width * 0.75, rect.center.dy));
+    await tester.pump();
+
+    expect(seekCalls, hasLength(1));
+    expect(
+      seekCalls.single.inMilliseconds,
+      closeTo(const Duration(minutes: 7, seconds: 30).inMilliseconds, 500),
+    );
   });
 }

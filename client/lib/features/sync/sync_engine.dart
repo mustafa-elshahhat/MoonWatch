@@ -360,7 +360,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         add(const _SyncEventFlushDeferred());
       }
     } else {
-      if (contentChanged) {
+      if (contentChanged || _lastNotifiedReadyContentKey == nextContentKey) {
         _lastNotifiedReadyContentKey = null;
       }
 

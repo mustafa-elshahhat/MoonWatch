@@ -481,6 +481,22 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
         .clamp(0.0, maxMs);
     final progress = posMs / maxMs;
 
+    double? positionMsForGlobalOffset(Offset globalPosition) {
+      final box = _trackKey.currentContext?.findRenderObject() as RenderBox?;
+      if (box == null || box.size.width <= 0) return null;
+      final local = box.globalToLocal(globalPosition);
+      return (local.dx.clamp(0.0, box.size.width) / box.size.width * maxMs)
+          .clamp(0.0, maxMs);
+    }
+
+    void commitSeek(double targetMs) {
+      if (!widget.canInteract || !ctx.canSeek) return;
+      final target = Duration(milliseconds: targetMs.toInt());
+      widget.onSeek?.call(target);
+      setState(() => _currentPosition = target);
+      showControls();
+    }
+
     return MouseRegion(
       onEnter: (_) => setState(() => _hoveredTrack = true),
       onExit: (_) => setState(() {
@@ -488,28 +504,27 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
         _scheduleHide();
       }),
       child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTapUp: (d) {
+          final targetMs = positionMsForGlobalOffset(d.globalPosition);
+          if (targetMs != null) commitSeek(targetMs);
+        },
         onHorizontalDragStart: (d) {
           _hideTimer?.cancel();
+          final targetMs = positionMsForGlobalOffset(d.globalPosition);
           setState(() {
             _isDragging = true;
-            _dragValue = posMs;
+            _dragValue = targetMs ?? posMs;
           });
         },
         onHorizontalDragUpdate: (d) {
-          final box =
-              _trackKey.currentContext?.findRenderObject() as RenderBox?;
-          if (box == null) return;
-          final trackWidth = box.size.width;
-          final localX = d.localPosition.dx.clamp(0.0, trackWidth);
-          final newVal = (localX / trackWidth * maxMs).clamp(0.0, maxMs);
-          setState(() => _dragValue = newVal);
+          final targetMs = positionMsForGlobalOffset(d.globalPosition);
+          if (targetMs == null) return;
+          setState(() => _dragValue = targetMs);
         },
         onHorizontalDragEnd: (_) {
           if (_dragValue != null) {
-            widget.onSeek?.call(Duration(milliseconds: _dragValue!.toInt()));
-            setState(() {
-              _currentPosition = Duration(milliseconds: _dragValue!.toInt());
-            });
+            commitSeek(_dragValue!);
           }
           setState(() {
             _isDragging = false;
@@ -519,92 +534,96 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
         },
         child: Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-          child: SizedBox(
-            key: _trackKey,
-            height: 28,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  height: (_isDragging || _hoveredTrack) ? 5 : 3,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(3),
+          child: KeyedSubtree(
+            key: const ValueKey('playback_timeline_track'),
+            child: SizedBox(
+              key: _trackKey,
+              height: 28,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    height: (_isDragging || _hoveredTrack) ? 5 : 3,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
                   ),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: LayoutBuilder(
-                    builder: (_, constraints) {
-                      return AnimatedContainer(
-                        duration: _isDragging
-                            ? Duration.zero
-                            : const Duration(milliseconds: 80),
-                        height: (_isDragging || _hoveredTrack) ? 5 : 3,
-                        width: (constraints.maxWidth * progress).clamp(
-                          0,
-                          constraints.maxWidth,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              AppColors.accentPrimaryMuted,
-                              AppColors.accentPrimary,
-                              AppColors.accentPrimaryHover,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(3),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.accentPrimary.withValues(
-                                alpha: 0.5,
-                              ),
-                              blurRadius: 6,
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                AnimatedOpacity(
-                  duration: const Duration(milliseconds: 150),
-                  opacity: (_isDragging || _hoveredTrack) ? 1.0 : 0.0,
-                  child: Align(
+                  Align(
                     alignment: Alignment.centerLeft,
                     child: LayoutBuilder(
                       builder: (_, constraints) {
-                        final thumbX = (constraints.maxWidth * progress).clamp(
-                          0,
-                          constraints.maxWidth - 12,
-                        );
-                        return Transform.translate(
-                          offset: Offset(thumbX.toDouble(), 0),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 100),
-                            width: _isDragging ? 16 : 12,
-                            height: _isDragging ? 16 : 12,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.accentPrimary.withValues(
-                                    alpha: 0.6,
-                                  ),
-                                  blurRadius: 8,
-                                  spreadRadius: 1,
-                                ),
+                        return AnimatedContainer(
+                          duration: _isDragging
+                              ? Duration.zero
+                              : const Duration(milliseconds: 80),
+                          height: (_isDragging || _hoveredTrack) ? 5 : 3,
+                          width: (constraints.maxWidth * progress).clamp(
+                            0,
+                            constraints.maxWidth,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                AppColors.accentPrimaryMuted,
+                                AppColors.accentPrimary,
+                                AppColors.accentPrimaryHover,
                               ],
                             ),
+                            borderRadius: BorderRadius.circular(3),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.accentPrimary.withValues(
+                                  alpha: 0.5,
+                                ),
+                                blurRadius: 6,
+                              ),
+                            ],
                           ),
                         );
                       },
                     ),
                   ),
-                ),
-              ],
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 150),
+                    opacity: (_isDragging || _hoveredTrack) ? 1.0 : 0.0,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: LayoutBuilder(
+                        builder: (_, constraints) {
+                          final thumbX =
+                              (constraints.maxWidth * progress).clamp(
+                            0,
+                            constraints.maxWidth - 12,
+                          );
+                          return Transform.translate(
+                            offset: Offset(thumbX.toDouble(), 0),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 100),
+                              width: _isDragging ? 16 : 12,
+                              height: _isDragging ? 16 : 12,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.accentPrimary.withValues(
+                                      alpha: 0.6,
+                                    ),
+                                    blurRadius: 8,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

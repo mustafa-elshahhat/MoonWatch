@@ -221,6 +221,7 @@ class _IptvSeriesDetailScreenState extends State<IptvSeriesDetailScreen> {
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => _EpisodeCard(
+                        key: ValueKey('episode-${episodes[index].id}'),
                         episode: episodes[index],
                         seriesName: info.name,
                         onTap: () => unawaited(
@@ -247,6 +248,7 @@ class _IptvSeriesDetailScreenState extends State<IptvSeriesDetailScreen> {
                       (context, index) => Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.md),
                         child: _EpisodeCard(
+                          key: ValueKey('episode-${episodes[index].id}'),
                           episode: episodes[index],
                           seriesName: info.name,
                           onTap: () => unawaited(
@@ -408,6 +410,7 @@ class _EpisodeCard extends StatefulWidget {
   final VoidCallback onTap;
 
   const _EpisodeCard({
+    super.key,
     required this.episode,
     required this.seriesName,
     required this.onTap,

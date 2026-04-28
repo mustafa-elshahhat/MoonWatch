@@ -235,9 +235,47 @@ class _PlayerGestureLayerState extends State<PlayerGestureLayer> {
         position.dy <= bottom;
   }
 
+  Duration _clampSeek(Duration target) {
+    final duration = _pc.duration;
+    final maxMs = duration > Duration.zero ? duration.inMilliseconds : 0;
+    final targetMs = target.inMilliseconds.clamp(0, maxMs);
+    return Duration(milliseconds: targetMs);
+  }
+
+  void _seekRelativeFromDoubleTap(int seconds) {
+    if (!widget.uiContext.canControlPlayback || !widget.uiContext.canSeek) {
+      return;
+    }
+
+    final target = _clampSeek(
+      _pc.currentPosition + Duration(seconds: seconds),
+    );
+    if (widget.onSeek != null) {
+      widget.onSeek!(target);
+    } else {
+      _pc.seekTo(target);
+    }
+    _showFeedback(
+      seconds < 0 ? '-10s' : '+10s',
+      seconds < 0 ? Icons.replay_10_rounded : Icons.forward_10_rounded,
+    );
+    widget.onShowOverlays();
+  }
+
   void _onDoubleTap() {
+    final position = _doubleTapPosition;
+    final size = context.size;
+    if (position == null || size == null || size.isEmpty) {
+      _doubleTapPosition = null;
+      return;
+    }
+
     if (_isCenterDoubleTap()) {
       _toggleFitMode();
+    } else if (position.dx < size.width / 2) {
+      _seekRelativeFromDoubleTap(-10);
+    } else {
+      _seekRelativeFromDoubleTap(10);
     }
     _doubleTapPosition = null;
   }

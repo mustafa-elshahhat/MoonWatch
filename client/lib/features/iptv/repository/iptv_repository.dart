@@ -1,6 +1,5 @@
 import '../../../core/logging/app_logger.dart';
 import '../../../core/protocol/payloads.dart';
-import '../config/iptv_config.dart';
 import '../models/iptv_category.dart';
 import '../models/live_stream.dart';
 import '../models/vod_stream.dart';
@@ -20,8 +19,6 @@ class IptvRepository {
   IptvRepository({required IptvApiService apiService, AppLogger? logger})
       : _apiService = apiService,
         _logger = logger ?? AppLogger('IptvRepository');
-
-  IptvConfig get config => _apiService.config;
 
   void clearCache() {
     _categoryCache.clear();

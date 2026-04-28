@@ -404,93 +404,183 @@ class AppConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: const Color(0xFF161517),
-      surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFF2A2A2D), width: 1),
+    final actionColor = confirmColor ?? AppColors.accentPrimary;
+
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xxl,
       ),
-      elevation: 24,
-      shadowColor: Colors.black.withValues(alpha: 0.6),
-      contentPadding: const EdgeInsets.fromLTRB(28, 24, 28, 24),
-      titlePadding: EdgeInsets.zero,
-      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-      actionsAlignment: MainAxisAlignment.end,
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 400),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (icon != null) ...[
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: (confirmColor ?? AppColors.accentPrimary).withValues(
-                    alpha: 0.12,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: FocusTraversalGroup(
+        policy: OrderedTraversalPolicy(),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: const Color(0xF21A1714),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.72),
+                  blurRadius: 42,
+                  offset: const Offset(0, 18),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          center: const Alignment(-0.72, -0.85),
+                          radius: 1.2,
+                          colors: [
+                            actionColor.withValues(alpha: 0.13),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  size: AppIconSize.lg,
-                  color: confirmColor ?? AppColors.accentPrimary,
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-            Text(
-              title,
-              style: AppTypography.titleLarge.copyWith(
-                color: AppColors.textPrimary,
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpacing.xxl),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (icon != null)
+                              Container(
+                                width: 54,
+                                height: 54,
+                                decoration: BoxDecoration(
+                                  color: actionColor.withValues(alpha: 0.14),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: actionColor.withValues(alpha: 0.28),
+                                  ),
+                                ),
+                                child: Icon(
+                                  icon,
+                                  size: AppIconSize.lg,
+                                  color: actionColor,
+                                ),
+                              ),
+                            if (icon != null)
+                              const SizedBox(width: AppSpacing.lg),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    title,
+                                    style: AppTypography.titleLarge.copyWith(
+                                      color: AppColors.textPrimary,
+                                      letterSpacing: -0.4,
+                                    ),
+                                  ),
+                                  const SizedBox(height: AppSpacing.sm),
+                                  Text(
+                                    message,
+                                    style: AppTypography.body.copyWith(
+                                      color: AppColors.textSecondary,
+                                      height: 1.48,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.xxl),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final stackButtons = constraints.maxWidth < 330;
+                            final stayButton = FocusTraversalOrder(
+                              order: const NumericFocusOrder(1),
+                              child: OutlinedButton(
+                                autofocus: true,
+                                onPressed: () => Navigator.pop(context, false),
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: Size(
+                                    stackButtons ? double.infinity : 120,
+                                    46,
+                                  ),
+                                  foregroundColor: AppColors.textPrimary,
+                                  side: BorderSide(
+                                    color: Colors.white.withValues(alpha: 0.14),
+                                  ),
+                                  backgroundColor:
+                                      Colors.white.withValues(alpha: 0.04),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: Text(cancelLabel),
+                              ),
+                            );
+                            final leaveButton = FocusTraversalOrder(
+                              order: const NumericFocusOrder(2),
+                              child: FilledButton.icon(
+                                onPressed: () => Navigator.pop(context, true),
+                                icon: const Icon(
+                                  Icons.exit_to_app_rounded,
+                                  size: 18,
+                                ),
+                                label: Text(confirmLabel),
+                                style: FilledButton.styleFrom(
+                                  minimumSize: Size(
+                                    stackButtons ? double.infinity : 128,
+                                    46,
+                                  ),
+                                  backgroundColor: actionColor,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  elevation: 0,
+                                ),
+                              ),
+                            );
+
+                            if (stackButtons) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  leaveButton,
+                                  const SizedBox(height: AppSpacing.sm),
+                                  stayButton,
+                                ],
+                              );
+                            }
+
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                stayButton,
+                                const SizedBox(width: AppSpacing.sm),
+                                leaveButton,
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              style: AppTypography.body.copyWith(
-                color: AppColors.textSecondary,
-                height: 1.5,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.textSecondary,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          child: Text(
-            cancelLabel,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-        ),
-        const SizedBox(width: 8),
-        FilledButton(
-          onPressed: () => Navigator.pop(context, true),
-          style: FilledButton.styleFrom(
-            backgroundColor: confirmColor ?? AppColors.accentPrimary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            elevation: 0,
-          ),
-          child: Text(
-            confirmLabel,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-        ),
-      ],
     );
   }
 }

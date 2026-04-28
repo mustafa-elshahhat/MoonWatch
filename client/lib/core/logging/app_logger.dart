@@ -13,6 +13,11 @@ class AppLogger {
     caseSensitive: false,
   );
 
+  static final RegExp _urlRe = RegExp(
+    r'https?://[^\s<>"\]\)]+',
+    caseSensitive: false,
+  );
+
   static final RegExp _queryUsernameRe = RegExp(
     r'(username=)[^&]+',
     caseSensitive: false,
@@ -21,6 +26,20 @@ class AppLogger {
     r'(password=)[^&]+',
     caseSensitive: false,
   );
+
+  static const String _redacted = '****';
+
+  static const Set<String> _sensitiveQueryKeys = {
+    'username',
+    'password',
+    'token',
+    'session',
+    'session_id',
+    'auth',
+    'signature',
+    'st',
+    'e',
+  };
 
   static String? _logFilePath;
   static IOSink? _fileSink;
@@ -110,14 +129,73 @@ class AppLogger {
   }
 
   static String sanitizeUrl(String url) {
-    String result = url.replaceFirstMapped(_pathCredentialsRe, (m) {
-      return '${m.group(1)}/${m.group(2)}/****/****/${m.group(5)}';
-    });
+    String result = url.replaceAllMapped(
+      _urlRe,
+      (m) => _sanitizeSingleUrl(m.group(0)!, redactAllQuery: false),
+    );
 
     result = result.replaceAll(_queryUsernameRe, r'username=****');
     result = result.replaceAll(_queryPasswordRe, r'password=****');
+    result = result.replaceFirstMapped(_pathCredentialsRe, (m) {
+      return '${m.group(1)}/${m.group(2)}/$_redacted/$_redacted/${m.group(5)}';
+    });
 
     return result;
+  }
+
+  static String sanitizeMediaLog(String message) {
+    return message.replaceAllMapped(
+      _urlRe,
+      (m) => _sanitizeSingleUrl(m.group(0)!, redactAllQuery: true),
+    );
+  }
+
+  static String _sanitizeSingleUrl(
+    String url, {
+    required bool redactAllQuery,
+  }) {
+    final uri = Uri.tryParse(url);
+    if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
+      return url;
+    }
+
+    final segments = uri.pathSegments.toList();
+    var redactedPath = false;
+
+    for (var i = 0; i < segments.length - 2; i++) {
+      final segment = segments[i].toLowerCase();
+      if (segment == 'live' || segment == 'movie' || segment == 'series') {
+        segments[i + 1] = _redacted;
+        segments[i + 2] = _redacted;
+        redactedPath = true;
+        break;
+      }
+    }
+
+    if (!redactedPath && segments.length >= 3) {
+      segments[segments.length - 3] = _redacted;
+      segments[segments.length - 2] = _redacted;
+    }
+
+    final query = uri.queryParametersAll.map((key, values) {
+      final lowerKey = key.toLowerCase();
+      final shouldRedact = redactAllQuery ||
+          _sensitiveQueryKeys.contains(
+            lowerKey,
+          );
+      return MapEntry(
+        key,
+        shouldRedact ? List.filled(values.length, _redacted) : values,
+      );
+    });
+
+    return uri
+        .replace(
+          pathSegments: segments,
+          queryParameters: query.isEmpty ? null : query,
+        )
+        .toString()
+        .replaceAll('%2A%2A%2A%2A', _redacted);
   }
 
   void d(String message, {String? event, Map<String, dynamic>? data}) {

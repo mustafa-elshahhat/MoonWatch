@@ -473,6 +473,7 @@ class _IptvBrowseScreenState extends State<IptvBrowseScreen>
       itemBuilder: (context, index) {
         final cat = displayed[index];
         return _PremiumCategoryCard(
+          key: ValueKey('category-${contentType.name}-${cat.categoryId}'),
           name: cat.categoryName,
           contentType: contentType,
           index: index,
@@ -514,6 +515,7 @@ class _PremiumCategoryCard extends StatefulWidget {
   final VoidCallback onTap;
 
   const _PremiumCategoryCard({
+    super.key,
     required this.name,
     required this.contentType,
     required this.index,
