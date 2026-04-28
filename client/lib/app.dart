@@ -33,7 +33,7 @@ class WatchPartyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'WatchParty',
+        title: 'MoonWatch',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
         initialRoute: '/',

@@ -33,6 +33,7 @@ dependencies:
   window_manager: ^0.5.1
   google_fonts: ^8.0.2
   flutter_secure_storage: ^9.2.2
+  screen_brightness: ^2.1.0
 
 dev_dependencies:
   flutter_test:

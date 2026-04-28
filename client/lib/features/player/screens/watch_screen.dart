@@ -28,6 +28,7 @@ import '../bloc/player_state.dart';
 import '../models/player_ui_context.dart';
 import '../models/video_fit_mode.dart';
 import '../widgets/player_top_bar.dart';
+import '../widgets/player_gesture_layer.dart';
 import '../widgets/smart_playback_controls.dart';
 
 class WatchScreen extends StatelessWidget {
@@ -382,50 +383,31 @@ class WatchScreenContentState extends State<WatchScreenContent> {
   ) {
     return MouseRegion(
       onHover: (_) => _showOverlays(),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _showOverlays,
-        onVerticalDragUpdate: (details) {
-          final width = MediaQuery.of(context).size.width;
-          final isLeft = details.localPosition.dx < width / 2;
-          final delta = -details.primaryDelta! / 200.0;
-          if (isLeft) {
-            setState(() {
-              _brightness = (_brightness + delta).clamp(0.1, 1.0);
-            });
-          } else {
-            final currentVol = _playerController.volume;
-            _playerController.setVolume((currentVol + delta).clamp(0.0, 1.0));
-          }
-          _showOverlays();
-        },
-        onHorizontalDragUpdate: (details) {
-          if (!uiContext.canControlPlayback) return;
-          final delta = details.primaryDelta! * 100; // 100ms per pixel
-          final target = _playerController.currentPosition +
-              Duration(milliseconds: delta.toInt());
-          invokeSeekAction(Duration(
-            milliseconds: target.inMilliseconds.clamp(
-              0,
-              _playerController.duration.inMilliseconds,
-            ),
-          ));
-          _showOverlays();
-        },
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            BlocBuilder<PlayerBloc, PlayerState>(
-              builder: (context, _) => _buildVideoView(_fitMode.boxFit),
-            ),
-            IgnorePointer(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 50),
-                color: Colors.black.withValues(
-                  alpha: (1.0 - _brightness).clamp(0.0, 1.0),
-                ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          BlocBuilder<PlayerBloc, PlayerState>(
+            builder: (context, _) => _buildVideoView(_fitMode.boxFit),
+          ),
+          PlayerGestureLayer(
+            uiContext: uiContext,
+            fitMode: _fitMode,
+            onFitModeChanged: (m) => setState(() => _fitMode = m),
+            onShowOverlays: _showOverlays,
+            brightness: _brightness,
+            onBrightnessChanged: (v) => setState(() => _brightness = v),
+            onSeek: uiContext.canControlPlayback
+                ? (target) => invokeSeekAction(target)
+                : null,
+          ),
+          IgnorePointer(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 50),
+              color: Colors.black.withValues(
+                alpha: (1.0 - _brightness).clamp(0.0, 1.0),
               ),
             ),
+          ),
             BlocBuilder<RoomBloc, RoomState>(
               builder: (context, roomState) =>
                   BlocBuilder<PlayerBloc, PlayerState>(
@@ -439,7 +421,7 @@ class WatchScreenContentState extends State<WatchScreenContent> {
               right: 0,
               child: AnimatedOpacity(
                 opacity: (!isFullscreen || _topBarVisible) ? 1.0 : 0.0,
-                duration: AppAnimation.normal,
+                duration: const Duration(milliseconds: 250),
                 child: IgnorePointer(
                   ignoring: isFullscreen && !_topBarVisible,
                   child: PlayerTopBar(

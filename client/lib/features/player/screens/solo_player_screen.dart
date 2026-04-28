@@ -17,6 +17,7 @@ import '../models/player_ui_context.dart';
 import '../models/video_fit_mode.dart';
 import '../widgets/player_top_bar.dart';
 import '../widgets/player_state_overlay.dart';
+import '../widgets/player_gesture_layer.dart';
 import '../widgets/smart_playback_controls.dart';
 
 class SoloPlayerScreen extends StatelessWidget {
@@ -190,36 +191,7 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
   ) {
     return MouseRegion(
       onHover: (_) => _showOverlays(),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _showOverlays,
-        onVerticalDragUpdate: (details) {
-          final width = MediaQuery.of(context).size.width;
-          final isLeft = details.localPosition.dx < width / 2;
-          final delta = -details.primaryDelta! / 200.0;
-          if (isLeft) {
-            setState(() {
-              _brightness = (_brightness + delta).clamp(0.1, 1.0);
-            });
-          } else {
-            final currentVol = _playerController.volume;
-            _playerController.setVolume((currentVol + delta).clamp(0.0, 1.0));
-          }
-          _showOverlays();
-        },
-        onHorizontalDragUpdate: (details) {
-          final delta = details.primaryDelta! * 100; // 100ms per pixel
-          final target = _playerController.currentPosition +
-              Duration(milliseconds: delta.toInt());
-          _playerBloc?.add(PlayerEventSeek(Duration(
-            milliseconds: target.inMilliseconds.clamp(
-              0,
-              _playerController.duration.inMilliseconds,
-            ),
-          )));
-          _showOverlays();
-        },
-        child: BlocBuilder<PlayerBloc, PlayerState>(
+      child: BlocBuilder<PlayerBloc, PlayerState>(
           builder: (context, state) {
             PlayerOverlayType? overlayType;
             String? errorMessage;
@@ -240,6 +212,16 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
               fit: StackFit.expand,
               children: [
                 _buildVideoView(_fitMode.boxFit),
+                PlayerGestureLayer(
+                  uiContext: uiContext,
+                  fitMode: _fitMode,
+                  onFitModeChanged: (m) => setState(() => _fitMode = m),
+                  onShowOverlays: _showOverlays,
+                  brightness: _brightness,
+                  onBrightnessChanged: (v) => setState(() => _brightness = v),
+                  onSeek: (target) =>
+                      _playerBloc?.add(PlayerEventSeek(target)),
+                ),
                 IgnorePointer(
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 50),
@@ -267,13 +249,13 @@ class _SoloPlayerScreenContentState extends State<_SoloPlayerScreenContent> {
                   right: 0,
                   child: AnimatedOpacity(
                     opacity: (!isFullscreen || _topBarVisible) ? 1.0 : 0.0,
-                    duration: AppAnimation.normal,
+                    duration: const Duration(milliseconds: 250),
                     child: IgnorePointer(
                       ignoring: isFullscreen && !_topBarVisible,
-                    child: PlayerTopBar(
-                      uiContext: uiContext,
-                      onBack: () => Navigator.pop(context),
-                    ),
+                      child: PlayerTopBar(
+                        uiContext: uiContext,
+                        onBack: () => Navigator.pop(context),
+                      ),
                     ),
                   ),
                 ),

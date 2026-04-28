@@ -28,6 +28,7 @@ class MediaKitPlayerImpl implements PlayerController {
   final List<StreamSubscription> _subscriptions = [];
   bool _isBuffering = false;
   bool _hasCompleted = false;
+  double _lastNonZeroVolume = 1.0;
 
   bool _disposed = false;
   bool _disposing = false;
@@ -104,6 +105,9 @@ class MediaKitPlayerImpl implements PlayerController {
 
   @override
   double get volume => (_player?.state.volume ?? 100.0) / 100.0;
+
+  @override
+  double get lastNonZeroVolume => _lastNonZeroVolume;
 
   @override
   Stream<double> get volumeStream => _volumeController.stream;
@@ -590,7 +594,13 @@ class MediaKitPlayerImpl implements PlayerController {
   @override
   Future<void> setVolume(double volume) async {
     if (_disposed || _disposing) return;
-    await _player?.setVolume(volume * 100.0);
+    final clamped = volume.clamp(0.0, 1.0);
+    if (clamped > 0) {
+      _lastNonZeroVolume = clamped;
+    } else if (this.volume > 0) {
+      _lastNonZeroVolume = this.volume;
+    }
+    await _player?.setVolume(clamped * 100.0);
   }
 
   @override

@@ -17,6 +17,7 @@ import '../../features/room/bloc/room_list_bloc.dart';
 import '../config/app_config.dart';
 import '../security/credential_store.dart';
 import '../../features/auth/bloc/auth_bloc.dart';
+import '../services/brightness_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -39,6 +40,7 @@ Future<void> configureDependencies({required AppConfig appConfig}) async {
   );
 
   getIt.registerLazySingleton<PlayerController>(() => MediaKitPlayerImpl());
+  getIt.registerLazySingleton<BrightnessService>(() => BrightnessService());
 
   getIt.registerLazySingleton<LatencyEstimator>(
     () => LatencyEstimator(signalRClient: getIt<SignalRClient>()),

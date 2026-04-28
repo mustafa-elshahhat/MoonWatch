@@ -15,6 +15,7 @@ class MockPlayerImpl implements PlayerController {
   double _volume = 1.0;
   bool _isPlaying = false;
   bool _isBuffering = false;
+  double _lastNonZeroVolume = 1.0;
 
   final List<Duration> seekHistory = [];
 
@@ -43,6 +44,9 @@ class MockPlayerImpl implements PlayerController {
 
   @override
   double get volume => _volume;
+
+  @override
+  double get lastNonZeroVolume => _lastNonZeroVolume;
 
   @override
   Stream<double> get volumeStream => _volumeStreamController.stream;
@@ -98,9 +102,15 @@ class MockPlayerImpl implements PlayerController {
 
   @override
   Future<void> setVolume(double volume) async {
-    _volume = volume;
-    actionHistory.add('setVolume:$volume');
-    _volumeStreamController.add(volume);
+    final clamped = volume.clamp(0.0, 1.0);
+    if (clamped > 0) {
+      _lastNonZeroVolume = clamped;
+    } else if (_volume > 0) {
+      _lastNonZeroVolume = _volume;
+    }
+    _volume = clamped;
+    actionHistory.add('setVolume:$clamped');
+    _volumeStreamController.add(clamped);
   }
 
   @override

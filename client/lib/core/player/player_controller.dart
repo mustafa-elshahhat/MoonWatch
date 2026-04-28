@@ -52,6 +52,7 @@ abstract class PlayerController {
   Future<void> seekTo(Duration position);
 
   double get volume;
+  double get lastNonZeroVolume;
   Stream<double> get volumeStream;
 
   Future<void> setVolume(double volume);

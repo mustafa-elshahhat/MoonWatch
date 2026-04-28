@@ -561,6 +561,7 @@ public class RoomService : IRoomService
             
             if (role == "host")
             {
+                // Capture exact position from host and set it as authoritative
                 room.HostPositionMs = positionMs;
                 room.HostPositionUpdatedAtMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 room.HostIsPlaying = false; 
@@ -702,17 +703,34 @@ public class RoomService : IRoomService
         await room.Lock.WaitAsync();
         try
         {
-            var (participant, role) = FindParticipant(room, connectionId);
+            var (_, role) = FindParticipant(room, connectionId);
             if (role != "host")
                 throw new RoleUnauthorizedException(room.RoomCode, role);
 
+            // Valid speeds
+            double[] allowed = { 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0 };
+            if (!allowed.Contains(speed))
+            {
+                if (speed < 0.5) speed = 0.5;
+                else if (speed > 2.0) speed = 2.0;
+                else speed = allowed.OrderBy(a => Math.Abs(a - speed)).First();
+            }
+
+            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (room.HostIsPlaying && room.HostPositionUpdatedAtMs > 0)
+            {
+                long elapsed = now - room.HostPositionUpdatedAtMs;
+                room.HostPositionMs += (long)(elapsed * room.PlaybackRate);
+            }
+
             room.PlaybackRate = speed;
+            room.HostPositionUpdatedAtMs = now;
             room.LastActivityAt = DateTimeOffset.UtcNow;
 
-            _logger.LogInformation("Playback speed changed {Event} {RoomId} {Speed}",
-                "playback.speed", room.RoomCode, speed);
+            _logger.LogInformation("Playback speed changed {Event} {RoomId} {Speed} at {Position}ms",
+                "playback.speed", room.RoomCode, speed, room.HostPositionMs);
 
-            return new PlaybackSpeedBroadcast(room.RoomCode, speed, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            return new PlaybackSpeedBroadcast(room.RoomCode, speed, now);
         }
         finally
         {

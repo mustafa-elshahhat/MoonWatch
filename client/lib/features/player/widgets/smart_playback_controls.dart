@@ -56,7 +56,6 @@ class SmartPlaybackControls extends StatefulWidget {
 class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     with SingleTickerProviderStateMixin {
   double _volume = 1.0;
-  bool _showVolumeSlider = false;
   bool _visible = true;
   bool _isDragging = false;
   double? _dragValue;
@@ -163,8 +162,9 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
     if (_volume > 0) {
       _pc.setVolume(0.0);
     } else {
-      _pc.setVolume(1.0);
+      _pc.setVolume(_pc.lastNonZeroVolume);
     }
+    showControls();
   }
 
   void _updateVolume(double value) {

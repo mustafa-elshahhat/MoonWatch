@@ -525,7 +525,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     final adjustedNow = now + _clockOffsetMs;
     final rawAgeMs = adjustedNow - event.serverTimestampMs;
     final ageMs = rawAgeMs.clamp(0, 30000);
-    final adjustedHostPositionMs = event.hostPositionMs + ageMs;
+    final adjustedHostPositionMs = event.hostPositionMs + (ageMs * event.playbackRate).toInt();
 
     final currentGuestPositionMs =
         _playerController.currentPosition.inMilliseconds;
@@ -969,7 +969,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         ? (now - serverTimestampMs).clamp(0, 30000)
         : 0;
     final adjustedPositionMs =
-        targetPositionMs + elapsedMs + (bestHostRttMs ~/ 2);
+        targetPositionMs + (elapsedMs * _playbackRate).toInt() + (bestHostRttMs ~/ 2);
 
     _logger.i(
       'SyncBloc: deferred_flush_applying — '
