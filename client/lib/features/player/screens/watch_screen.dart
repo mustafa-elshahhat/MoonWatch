@@ -9,6 +9,7 @@ import '../../../core/services/fullscreen_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/playback_utils.dart';
 import '../../../shared/widgets/app_components.dart';
 import '../../room/bloc/room_bloc.dart';
 import '../../room/bloc/room_event.dart';
@@ -184,9 +185,10 @@ class WatchScreenContentState extends State<WatchScreenContent> {
   }
 
   void invokeSpeedAction(double speed) {
-    _logger.i('host.setPlaybackSpeed: speed=$speed');
-    _playerController.setPlaybackSpeed(speed);
-    _roomRepository.invokeSetPlaybackSpeed(speed);
+    final normalized = PlaybackUtils.normalizeSpeed(speed);
+    _logger.i('host.setPlaybackSpeed: speed=$speed (normalized=$normalized)');
+    _playerController.setPlaybackSpeed(normalized);
+    _roomRepository.invokeSetPlaybackSpeed(normalized);
   }
 
   void invokeNextEpisode() {

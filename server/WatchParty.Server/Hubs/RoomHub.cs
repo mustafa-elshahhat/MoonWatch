@@ -122,7 +122,8 @@ public class RoomHub : Hub
                     var estimatedPositionMs = result.HostPositionMs.Value;
                     if (result.HostIsPlaying.Value && result.HostPositionUpdatedAtMs.HasValue && result.HostPositionUpdatedAtMs.Value > 0)
                     {
-                        estimatedPositionMs += serverTimestampMs - result.HostPositionUpdatedAtMs.Value;
+                        var elapsedMs = serverTimestampMs - result.HostPositionUpdatedAtMs.Value;
+                        estimatedPositionMs += (long)(elapsedMs * (result.PlaybackRate ?? 1.0));
                     }
 
                     await Clients.Caller.SendAsync(RoomEvents.PlaybackStateSync, new PlaybackStateSyncPayload(

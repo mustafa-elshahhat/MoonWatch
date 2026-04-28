@@ -157,3 +157,10 @@ Icon
 ._*
 .Spotlight-V100
 .Trashes
+
+# Test and coverage logs
+test_output.txt
+*_test_output.txt
+flutter_test_output*.txt
+coverage/
+.coverage/

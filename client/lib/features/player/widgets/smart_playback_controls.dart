@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../models/player_ui_context.dart';
 import '../models/video_fit_mode.dart';
+import '../../../core/utils/playback_utils.dart';
 
 typedef PlayCallback = void Function(Duration position);
 typedef PauseCallback = void Function(Duration position);
@@ -253,7 +254,7 @@ class SmartPlaybackControlsState extends State<SmartPlaybackControls>
 
   void _adjustSpeed(double delta) {
     final current = _pc.playbackSpeed;
-    final next = (current + delta).clamp(0.5, 2.0);
+    final next = PlaybackUtils.normalizeSpeed(current + delta);
     if (next != current) {
       if (widget.onSpeedChanged != null) {
         widget.onSpeedChanged!(next);
@@ -915,7 +916,7 @@ class _SpeedBtn extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
       ),
-      itemBuilder: (context) => [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0]
+      itemBuilder: (context) => PlaybackUtils.supportedSpeeds
           .map((s) => PopupMenuItem<double>(
                 value: s,
                 height: 36,
