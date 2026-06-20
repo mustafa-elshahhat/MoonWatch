@@ -67,6 +67,20 @@ public class InvalidStreamUrlException : Exception
 }
 
 
+public class InvalidContentTypeException : Exception
+{
+    public string RoomId { get; }
+    public string ContentType { get; }
+
+    public InvalidContentTypeException(string roomId, string contentType)
+        : base($"Invalid content type '{contentType}' for room '{roomId}'. Allowed: live, movie, episode.")
+    {
+        RoomId = roomId;
+        ContentType = contentType;
+    }
+}
+
+
 public class ConnectionNotInRoomException : Exception
 {
     public string ConnectionId { get; }

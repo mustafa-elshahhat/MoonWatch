@@ -28,18 +28,22 @@ class HttpClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          _logger.d('HTTP ${options.method} ${options.uri}');
+          // Route room-server URLs through the shared sanitizer for consistency
+          // with IPTV logging (FL-001) — redacts any credential/room segments.
+          _logger.d(
+            'HTTP ${options.method} ${AppLogger.sanitizeUrl(options.uri.toString())}',
+          );
           handler.next(options);
         },
         onResponse: (response, handler) {
           _logger.d(
-            'HTTP ${response.statusCode} ${response.requestOptions.uri}',
+            'HTTP ${response.statusCode} ${AppLogger.sanitizeUrl(response.requestOptions.uri.toString())}',
           );
           handler.next(response);
         },
         onError: (error, handler) {
           _logger.e(
-            'HTTP Error ${error.response?.statusCode} ${error.requestOptions.uri}',
+            'HTTP Error ${error.response?.statusCode} ${AppLogger.sanitizeUrl(error.requestOptions.uri.toString())}',
           );
           handler.next(error);
         },

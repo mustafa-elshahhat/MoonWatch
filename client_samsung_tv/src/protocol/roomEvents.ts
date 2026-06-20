@@ -3,6 +3,8 @@ export const RoomEvents = {
   roomGuestJoined: 'room:guest_joined',
   roomGuestLeft: 'room:guest_left',
   roomGuestReconnected: 'room:guest_reconnected',
+  roomHostAway: 'room:host_away',
+  roomHostReconnected: 'room:host_reconnected',
   roomClosed: 'room:closed',
   roomContentSet: 'room:content_set',
   roomError: 'room:error',

@@ -306,6 +306,32 @@ void main() {
     );
 
     blocTest<ReconnectBloc, ReconnectState>(
+      'host rejoin: room:joined(host) while Attempting → Succeeded → Idle (FL-003)',
+      build: () {
+        final bloc = buildBloc();
+        bloc.storeRoomCredentials('ABC123', 'host');
+        bloc.startListening();
+        return bloc;
+      },
+      seed: () => const ReconnectStateAttempting(attemptNumber: 1),
+      act: (bloc) {
+        // With the server host-grace + rebind flow (BE-001/XP-001), the host's
+        // JoinRoom on reconnect now succeeds and the server emits room:joined
+        // instead of a fatal room_full / room_not_found. Host reconnect is no
+        // longer treated as fatal.
+        roomEventsController.add(
+          const RepoEventRoomJoined(
+            roomCode: 'ABC123',
+            role: 'host',
+            guestPresent: true,
+          ),
+        );
+      },
+      wait: const Duration(milliseconds: 50),
+      expect: () => [const ReconnectStateSuccess(), const ReconnectStateIdle()],
+    );
+
+    blocTest<ReconnectBloc, ReconnectState>(
       'room:error(room_closed) while Attempting → Failed(room_closed)',
       build: () {
         final bloc = buildBloc();

@@ -13,7 +13,6 @@ export const PLAYER_DIAGNOSTICS: boolean = false;
 /** Console logger that is a no-op unless diagnostics are enabled. */
 export function diag(...args: unknown[]): void {
   if (!PLAYER_DIAGNOSTICS) return;
-  // eslint-disable-next-line no-console
   console.log('[MoonWatch player]', ...args);
 }
 

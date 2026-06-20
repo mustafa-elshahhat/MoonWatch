@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.SignalR;
 using WatchParty.Server.Exceptions;
+using WatchParty.Server.Hubs;
 using WatchParty.Server.Models;
+using WatchParty.Shared.Protocol;
 using WatchParty.Shared.Protocol.Payloads;
 
 namespace WatchParty.Server.Services;
@@ -10,15 +13,38 @@ namespace WatchParty.Server.Services;
 
 public class RoomService : IRoomService
 {
+    // Known IPTV content types the protocol supports. Host-supplied content
+    // descriptors are validated/normalized against this set (SP-003).
+    private static readonly HashSet<string> AllowedContentTypes =
+        new(StringComparer.Ordinal) { "live", "movie", "episode" };
+
     private readonly IRoomRegistry _registry;
     private readonly ILogger<RoomService> _logger;
     private readonly IConfiguration _configuration;
+    // Optional collaborators used by the asynchronous grace-expiry tasks to stop
+    // the per-room sync timer and notify peers. They are null in unit tests that
+    // construct RoomService directly (state transitions are still asserted), and
+    // injected by DI in the running app (greediest resolvable constructor).
+    private readonly IHubContext<RoomHub>? _hubContext;
+    private readonly StateSyncTimerService? _stateSyncTimer;
 
     public RoomService(IRoomRegistry registry, ILogger<RoomService> logger, IConfiguration configuration)
+        : this(registry, logger, configuration, null, null)
+    {
+    }
+
+    public RoomService(
+        IRoomRegistry registry,
+        ILogger<RoomService> logger,
+        IConfiguration configuration,
+        IHubContext<RoomHub>? hubContext,
+        StateSyncTimerService? stateSyncTimer)
     {
         _registry = registry;
         _logger = logger;
         _configuration = configuration;
+        _hubContext = hubContext;
+        _stateSyncTimer = stateSyncTimer;
     }
 
     
@@ -74,6 +100,48 @@ public class RoomService : IRoomService
 
     private JoinResult HandleHostJoin(Room room, string connectionId)
     {
+        // Host reconnect: during the grace window, rebind the new SignalR
+        // connection id to the existing host slot instead of rejecting the
+        // join. This keeps the room (and the guest) alive across a host blip.
+        if (room.HostAway)
+        {
+            if (room.HostGraceCts != null)
+            {
+                room.HostGraceCts.Cancel();
+                room.HostGraceCts.Dispose();
+                room.HostGraceCts = null;
+            }
+
+            room.Host = new RoomParticipant
+            {
+                ConnectionId = connectionId,
+                Role = ParticipantRole.Host,
+            };
+            room.HostAway = false;
+            room.LastActivityAt = DateTimeOffset.UtcNow;
+
+            _registry.RegisterConnection(connectionId, room.RoomCode);
+
+            var guestPresent = room.Guest != null && !room.GuestAway;
+            var hostHasPlaybackState = room.HostIsPlaying || room.HostPositionMs > 0;
+
+            _logger.LogInformation("Host reconnected {Event} {RoomId} {ConnectionId}",
+                "room.host_reconnected", room.RoomCode, connectionId);
+
+            return new JoinResult(
+                room.RoomCode,
+                "host",
+                GuestPresent: guestPresent,
+                room.ContentDescriptor,
+                IsNewGuest: false,
+                HostPositionMs: hostHasPlaybackState ? room.HostPositionMs : null,
+                HostIsPlaying: hostHasPlaybackState ? room.HostIsPlaying : null,
+                HostPlaybackSeqNo: hostHasPlaybackState ? room.HostPlaybackSeqNo : null,
+                HostPositionUpdatedAtMs: hostHasPlaybackState ? room.HostPositionUpdatedAtMs : null,
+                PlaybackRate: room.PlaybackRate,
+                IsHostReconnect: true);
+        }
+
         if (room.State != RoomState.Created)
             throw new RoomFullException(room.RoomCode);
 
@@ -204,11 +272,10 @@ public class RoomService : IRoomService
 
             if (room.Host?.ConnectionId == connectionId)
             {
-                
-                var leave = CloseRoom(room, "host_disconnected", "host");
-                _logger.LogInformation("Host disconnected, room closed {Event} {RoomId} {ConnectionId}",
-                    "room.closed", room.RoomCode, connectionId);
-                return new DisconnectResult(leave.RoomCode, leave.Role, leave.Reason, leave.PeerConnectionId, null);
+                // Don't destroy the room on a host blip — start a grace period so
+                // the host can rebind a new connection id (auto-reconnect). The
+                // room is only closed if the grace timer expires (BE-001/XP-001).
+                return HandleHostDisconnect(room, connectionId);
             }
             else if (room.Guest?.ConnectionId == connectionId)
             {
@@ -253,6 +320,10 @@ public class RoomService : IRoomService
             try
             {
                 await Task.Delay(TimeSpan.FromSeconds(gracePeriodSeconds), cts.Token);
+
+                string? hostConnectionId = null;
+                var guestLeftPermanently = false;
+
                 await room.Lock.WaitAsync();
                 try
                 {
@@ -261,6 +332,19 @@ public class RoomService : IRoomService
                         room.Guest = null;
                         room.GuestAway = false;
                         room.GuestGraceCts = null;
+
+                        // Guest is gone for good: settle the room out of Active so it
+                        // isn't stuck "active" with a single participant (BE-002),
+                        // which also makes the state-sync timer (emits only while
+                        // Active) go quiet.
+                        if (room.State == RoomState.Active)
+                        {
+                            room.State = RoomState.Waiting;
+                        }
+
+                        hostConnectionId = room.Host?.ConnectionId;
+                        guestLeftPermanently = true;
+
                         _logger.LogInformation("Guest grace period expired {Event} {RoomId}",
                             "room.guest_left", roomCode);
                     }
@@ -269,10 +353,29 @@ public class RoomService : IRoomService
                 {
                     room.Lock.Release();
                 }
+
+                if (guestLeftPermanently)
+                {
+                    // Stop wasteful broadcasts now that no guest remains.
+                    _stateSyncTimer?.StopForRoom(roomCode);
+
+                    // Tell the host the guest is gone for good (grace 0 = definitive)
+                    // so its UI settles from "guest away" to "guest left".
+                    if (hostConnectionId != null && _hubContext != null)
+                    {
+                        await _hubContext.Clients.Client(hostConnectionId).SendAsync(
+                            RoomEvents.RoomGuestLeft,
+                            new RoomGuestLeftPayload(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), 0));
+                    }
+                }
             }
             catch (TaskCanceledException)
             {
-                
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in guest grace expiry for room {RoomId}", roomCode);
             }
         });
 
@@ -296,6 +399,98 @@ public class RoomService : IRoomService
             gracePeriodSeconds);
     }
 
+    private DisconnectResult HandleHostDisconnect(Room room, string connectionId)
+    {
+        _registry.UnregisterConnection(connectionId);
+        var gracePeriodSeconds = StartHostGracePeriod(room);
+
+        _logger.LogInformation("Host disconnected, grace period started {Event} {RoomId} {ConnectionId} {GracePeriodSeconds}",
+            "room.host_away", room.RoomCode, connectionId, gracePeriodSeconds);
+
+        return new DisconnectResult(
+            room.RoomCode,
+            "host",
+            "host_disconnected",
+            room.Guest?.ConnectionId,
+            gracePeriodSeconds);
+    }
+
+
+
+
+    private int StartHostGracePeriod(Room room)
+    {
+        var gracePeriodSeconds = _configuration.GetValue("WatchParty:Room:HostGracePeriodSeconds", 30);
+
+        room.HostAway = true;
+        room.LastActivityAt = DateTimeOffset.UtcNow;
+        if (room.Host != null)
+        {
+            room.Host.IsPlayerReady = false;
+            room.Host.BufferingState = BufferingState.Ready;
+        }
+
+        // No authoritative host while away — stop the periodic state-sync timer so
+        // we don't broadcast to a group whose host has dropped. Host playback
+        // position/state are intentionally preserved so the room can resume on
+        // rebind. The timer restarts when the host reconnects and is playing.
+        _stateSyncTimer?.StopForRoom(room.RoomCode);
+
+        room.HostGraceCts = new CancellationTokenSource();
+        var cts = room.HostGraceCts;
+        var roomCode = room.RoomCode;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(gracePeriodSeconds), cts.Token);
+
+                string? guestConnectionId = null;
+                var closed = false;
+
+                await room.Lock.WaitAsync();
+                try
+                {
+                    if (room.HostAway && room.HostGraceCts == cts && room.State != RoomState.Closed)
+                    {
+                        // Host never came back — close the room for good.
+                        guestConnectionId = room.Guest?.ConnectionId;
+                        CloseRoom(room, "host_disconnected", "host");
+                        closed = true;
+                        _logger.LogInformation("Host grace period expired, room closed {Event} {RoomId}",
+                            "room.closed", roomCode);
+                    }
+                }
+                finally
+                {
+                    room.Lock.Release();
+                }
+
+                if (closed)
+                {
+                    _stateSyncTimer?.StopForRoom(roomCode);
+                    if (guestConnectionId != null && _hubContext != null)
+                    {
+                        await _hubContext.Clients.Client(guestConnectionId).SendAsync(
+                            RoomEvents.RoomClosed,
+                            new RoomClosedPayload("host_disconnected", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in host grace expiry for room {RoomId}", roomCode);
+            }
+        });
+
+        return gracePeriodSeconds;
+    }
+
     private LeaveResult CloseRoom(Room room, string reason, string callerRole)
     {
         var peerConnectionId = callerRole == "host"
@@ -304,7 +499,7 @@ public class RoomService : IRoomService
 
         room.State = RoomState.Closed;
 
-        
+
         if (room.GuestGraceCts != null)
         {
             room.GuestGraceCts.Cancel();
@@ -312,7 +507,14 @@ public class RoomService : IRoomService
             room.GuestGraceCts = null;
         }
 
-        
+        if (room.HostGraceCts != null)
+        {
+            room.HostGraceCts.Cancel();
+            room.HostGraceCts.Dispose();
+            room.HostGraceCts = null;
+        }
+
+
         if (room.Host?.ConnectionId != null)
             _registry.UnregisterConnection(room.Host.ConnectionId);
         if (room.Guest?.ConnectionId != null)
@@ -451,6 +653,18 @@ public class RoomService : IRoomService
         try
         {
             ValidateHostAction(room, connectionId, RoomState.Waiting, RoomState.Joined, RoomState.Active);
+
+            // Validate/normalize the content type before storing & rebroadcasting
+            // it to the guest (SP-003). Reject anything outside the known set.
+            var normalizedType = (descriptor.ContentType ?? string.Empty).Trim().ToLowerInvariant();
+            if (!AllowedContentTypes.Contains(normalizedType))
+            {
+                throw new InvalidContentTypeException(room.RoomCode, descriptor.ContentType ?? string.Empty);
+            }
+            if (!string.Equals(normalizedType, descriptor.ContentType, StringComparison.Ordinal))
+            {
+                descriptor = descriptor with { ContentType = normalizedType };
+            }
 
             room.ContentDescriptor = descriptor;
             room.LastActivityAt = DateTimeOffset.UtcNow;

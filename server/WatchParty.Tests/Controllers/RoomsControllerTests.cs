@@ -1,7 +1,9 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
+using WatchParty.Server.Configuration;
 using WatchParty.Server.Controllers;
 using WatchParty.Server.Models;
 using WatchParty.Server.Services;
@@ -10,6 +12,13 @@ namespace WatchParty.Tests.Controllers;
 
 public class RoomsControllerTests
 {
+    private static RoomsController CreateController(IRoomRegistry registry, WatchPartyOptions? options = null) =>
+        new(
+            Mock.Of<IRoomService>(),
+            registry,
+            Mock.Of<ILogger<RoomsController>>(),
+            Options.Create(options ?? new WatchPartyOptions()));
+
     [Fact]
     public void ListRooms_ReturnsAllActiveRooms()
     {
@@ -58,10 +67,7 @@ public class RoomsControllerTests
         };
         registry.TryAdd(hostMissing.RoomCode, hostMissing);
 
-        var controller = new RoomsController(
-            Mock.Of<IRoomService>(),
-            registry,
-            Mock.Of<ILogger<RoomsController>>());
+        var controller = CreateController(registry);
 
         var result = controller.ListRooms();
 
@@ -78,5 +84,34 @@ public class RoomsControllerTests
         Assert.DoesNotContain("CREA01", codes);
         Assert.DoesNotContain("CLOS01", codes);
         Assert.Contains("MISS01", codes);
+
+        // BE-004: the public summary must not leak internal latency state.
+        foreach (var room in rooms.EnumerateArray())
+        {
+            Assert.False(room.TryGetProperty("hostRtt", out _), "hostRtt must not be in the public room summary.");
+        }
+    }
+
+    [Fact]
+    public void ListRooms_WhenPublicListingDisabled_ReturnsEmpty()
+    {
+        var registry = new InMemoryRoomRegistry();
+        var waiting = new Room("WAIT01")
+        {
+            State = RoomState.Waiting,
+            Host = new RoomParticipant { ConnectionId = "host-1", Role = ParticipantRole.Host },
+        };
+        registry.TryAdd(waiting.RoomCode, waiting);
+
+        var options = new WatchPartyOptions();
+        options.PublicRoomListing.Enabled = false;
+        var controller = CreateController(registry, options);
+
+        var result = controller.ListRooms();
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        using var json = JsonDocument.Parse(JsonSerializer.Serialize(ok.Value));
+        var rooms = json.RootElement.GetProperty("rooms");
+        Assert.Empty(rooms.EnumerateArray());
     }
 }

@@ -16,7 +16,7 @@ MoonWatch lets a small group watch the same IPTV stream together in real time. T
 - **Solo playback** — watch anything without a room
 - **Watch-party rooms** — create or join a room with a six-letter code
 - **Host-controlled sync** — host drives play, pause, and seek; guests follow automatically
-- **Guest reconnect** — guests have a 30-second grace window to reconnect without losing the session
+- **Host & guest reconnect** — both the host and guests have a configurable grace window (default 30s) to reconnect without ending the party; the server keeps the room alive and rebinds the reconnecting connection
 - **Buffering coordination** — the server holds both sides until both players signal ready, then resumes together
 - **Shared protocol package** — Dart and C# definitions kept in a single canonical location
 
@@ -87,7 +87,21 @@ Edit `client/assets/config/appsettings.local.json`:
 
 ### 2. IPTV Credentials
 
-IPTV username and password are entered directly in the app during the first launch and are stored securely on the device using `flutter_secure_storage`.
+IPTV username and password are entered directly in the app during the first launch and are stored securely on the device using `flutter_secure_storage`. Room-server HTTP logs are sanitized via `AppLogger.sanitizeUrl`, so room codes and any credential-bearing URLs are never written verbatim.
+
+> **Dependency note (FL-003).** The Flutter client speaks SignalR through the community
+> `signalr_netcore` package. Reconnect correctness (including the host-grace flow above)
+> depends on its `withAutomaticReconnect` behaviour — pin/track it and re-check after .NET
+> SignalR upgrades. Reconnect behaviour is covered by `client/test/features/reconnect`.
+
+---
+
+## Documentation
+
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — backend production/ops: environment, CORS (incl. the Samsung TV origin), the in-memory/single-instance constraint, public-room-listing privacy flag, and reconnect grace settings.
+- [`docs/FULL_REPOSITORY_AUDIT_FIX_RESULTS.md`](docs/FULL_REPOSITORY_AUDIT_FIX_RESULTS.md) — what was implemented for each audit issue.
+- [`docs/FULL_REPOSITORY_AUDIT_FIX_PLAN.md`](docs/FULL_REPOSITORY_AUDIT_FIX_PLAN.md) — the original read-only audit.
+- [`client_samsung_tv/README.md`](client_samsung_tv/README.md) — Samsung TV / Tizen client (build target, CORS, credential-storage risk).
 
 ---
 

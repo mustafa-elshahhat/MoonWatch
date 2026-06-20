@@ -23,6 +23,8 @@ void main() {
       expect(RoomEvents.roomGuestJoined, 'room:guest_joined');
       expect(RoomEvents.roomGuestLeft, 'room:guest_left');
       expect(RoomEvents.roomGuestReconnected, 'room:guest_reconnected');
+      expect(RoomEvents.roomHostAway, 'room:host_away');
+      expect(RoomEvents.roomHostReconnected, 'room:host_reconnected');
       expect(RoomEvents.roomClosed, 'room:closed');
       expect(RoomEvents.roomContentSet, 'room:content_set');
       expect(RoomEvents.roomError, 'room:error');
@@ -49,6 +51,24 @@ void main() {
       expect(RoomEvents.hubNotifyPlayerReady, 'NotifyPlayerReady');
       expect(RoomEvents.hubNotifyBufferingReady, 'NotifyBufferingReady');
       expect(RoomEvents.hubPing, 'Ping');
+    });
+  });
+
+  group('Host grace payloads (BE-001/XP-001)', () {
+    test('RoomHostAwayPayload parses grace seconds', () {
+      final payload = RoomHostAwayPayload.fromJson({
+        'serverTimestampMs': 1700000000000,
+        'gracePeriodSeconds': 30,
+      });
+      expect(payload.serverTimestampMs, 1700000000000);
+      expect(payload.gracePeriodSeconds, 30);
+    });
+
+    test('RoomHostReconnectedPayload parses timestamp', () {
+      final payload = RoomHostReconnectedPayload.fromJson({
+        'serverTimestampMs': 1700000000001,
+      });
+      expect(payload.serverTimestampMs, 1700000000001);
     });
   });
 

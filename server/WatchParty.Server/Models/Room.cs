@@ -18,6 +18,10 @@ public class Room
 
     public CancellationTokenSource? GuestGraceCts { get; set; }
 
+    public bool HostAway { get; set; }
+
+    public CancellationTokenSource? HostGraceCts { get; set; }
+
     public DateTimeOffset CreatedAt { get; } = DateTimeOffset.UtcNow;
 
     public DateTimeOffset LastActivityAt { get; set; } = DateTimeOffset.UtcNow;

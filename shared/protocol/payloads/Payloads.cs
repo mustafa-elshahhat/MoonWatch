@@ -46,6 +46,10 @@ public record RoomGuestLeftPayload(long ServerTimestampMs, int GracePeriodSecond
 
 public record RoomGuestReconnectedPayload(long ServerTimestampMs);
 
+public record RoomHostAwayPayload(long ServerTimestampMs, int GracePeriodSeconds);
+
+public record RoomHostReconnectedPayload(long ServerTimestampMs);
+
 public record RoomClosedPayload(string Reason, long ServerTimestampMs);
 
 public record RoomContentSetPayload(IptvContentDescriptor Descriptor, long ServerTimestampMs);

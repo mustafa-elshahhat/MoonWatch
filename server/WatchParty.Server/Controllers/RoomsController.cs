@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
+using WatchParty.Server.Configuration;
 using WatchParty.Server.Services;
 
 namespace WatchParty.Server.Controllers;
@@ -14,12 +16,18 @@ public class RoomsController : ControllerBase
     private readonly IRoomService _roomService;
     private readonly IRoomRegistry _roomRegistry;
     private readonly ILogger<RoomsController> _logger;
+    private readonly WatchPartyOptions _options;
 
-    public RoomsController(IRoomService roomService, IRoomRegistry roomRegistry, ILogger<RoomsController> logger)
+    public RoomsController(
+        IRoomService roomService,
+        IRoomRegistry roomRegistry,
+        ILogger<RoomsController> logger,
+        IOptions<WatchPartyOptions> options)
     {
         _roomService = roomService;
         _roomRegistry = roomRegistry;
         _logger = logger;
+        _options = options.Value;
     }
 
     
@@ -121,9 +129,21 @@ public class RoomsController : ControllerBase
     }
 
     
+    // Public active-room listing for the Samsung TV "Join Room" screen.
+    // Rate-limited (BE-003) and returns only safe public summaries — never IPTV
+    // credentials, playback URLs, or internal latency/connection internals
+    // (BE-004). Can be turned off in production via WatchParty:PublicRoomListing.
     [HttpGet]
+    [EnableRateLimiting("room-list")]
     public IActionResult ListRooms()
     {
+        // Operators can disable public room discovery in production. When off,
+        // the endpoint stays available (no 404) but advertises no rooms.
+        if (!_options.PublicRoomListing.Enabled)
+        {
+            return Ok(new { rooms = Array.Empty<object>() });
+        }
+
         var rooms = _roomRegistry.GetAll()
             .Where(r => r.State != Models.RoomState.Closed
                         && r.State != Models.RoomState.Created)
@@ -138,7 +158,6 @@ public class RoomsController : ControllerBase
                 createdAt = r.CreatedAt.ToString("o"),
                 contentSet = r.ContentDescriptor != null,
                 contentType = r.ContentDescriptor?.ContentType.ToLowerInvariant(),
-                hostRtt = r.HostRttMs,
             })
             .ToList();
 

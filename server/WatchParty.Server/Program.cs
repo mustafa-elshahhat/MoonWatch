@@ -10,6 +10,9 @@ using WatchParty.Server.Middleware;
 using WatchParty.Server.Services;
 
 
+var AppStartedAt = DateTimeOffset.UtcNow;
+var AppVersion = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown";
+
 var LogDir = Path.Combine(AppContext.BaseDirectory, "logs");
 var ServerLogPath = Path.Combine(LogDir, "server.log");
 try
@@ -17,7 +20,13 @@ try
     Directory.CreateDirectory(LogDir);
     if (File.Exists(ServerLogPath)) File.Delete(ServerLogPath);
 }
-catch {  }
+catch (Exception ex)
+{
+    // Best-effort log reset before the logger exists. Don't crash startup, but
+    // surface the problem (e.g. a read-only/misconfigured log dir in production)
+    // instead of swallowing it silently.
+    Console.Error.WriteLine($"[startup] Could not reset log file '{ServerLogPath}': {ex.Message}");
+}
 
 
 
@@ -74,25 +83,47 @@ try
     {
         options.AddDefaultPolicy(policy =>
         {
-            if (wpOptions.Cors.AllowedOrigins.Length > 0)
+            var configuredOrigins = wpOptions.Cors.AllowedOrigins;
+            if (configuredOrigins.Length > 0)
             {
-                policy.WithOrigins(wpOptions.Cors.AllowedOrigins)
+                // Explicit origins. This path is used in production. The literal
+                // "null" is allowed here for packaged Tizen widgets / sandboxed
+                // contexts that send `Origin: null` (WithOrigins matches it).
+                policy.WithOrigins(configuredOrigins)
                     .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
+                    .AllowAnyMethod();
+
+                // Credentials are only safe with explicit, non-wildcard origins.
+                // Never combine credentials with "*" or the literal "null".
+                var hasUnsafeOrigin = configuredOrigins.Any(o =>
+                    o == "*" || string.Equals(o, "null", StringComparison.OrdinalIgnoreCase));
+                var allowCredentials = wpOptions.Cors.AllowCredentials && !hasUnsafeOrigin;
+                if (allowCredentials)
+                {
+                    policy.AllowCredentials();
+                }
+
+                Log.Information(
+                    "CORS: allowing {Count} configured origin(s); credentials={Credentials}.",
+                    configuredOrigins.Length, allowCredentials);
             }
             else if (builder.Environment.IsProduction())
             {
+                // Fail safe: no any-origin-with-credentials in production.
                 Log.Warning("WatchParty:Cors:AllowedOrigins is empty in Production. " +
-                    "Browser-based clients will be blocked by CORS. " +
-                    "Native mobile/desktop clients are unaffected. " +
-                    "To enable browser clients, set AllowedOrigins in appsettings.Production.json or via environment variables.");
+                    "Browser-based clients (e.g. the Samsung TV/Tizen app) will be blocked by CORS. " +
+                    "Native mobile/desktop clients (Flutter) are unaffected. " +
+                    "Set WatchParty:Cors:AllowedOrigins — and, for the packaged Tizen widget, its captured " +
+                    "Origin (or the literal \"null\") — in appsettings.Production.json or via environment " +
+                    "variables. See docs/DEPLOYMENT.md.");
                 policy.WithOrigins(Array.Empty<string>())
                     .AllowAnyHeader()
                     .AllowAnyMethod();
             }
             else
             {
+                // Development convenience only — gated on !IsProduction().
+                Log.Information("CORS: development mode — allowing any origin with credentials (non-production only).");
                 policy.SetIsOriginAllowed(_ => true)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
@@ -136,16 +167,31 @@ try
                     QueueLimit = 0,
                 }));
 
+        // Throttles GET /api/v1/rooms (active-room enumeration / Join screen poll).
+        options.AddPolicy("room-list", context =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = wpOptions.RoomListRateLimit.MaxRequests,
+                    Window = TimeSpan.FromSeconds(wpOptions.RoomListRateLimit.WindowSeconds),
+                    QueueLimit = 0,
+                }));
+
         options.OnRejected = async (context, _) =>
         {
             context.HttpContext.Response.ContentType = "application/json";
             
             var path = context.HttpContext.Request.Path.Value ?? "";
+            var method = context.HttpContext.Request.Method;
             int retryAfter;
             if (path.EndsWith("/join", StringComparison.OrdinalIgnoreCase))
                 retryAfter = wpOptions.RoomJoinRateLimit.WindowSeconds;
             else if (path.Contains("/status", StringComparison.OrdinalIgnoreCase))
                 retryAfter = wpOptions.RoomStatusRateLimit.WindowSeconds;
+            else if (HttpMethods.IsGet(method))
+                // GET /api/v1/rooms — the active-room list endpoint.
+                retryAfter = wpOptions.RoomListRateLimit.WindowSeconds;
             else
                 retryAfter = wpOptions.RoomCreationRateLimit.WindowSeconds;
 
@@ -199,6 +245,11 @@ try
             {
                 status = report.Status.ToString().ToLowerInvariant(),
                 activeRooms,
+                // Diagnostics for the single-instance/in-memory deployment model
+                // (BE-007): a version/uptime jump signals a process recycle, which
+                // is when in-memory rooms are lost.
+                version = AppVersion,
+                uptimeSeconds = (long)(DateTimeOffset.UtcNow - AppStartedAt).TotalSeconds,
             });
         },
     });

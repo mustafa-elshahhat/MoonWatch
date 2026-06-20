@@ -75,8 +75,38 @@ public class RoomHub : Hub
                 serverTimestampMs,
                 result.PlaybackRate ?? 1.0));
 
-            
-            if (result.Role == "guest" && result.IsNewGuest)
+            // Host reconnect: the new connection rebound to the existing host slot
+            // during the grace window (BE-001/XP-001). Tell the guest the host is
+            // back and resync the rejoined host to the current playback state.
+            if (result.Role == "host" && result.IsHostReconnect)
+            {
+                await Clients.GroupExcept(result.RoomCode, Context.ConnectionId)
+                    .SendAsync(RoomEvents.RoomHostReconnected, new RoomHostReconnectedPayload(serverTimestampMs));
+
+                if (result.HostPositionMs.HasValue && result.HostIsPlaying.HasValue)
+                {
+                    var estimatedPositionMs = result.HostPositionMs.Value;
+                    if (result.HostIsPlaying.Value && result.HostPositionUpdatedAtMs.HasValue && result.HostPositionUpdatedAtMs.Value > 0)
+                    {
+                        var elapsedMs = serverTimestampMs - result.HostPositionUpdatedAtMs.Value;
+                        estimatedPositionMs += (long)(elapsedMs * (result.PlaybackRate ?? 1.0));
+                    }
+
+                    await Clients.Caller.SendAsync(RoomEvents.PlaybackStateSync, new PlaybackStateSyncPayload(
+                        estimatedPositionMs,
+                        result.HostIsPlaying.Value,
+                        serverTimestampMs,
+                        result.HostPlaybackSeqNo ?? 0,
+                        result.PlaybackRate ?? 1.0));
+
+                    // Resume periodic state-sync broadcasts if playback is ongoing.
+                    if (result.HostIsPlaying.Value)
+                    {
+                        _stateSyncTimer.StartForRoom(result.RoomCode);
+                    }
+                }
+            }
+            else if (result.Role == "guest" && result.IsNewGuest)
             {
                 await Clients.GroupExcept(result.RoomCode, Context.ConnectionId)
                     .SendAsync(RoomEvents.RoomGuestJoined, new RoomGuestJoinedPayload(serverTimestampMs));
@@ -383,6 +413,11 @@ public class RoomHub : Hub
             _logger.LogWarning(ex, "Unauthorized SetContent by {Role} in {RoomId}", ex.Role, ex.RoomId);
             await SendError("role_unauthorized", "Only the host can set content.");
         }
+        catch (InvalidContentTypeException ex)
+        {
+            _logger.LogWarning(ex, "Invalid content type {ContentType} in {RoomId}", ex.ContentType, ex.RoomId);
+            await SendError("invalid_content_type", "Content type must be 'live', 'movie', or 'episode'.");
+        }
         catch (ConnectionNotInRoomException)
         {
             await SendError("room_not_found", "Not in a room.");
@@ -537,15 +572,18 @@ public class RoomHub : Hub
             {
                 if (result.Role == "host")
                 {
-                    
+                    // Host dropped — the room is kept alive for a grace period so the
+                    // host can rebind a new connection id (BE-001/XP-001). Pause the
+                    // sync timer and tell the guest the host is temporarily away
+                    // (not closed). The room closes only if the grace timer expires.
                     _stateSyncTimer.StopForRoom(result.RoomCode);
 
                     if (result.PeerConnectionId != null)
                     {
                         await Clients.Client(result.PeerConnectionId)
-                            .SendAsync(RoomEvents.RoomClosed, new RoomClosedPayload(
-                                result.Reason,
-                                DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
+                            .SendAsync(RoomEvents.RoomHostAway, new RoomHostAwayPayload(
+                                DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                                result.GracePeriodSeconds ?? 30));
                     }
                 }
                 else if (result.Role == "guest")

@@ -96,12 +96,13 @@ public class StateSyncTimerService : IHostedService, IDisposable
             long serverTimestampMs = 0;
             int hostPlaybackSeqNo = 0;
             long hostPositionMs = 0;
+            double playbackRate = 1.0;
             bool shouldEmit = false;
 
             await room.Lock.WaitAsync();
             try
             {
-                
+
                 if (room.State == RoomState.Active && room.HostIsPlaying && !room.IsBuffering)
                 {
                     shouldEmit = true;
@@ -109,12 +110,16 @@ public class StateSyncTimerService : IHostedService, IDisposable
                     hostIsPlaying = room.HostIsPlaying;
                     hostPlaybackSeqNo = room.HostPlaybackSeqNo;
                     hostPositionMs = room.HostPositionMs;
+                    // Snapshot the playback rate under the lock so the value used in
+                    // the broadcast matches the estimatedPositionMs computed here and
+                    // cannot be changed concurrently after the lock is released.
+                    playbackRate = room.PlaybackRate;
 
                     estimatedPositionMs = hostPositionMs;
                     if (room.HostPositionUpdatedAtMs > 0)
                     {
                         var elapsedMs = serverTimestampMs - room.HostPositionUpdatedAtMs;
-                        estimatedPositionMs += (long)(elapsedMs * room.PlaybackRate);
+                        estimatedPositionMs += (long)(elapsedMs * playbackRate);
                     }
                 }
             }
@@ -134,7 +139,7 @@ public class StateSyncTimerService : IHostedService, IDisposable
                     hostIsPlaying,
                     serverTimestampMs,
                     hostPlaybackSeqNo,
-                    room.PlaybackRate));
+                    playbackRate));
 
             _logger.LogDebug("State sync emitted {Event} {RoomId} {HostPositionMs} {EstimatedPositionMs} {IsPlaying}",
                 "playback.state_sync", roomCode, hostPositionMs, estimatedPositionMs, hostIsPlaying);

@@ -54,3 +54,35 @@ jobs:
 
     - name: Shared Test
       run: cd shared && dart test
+
+  samsung-tv:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+        cache-dependency-path: client_samsung_tv/package-lock.json
+
+    - name: Install dependencies
+      run: cd client_samsung_tv && npm ci
+
+    - name: Protocol drift check
+      run: cd client_samsung_tv && npm run check:protocol
+
+    - name: Typecheck
+      run: cd client_samsung_tv && npm run typecheck
+
+    - name: Unit tests
+      run: cd client_samsung_tv && npm test
+
+    - name: Build
+      run: cd client_samsung_tv && npm run build
+
+    # Dev-server-only advisories (e.g. esbuild GHSA-g7r4-m6w7-qqqr) do not affect
+    # the shipped Tizen bundle; high+ severity should still fail the build.
+    - name: Audit (high+)
+      run: cd client_samsung_tv && npm audit --audit-level=high

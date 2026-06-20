@@ -5,6 +5,8 @@ class RoomEvents {
   static const String roomGuestJoined = 'room:guest_joined';
   static const String roomGuestLeft = 'room:guest_left';
   static const String roomGuestReconnected = 'room:guest_reconnected';
+  static const String roomHostAway = 'room:host_away';
+  static const String roomHostReconnected = 'room:host_reconnected';
   static const String roomClosed = 'room:closed';
   static const String roomContentSet = 'room:content_set';
   static const String roomError = 'room:error';

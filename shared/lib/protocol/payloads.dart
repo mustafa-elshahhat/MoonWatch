@@ -118,6 +118,33 @@ class RoomGuestReconnectedPayload {
       );
 }
 
+class RoomHostAwayPayload {
+  final int serverTimestampMs;
+  final int gracePeriodSeconds;
+
+  const RoomHostAwayPayload({
+    required this.serverTimestampMs,
+    required this.gracePeriodSeconds,
+  });
+
+  factory RoomHostAwayPayload.fromJson(Map<String, dynamic> json) =>
+      RoomHostAwayPayload(
+        serverTimestampMs: json['serverTimestampMs'] as int,
+        gracePeriodSeconds: json['gracePeriodSeconds'] as int,
+      );
+}
+
+class RoomHostReconnectedPayload {
+  final int serverTimestampMs;
+
+  const RoomHostReconnectedPayload({required this.serverTimestampMs});
+
+  factory RoomHostReconnectedPayload.fromJson(Map<String, dynamic> json) =>
+      RoomHostReconnectedPayload(
+        serverTimestampMs: json['serverTimestampMs'] as int,
+      );
+}
+
 class RoomClosedPayload {
   final String reason;
   final int serverTimestampMs;

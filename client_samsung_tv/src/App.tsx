@@ -112,6 +112,10 @@ export default function App() {
       onGuestJoined: () => setRoom((current) => current ? { ...current, guestPresent: true, peerStatus: 'connected' } : current),
       onGuestLeft: () => setRoom((current) => current ? { ...current, guestPresent: false, peerStatus: 'away', peerReady: false } : current),
       onGuestReconnected: () => setRoom((current) => current ? { ...current, guestPresent: true, peerStatus: 'connected' } : current),
+      // Host temporarily away during its reconnect grace window (BE-001/XP-001):
+      // keep the room but reflect that the peer (host) is away.
+      onHostAway: () => setRoom((current) => current ? { ...current, peerStatus: 'away' } : current),
+      onHostReconnected: () => setRoom((current) => current ? { ...current, peerStatus: 'connected' } : current),
       onRoomClosed: (payload) => {
         setRoom(undefined);
         setPlayerIntent(undefined);

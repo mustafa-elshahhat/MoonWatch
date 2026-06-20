@@ -1,5 +1,6 @@
 export { Badge } from './Badge';
 export { EmptyState } from './EmptyState';
+export { ErrorBoundary } from './ErrorBoundary';
 export { ErrorState } from './ErrorState';
 export { FocusBoundary } from './FocusBoundary';
 export { Icon } from './Icon';

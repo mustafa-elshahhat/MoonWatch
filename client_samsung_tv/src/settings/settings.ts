@@ -14,8 +14,9 @@ export type SettingsValidationScope = 'server' | 'iptv' | 'login' | 'playback' |
 
 /**
  * Production defaults. The server URL points at the same backend the Flutter
- * client uses, and the IPTV base URL is pre-filled (editable) to match it, so a
- * fresh TV only needs IPTV credentials to start. Stored user values always win.
+ * client uses. No IPTV provider is shipped: the IPTV base URL and credentials
+ * are blank by default, so a fresh TV must enter its own provider details
+ * before playback. Stored user values always win.
  */
 export const defaultSettings: TvSettings = {
   serverBaseUrl: PRODUCTION_SERVER_BASE_URL,
@@ -36,12 +37,13 @@ export function loadSettings(): TvSettings {
     if (!raw) return { ...defaultSettings };
     const parsed = JSON.parse(raw) as Partial<TvSettings>;
     const merged = sanitizeSettings({ ...defaultSettings, ...parsed });
-    // Fall back to production defaults if a previously stored value is blank,
-    // so existing installs never get stranded without a server / provider URL.
+    // Fall back to the production server default if a stored server URL is
+    // blank, so existing installs are never stranded without a backend. The
+    // IPTV base URL is intentionally NOT defaulted — a blank value stays blank
+    // so the user is forced to enter their own provider (no provider shipped).
     return {
       ...merged,
       serverBaseUrl: merged.serverBaseUrl || defaultSettings.serverBaseUrl,
-      iptvBaseUrl: merged.iptvBaseUrl || defaultSettings.iptvBaseUrl,
     };
   } catch {
     return { ...defaultSettings };

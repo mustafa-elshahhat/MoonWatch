@@ -280,16 +280,76 @@ public class RoomServiceTests
     
 
     [Fact]
-    public async Task HostDisconnect_ClosesRoom()
+    public async Task HostDisconnect_StartsGracePeriod_RoomSurvives()
     {
+        // BE-001/XP-001: a host blip must NOT destroy the room. The room stays
+        // alive (HostAway) for a grace period so the host can rebind.
         var (code, room) = await SetupActiveRoom();
         var result = await _service.HandleDisconnected("host-conn");
 
         Assert.NotNull(result);
-        Assert.Equal("host_disconnected", result!.Reason);
+        Assert.Equal("host", result!.Role);
+        Assert.Equal("host_disconnected", result.Reason);
         Assert.Equal("guest-conn", result.PeerConnectionId);
+        Assert.Equal(30, result.GracePeriodSeconds);
+        Assert.True(room.HostAway);
+        Assert.NotEqual(RoomState.Closed, room.State);
+        Assert.True(_registry.TryGet(code, out _));
+    }
+
+    [Fact]
+    public async Task HostReconnect_WithinGracePeriod_RebindsConnection()
+    {
+        // BE-001/XP-001: host rejoin during grace rebinds a new connection id to
+        // the existing host slot instead of throwing RoomFull.
+        var (code, room) = await SetupActiveRoom();
+        room.HostPositionMs = 42000;
+        room.HostIsPlaying = true;
+
+        await _service.HandleDisconnected("host-conn");
+        Assert.True(room.HostAway);
+
+        var rejoin = await _service.HandleJoinRoom("host-conn2", code, "host");
+
+        Assert.Equal("host", rejoin.Role);
+        Assert.True(rejoin.IsHostReconnect);
+        Assert.False(room.HostAway);
+        Assert.Null(room.HostGraceCts);
+        Assert.Equal("host-conn2", room.Host!.ConnectionId);
+        Assert.NotEqual(RoomState.Closed, room.State);
+        // The rejoined host is resynced to the preserved playback state.
+        Assert.Equal(42000, rejoin.HostPositionMs);
+        Assert.True(rejoin.HostIsPlaying);
+    }
+
+    [Fact]
+    public async Task HostGracePeriodExpiry_ClosesRoom()
+    {
+        var registry = new InMemoryRoomRegistry();
+        var logger = Mock.Of<ILogger<RoomService>>();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["WatchParty:Room:HostGracePeriodSeconds"] = "1"
+            })
+            .Build();
+        var service = new RoomService(registry, logger, config);
+
+        var code = service.CreateRoom();
+        await service.HandleJoinRoom("host-conn", code, "host");
+        await service.HandleJoinRoom("guest-conn", code, "guest");
+
+        registry.TryGet(code, out var room);
+
+        await service.HandleDisconnected("host-conn");
+        Assert.True(room!.HostAway);
+
+        // Wait past the (short) grace period.
+        await Task.Delay(3000);
+
+        // Host never returned — the room is closed and removed.
         Assert.Equal(RoomState.Closed, room.State);
-        Assert.False(_registry.TryGet(code, out _));
+        Assert.False(registry.TryGet(code, out _));
     }
 
     [Fact]
@@ -662,8 +722,9 @@ public class RoomServiceTests
         Assert.False(room.GuestAway);
         Assert.Null(room.GuestGraceCts);
 
-        
-        Assert.Equal(RoomState.Active, room.State);
+        // BE-002: once the guest is gone for good the room must not stay Active
+        // with a single participant — it settles back to Waiting (room stays open).
+        Assert.Equal(RoomState.Waiting, room.State);
         Assert.True(registry.TryGet(code, out _));
 
         
@@ -741,6 +802,26 @@ public class RoomServiceTests
 
         var guestReady = await _service.HandleNotifyPlayerReady("guest-conn", nextDescriptor.ContentKey);
         Assert.False(guestReady.GateOpened);
+    }
+
+    [Fact]
+    public async Task SetContent_InvalidContentType_Throws()
+    {
+        // SP-003: unknown content types are rejected, not echoed to the guest.
+        var (_, _) = await SetupActiveRoom();
+        var bad = new IptvContentDescriptor("vod", "12345", "ts", "Bad type");
+        await Assert.ThrowsAsync<InvalidContentTypeException>(() =>
+            _service.HandleSetContent("host-conn", bad));
+    }
+
+    [Fact]
+    public async Task SetContent_NormalizesContentTypeCasing()
+    {
+        // SP-003: a known type in a different case is normalized to lower-case.
+        var (_, room) = await SetupActiveRoom();
+        var mixed = new IptvContentDescriptor("EPISODE", "928875", "m3u8", "Episode 2");
+        await _service.HandleSetContent("host-conn", mixed);
+        Assert.Equal("episode", room.ContentDescriptor!.ContentType);
     }
 
     private async Task<(string code, Room room)> SetupActiveRoom()

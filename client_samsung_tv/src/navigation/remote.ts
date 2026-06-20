@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 type RemoteHandler = () => void;
 
@@ -26,12 +26,19 @@ export function registerTizenRemoteKeys(): void {
 }
 
 export function useRemoteNavigation(handlers: RemoteHandlers): void {
+  // Keep the latest handlers in a ref so the keydown listener and Tizen key
+  // registration run exactly once per mount, instead of being torn down and
+  // re-added on every render (which also risks dropping a keypress mid-swap).
+  const handlersRef = useRef(handlers);
+  handlersRef.current = handlers;
+
   useEffect(() => {
     registerTizenRemoteKeys();
 
     const onKeyDown = (event: KeyboardEvent) => {
       const key = mapKey(event);
       if (!key) return;
+      const current = handlersRef.current;
 
       if (key === 'up' || key === 'down' || key === 'left' || key === 'right') {
         event.preventDefault();
@@ -49,37 +56,38 @@ export function useRemoteNavigation(handlers: RemoteHandlers): void {
 
       if (key === 'back') {
         event.preventDefault();
-        handlers.onBack?.();
+        current.onBack?.();
         return;
       }
 
       if (key === 'play') {
         event.preventDefault();
-        handlers.onPlay?.();
+        current.onPlay?.();
         return;
       }
 
       if (key === 'pause') {
         event.preventDefault();
-        handlers.onPause?.();
+        current.onPause?.();
         return;
       }
 
       if (key === 'fastForward') {
         event.preventDefault();
-        handlers.onFastForward?.();
+        current.onFastForward?.();
         return;
       }
 
       if (key === 'rewind') {
         event.preventDefault();
-        handlers.onRewind?.();
+        current.onRewind?.();
       }
     };
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [handlers]);
+    // Mount-only: handlers are read live via handlersRef.
+  }, []);
 }
 
 export function focusFirst(container: ParentNode = document): boolean {
@@ -142,8 +150,65 @@ function mapKey(event: KeyboardEvent): RemoteKey | undefined {
   }
 }
 
+// --- Focusable caching (TV-005) -------------------------------------------
+// The previous implementation re-queried the whole document and ran
+// getBoundingClientRect + getComputedStyle on every candidate for every D-pad
+// press — a forced reflow per keypress that feels laggy on TV SoCs. We now:
+//   1. scope the query to the active FocusBoundary (or the document fallback),
+//   2. cache the (visibility-filtered) focusable list per boundary, rebuilding
+//      only when that subtree mutates (MutationObserver), so getComputedStyle
+//      leaves the hot path, and
+//   3. read each candidate's rect just once in moveFocus.
+interface FocusableCache {
+  boundary: ParentNode;
+  items: HTMLElement[];
+  observer: MutationObserver;
+}
+
+let focusableCache: FocusableCache | undefined;
+
+function activeBoundary(): ParentNode {
+  const active = document.activeElement;
+  if (active instanceof Element) {
+    const boundary = active.closest('[data-focus-boundary="true"]');
+    if (boundary) return boundary;
+  }
+  // No active boundary (e.g. the player screen): use the last mounted boundary
+  // if present, otherwise scan the document.
+  const boundaries = document.querySelectorAll<HTMLElement>('[data-focus-boundary="true"]');
+  return boundaries.length ? boundaries[boundaries.length - 1] : document;
+}
+
+function scopedFocusable(): HTMLElement[] {
+  const boundary = activeBoundary();
+  const stillConnected = !(boundary instanceof Node) || boundary.isConnected;
+  if (focusableCache && focusableCache.boundary === boundary && stillConnected) {
+    return focusableCache.items;
+  }
+
+  focusableCache?.observer.disconnect();
+
+  const items = getFocusable(boundary);
+  const observer = new MutationObserver(() => {
+    // Any structural/attribute change in the boundary invalidates the cache;
+    // it is rebuilt lazily on the next navigation.
+    focusableCache?.observer.disconnect();
+    focusableCache = undefined;
+  });
+  if (boundary instanceof Node) {
+    observer.observe(boundary, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['disabled', 'aria-disabled', 'class', 'style', 'hidden'],
+    });
+  }
+  focusableCache = { boundary, items, observer };
+  return items;
+}
+
 function moveFocus(direction: 'up' | 'down' | 'left' | 'right'): void {
-  const focusable = getFocusable(document);
+  const focusable = scopedFocusable();
   if (focusable.length === 0) return;
 
   const active = document.activeElement instanceof HTMLElement && focusable.includes(document.activeElement)
@@ -151,12 +216,13 @@ function moveFocus(direction: 'up' | 'down' | 'left' | 'right'): void {
     : focusable[0];
 
   if (!active) return;
-  const activeRect = active.getBoundingClientRect();
-  const activeCenter = center(activeRect);
+  const activeCenter = center(active.getBoundingClientRect());
 
   const candidates = focusable
     .filter((item) => item !== active)
     .map((item) => ({ item, rect: item.getBoundingClientRect() }))
+    // Guard against a cached item that became hidden before the cache rebuilt.
+    .filter(({ rect }) => rect.width > 0 && rect.height > 0)
     .filter(({ rect }) => isDirectionCandidate(direction, activeCenter, center(rect)))
     .map(({ item, rect }) => ({ item, score: scoreCandidate(direction, activeCenter, center(rect)) }))
     .sort((a, b) => a.score - b.score);

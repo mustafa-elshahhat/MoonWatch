@@ -16,18 +16,21 @@ Serif type).
 
 ## Production backend (default)
 
-The app ships pointed at the **production MoonWatch backend** so it works out of the box:
+The app ships pointed at the **production MoonWatch backend** so the room server works out
+of the box. No IPTV provider is bundled — you supply your own on first run:
 
 | Setting | Default | Source |
 | --- | --- | --- |
 | Server Base URL | `https://moviedate.runasp.net` | Same backend the Flutter client uses |
-| IPTV Base URL | `http://xc.nv2.xyz` | Pre-filled (editable) to match the Flutter app |
+| IPTV Base URL | _(blank — you must enter your own provider)_ | Entered in Settings on first run |
 
 These defaults live in [`src/config/appConfig.ts`](src/config/appConfig.ts). The SignalR
 hub URL is derived as `${serverBaseUrl}/hubs/room`, matching the server and Flutter client.
 
 - **You do not need to enter the server URL** for normal use. On first run the app opens
-  the **Sign in** screen and only asks for your **IPTV username and password**.
+  the **Sign in** screen and asks for your **IPTV Base URL, username, and password**.
+- No real IPTV provider URL is committed to this repo (it mirrors how the Flutter client
+  keeps the provider out of source). Prefer an `https://` provider where available.
 - The Server Base URL can still be overridden under **Settings → This TV → Advanced server
   settings** (e.g. to point at a local server). Leave it blank to fall back to the production default.
 
@@ -39,7 +42,7 @@ Open **Settings** from the Home screen. Fields are stored in this TV's LocalStor
 (key `moonwatch.tv.settings.v1`).
 
 **IPTV provider (primary):**
-- **IPTV Base URL** — pre-filled; change it if your provider differs
+- **IPTV Base URL** — your provider's base URL (blank by default; required before playback)
 - **IPTV username** / **IPTV password** — your provider credentials
 - **Test connection** — verifies the IPTV credentials and probes the room server
 
@@ -47,8 +50,16 @@ Open **Settings** from the Home screen. Fields are stored in this TV's LocalStor
 - **Device name** (optional) — shown on Home and in watch-party rooms
 - **Advanced server settings** — the Server Base URL override (defaults to production)
 
-> IPTV credentials are stored locally in LocalStorage. Samsung TV web apps have no
-> secure storage, so treat the device as you would any signed-in TV app.
+> **Credential storage (accepted risk — TV-003).** IPTV username/password are stored
+> **unencrypted** in LocalStorage (key `moonwatch.tv.settings.v1`). Tizen Web Apps provide
+> no secure keystore equivalent to the Flutter client's `flutter_secure_storage`, so this is
+> an unavoidable platform limitation. **No fake/obfuscated "encryption" is applied** — that
+> would only provide false assurance. Mitigations in place: credentials and full stream URLs
+> are **never logged** (player diagnostics are off by default and only ever emit
+> `scheme · *.ext`, see [`src/player/diagnostics.ts`](src/player/diagnostics.ts)); playback
+> URLs are resolved locally and never sent over SignalR. Treat the device as you would any
+> signed-in TV app. Longer term, provider auth could be proxied through the backend so the TV
+> never stores credentials.
 
 ---
 
@@ -212,6 +223,30 @@ tizen run -p MWATCHTV01.MoonWatchTV -t <TV_TARGET>
 
 The app icon is a lightweight 512×512 PNG (`icon.png`).
 
+### Build target & Tizen 5.5 (TV-001)
+
+Tizen 5.5 (2020 Samsung TVs — the declared minimum) runs ~Chromium 76, which does **not**
+support optional chaining (`?.`) or nullish coalescing (`??`). The Vite build target is set
+to **`chrome69`** in [`vite.config.ts`](vite.config.ts) so esbuild down-levels that syntax;
+the shipped `dist/assets/*.js` therefore contains **zero** `?.`/`??` operators (verify after
+a build by scanning the bundle). If you raise `required_version`, you may relax the target —
+but re-scan the bundle to confirm what ships.
+
+### `<access origin="*">` rationale (TV-010)
+
+The widget grants `<access origin="*">` because users supply **arbitrary** IPTV provider
+URLs (and an overridable room-server URL), so the set of origins the app must reach is not
+known ahead of time. This is the intended, use-case-justified grant for a streaming client.
+If the provider set ever becomes fixed, narrow it to those origins.
+
+### Production CORS for the TV (XP-002)
+
+The TV app is a Chromium web app and is therefore subject to CORS (the native Flutter client
+is not). The production backend must allow the TV's web origin via
+`WatchParty:Cors:AllowedOrigins`. A packaged Tizen widget sends a fixed widget `Origin` (or
+the literal `null`); capture it on hardware/emulator against the production server and add it
+to the allow-list. See [`../docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md).
+
 ---
 
 ## Known limitations
@@ -223,9 +258,11 @@ The app icon is a lightweight 512×512 PNG (`icon.png`).
 - **Browser playback differs from Tizen AVPlay** — treat browser results as UI testing only.
 - **Live streams may report no duration** — the player shows a `LIVE` indicator and disables
   seeking in that case.
-- **IPTV credentials are stored locally** in the TV's LocalStorage (no secure storage on Tizen).
-- Rooms are held in server memory; a server restart closes open rooms, and host reconnect
-  depends on the server preserving the SignalR session.
+- **IPTV credentials are stored unencrypted in LocalStorage** — accepted risk (TV-003); see
+  the "Credential storage" note under [How settings work](#how-settings-work).
+- Rooms are held in server memory; a server restart closes open rooms. The host now has a
+  reconnect **grace period** (the server keeps the room alive and rebinds the host's new
+  SignalR connection), so brief host network blips no longer end the party.
 
 ---
 

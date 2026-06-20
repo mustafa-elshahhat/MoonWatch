@@ -16,7 +16,9 @@ public static class RoomCodeGenerator
         "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".ToCharArray();
 
     private const int CodeLength = 6;
-    private const int MaxCollisionRetries = 3;
+    // With a 32^6 (~1.07B) keyspace, collisions are vanishingly rare; a few
+    // extra retries cost nothing and avoid a spurious 503 under high room churn.
+    private const int MaxCollisionRetries = 8;
 
     
     

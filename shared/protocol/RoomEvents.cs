@@ -12,6 +12,8 @@ public static class RoomEvents
     public const string RoomGuestJoined = "room:guest_joined";
     public const string RoomGuestLeft = "room:guest_left";
     public const string RoomGuestReconnected = "room:guest_reconnected";
+    public const string RoomHostAway = "room:host_away";
+    public const string RoomHostReconnected = "room:host_reconnected";
     public const string RoomClosed = "room:closed";
     public const string RoomContentSet = "room:content_set";
     public const string RoomError = "room:error";

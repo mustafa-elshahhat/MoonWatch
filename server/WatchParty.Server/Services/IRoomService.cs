@@ -82,7 +82,8 @@ public record JoinResult(
     bool? HostIsPlaying = null,
     int? HostPlaybackSeqNo = null,
     long? HostPositionUpdatedAtMs = null,
-    double? PlaybackRate = null);
+    double? PlaybackRate = null,
+    bool IsHostReconnect = false);
 
 
 public record LeaveResult(

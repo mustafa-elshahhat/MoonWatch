@@ -31,6 +31,15 @@ export interface RoomGuestReconnectedPayload {
   serverTimestampMs: number;
 }
 
+export interface RoomHostAwayPayload {
+  serverTimestampMs: number;
+  gracePeriodSeconds: number;
+}
+
+export interface RoomHostReconnectedPayload {
+  serverTimestampMs: number;
+}
+
 export interface RoomClosedPayload {
   reason: string;
   serverTimestampMs: number;

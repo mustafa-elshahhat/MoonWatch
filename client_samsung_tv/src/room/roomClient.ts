@@ -20,6 +20,7 @@ import type {
   RoomClosedPayload,
   RoomContentSetPayload,
   RoomGuestLeftPayload,
+  RoomHostAwayPayload,
   RoomJoinedPayload,
   RoomRole,
 } from '../protocol/payloads';
@@ -39,6 +40,8 @@ export interface RoomClientEvents {
   onGuestJoined?: () => void;
   onGuestLeft?: (payload: RoomGuestLeftPayload) => void;
   onGuestReconnected?: () => void;
+  onHostAway?: (payload: RoomHostAwayPayload) => void;
+  onHostReconnected?: () => void;
   onRoomClosed?: (payload: RoomClosedPayload) => void;
   onContentSet?: (payload: RoomContentSetPayload) => void;
   onRoomError?: (payload: ErrorPayload) => void;
@@ -177,6 +180,8 @@ export class RoomClient {
     connection.on(RoomEvents.roomGuestJoined, () => this.events.onGuestJoined?.());
     connection.on(RoomEvents.roomGuestLeft, (payload: RoomGuestLeftPayload) => this.events.onGuestLeft?.(payload));
     connection.on(RoomEvents.roomGuestReconnected, () => this.events.onGuestReconnected?.());
+    connection.on(RoomEvents.roomHostAway, (payload: RoomHostAwayPayload) => this.events.onHostAway?.(payload));
+    connection.on(RoomEvents.roomHostReconnected, () => this.events.onHostReconnected?.());
     connection.on(RoomEvents.roomClosed, (payload: RoomClosedPayload) => this.handleRoomClosed(payload));
     connection.on(RoomEvents.roomContentSet, (payload: RoomContentSetPayload) => this.events.onContentSet?.(payload));
     connection.on(RoomEvents.roomError, (payload: ErrorPayload) => this.handleRoomError(payload));
@@ -248,14 +253,10 @@ export class RoomClient {
 
   private async rejoinAfterReconnect(): Promise<void> {
     if (!this.roomCode || !this.role) return;
-    if (this.role === 'host') {
-      this.events.onRoomError?.({
-        code: 'host_reconnect_limited',
-        message: 'Host reconnect depends on the server preserving the SignalR session. If the room closed, create a new room.',
-        serverTimestampMs: Date.now(),
-      });
-      return;
-    }
+    // Both host and guest re-invoke JoinRoom on reconnect. The server keeps the
+    // room alive for a grace period and rebinds the new SignalR connection id to
+    // the existing slot (host grace: BE-001/XP-001), so host reconnect is now
+    // supported instead of being treated as fatal.
     try {
       await this.connection!.invoke(RoomEvents.hubJoinRoom, this.roomCode, this.role);
     } catch (error) {

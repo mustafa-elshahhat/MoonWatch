@@ -49,7 +49,11 @@ flutter:
   uses-material-design: true
   assets:
     - assets/config/
-    - assets/icon.png
+    # Note: assets/icon.png (1024x1024) is intentionally NOT bundled as a
+    # runtime asset (FL-002). No Dart code references it — it exists only as the
+    # high-res source for flutter_launcher_icons below (read from disk at build
+    # time, not from the asset bundle), so bundling it would add ~1.6 MB to the
+    # app for nothing. The generated platform launcher icons are unaffected.
 
 flutter_launcher_icons:
   android: "launcher_icon"
