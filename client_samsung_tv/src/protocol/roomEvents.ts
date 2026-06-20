@@ -1,0 +1,35 @@
+export const RoomEvents = {
+  roomJoined: 'room:joined',
+  roomGuestJoined: 'room:guest_joined',
+  roomGuestLeft: 'room:guest_left',
+  roomGuestReconnected: 'room:guest_reconnected',
+  roomClosed: 'room:closed',
+  roomContentSet: 'room:content_set',
+  roomError: 'room:error',
+  playerReady: 'player:ready',
+
+  playbackPlay: 'playback:play',
+  playbackPause: 'playback:pause',
+  playbackSeek: 'playback:seek',
+  playbackStateSync: 'playback:state_sync',
+  playbackSpeed: 'playback:speed',
+
+  bufferingStall: 'buffering:stall',
+  bufferingReady: 'buffering:ready',
+  bufferingResume: 'buffering:resume',
+
+  pong: 'pong',
+
+  hubCreateRoom: 'CreateRoom',
+  hubJoinRoom: 'JoinRoom',
+  hubLeaveRoom: 'LeaveRoom',
+  hubSetContent: 'SetContent',
+  hubPlay: 'Play',
+  hubPause: 'Pause',
+  hubSeek: 'Seek',
+  hubSetPlaybackSpeed: 'SetPlaybackSpeed',
+  hubNotifyBufferingStall: 'NotifyBufferingStall',
+  hubNotifyPlayerReady: 'NotifyPlayerReady',
+  hubNotifyBufferingReady: 'NotifyBufferingReady',
+  hubPing: 'Ping',
+} as const;

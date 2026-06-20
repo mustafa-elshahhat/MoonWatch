@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets"
+        xmlns:tizen="http://tizen.org/ns/widgets"
+        id="http://mustafa-elshahhat.github.io/moonwatch/samsung-tv"
+        version="1.0.0"
+        viewmodes="maximized">
+  <tizen:application id="MWATCHTV01.MoonWatchTV" package="MWATCHTV01" required_version="5.5" />
+  <tizen:profile name="tv-samsung" />
+  <name>MoonWatchTV</name>
+  <description>Samsung Smart TV client for MoonWatch IPTV watch parties.</description>
+  <author href="https://github.com/mustafa-elshahhat/MoonWatch">MoonWatch</author>
+  <content src="index.html" />
+  <icon src="icon.png" />
+  <access origin="*" />
+  <tizen:privilege name="http://tizen.org/privilege/internet" />
+  <tizen:setting screen-orientation="landscape"
+                 context-menu="disable"
+                 background-support="disable"
+                 encryption="disable"
+                 install-location="auto"
+                 hwkey-event="enable" />
+</widget>

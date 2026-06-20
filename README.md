@@ -46,6 +46,7 @@ MoonWatch/
 │   │   ├── features/    # auth, iptv, player, room, sync, reconnect, navigation
 │   │   └── shared/      # shared widgets
 │   └── test/
+├── client_samsung_tv/   # React/TypeScript Samsung Tizen Web App client
 ├── server/
 │   ├── WatchParty.Server/   # ASP.NET Core SignalR backend
 │   └── WatchParty.Tests/    # xUnit integration and unit tests
