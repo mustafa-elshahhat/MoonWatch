@@ -16,6 +16,9 @@ export type IconName =
   | 'alert'
   | 'signal'
   | 'search'
+  | 'add'
+  | 'refresh'
+  | 'next'
   | 'moon';
 
 interface IconProps {
@@ -29,6 +32,7 @@ interface IconProps {
 const FILLED: Partial<Record<IconName, string>> = {
   play: 'M8 5v14l11-7z',
   pause: 'M7 4h4v16H7zM13 4h4v16h-4z',
+  next: 'M6 5l9 7-9 7zM17 5h2v14h-2z',
 };
 
 const PATHS: Record<IconName, string> = {
@@ -47,6 +51,9 @@ const PATHS: Record<IconName, string> = {
   alert: 'M12 3L2 20h20L12 3zM12 10v4M12 18h.01',
   signal: 'M5 13a10 10 0 0 1 14 0M8.5 16.5a5 5 0 0 1 7 0M12 20h.01M2 9.5a16 16 0 0 1 20 0',
   search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-3.5-3.5',
+  add: 'M12 5v14M5 12h14',
+  refresh: 'M21 12a9 9 0 1 1-2.64-6.36M21 4v5h-5',
+  next: 'M6 5l9 7-9 7zM17 5h2v14h-2z',
   moon: 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z',
 };
 

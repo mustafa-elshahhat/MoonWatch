@@ -1,16 +1,26 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { EmptyState, ErrorState, FocusBoundary, Icon, SkeletonGrid, TvButton, TvCard, TvGrid } from '../components';
+import { useAutoPagedItems } from '../hooks/useAutoPagedItems';
 import { IptvService } from '../iptv/iptvService';
+import type { EpisodeContext, EpisodeEntry } from '../iptv/episodeContext';
 import type { IptvCategory, SeriesEpisode, SeriesInfo, SeriesItem } from '../iptv/types';
 import type { IptvContentDescriptor } from '../protocol/payloads';
 import type { TvSettings } from '../settings/settings';
 import { validateSettings } from '../settings/settings';
 import { userFacingError } from '../utils/format';
 
+/** TV-sized initial/page size — keeps the focusable DOM small on big categories. */
+const PAGE_SIZE = 48;
+
+interface FlatEpisode {
+  episode: SeriesEpisode;
+  season: string;
+}
+
 interface SeriesScreenProps {
   settings: TvSettings;
   roomRole?: string;
-  onSelect: (descriptor: IptvContentDescriptor) => Promise<void> | void;
+  onSelect: (descriptor: IptvContentDescriptor, episodeContext?: EpisodeContext) => Promise<void> | void;
   onBack: () => void;
   onSettings: () => void;
 }
@@ -85,6 +95,41 @@ export function SeriesScreen({ settings, roomRole, onSelect, onBack, onSettings 
     else setReloadToken((value) => value + 1);
   };
 
+  const currentCategory = categories.find((category) => category.categoryId === categoryId)?.categoryName ?? 'All';
+
+  // Flatten every episode in season → episode order. This single ordered list
+  // backs both the bounded episode grid and the player's Next Episode context,
+  // so the next episode rolls naturally into the next season.
+  const flatEpisodes = useMemo<FlatEpisode[]>(() => {
+    if (!seriesInfo) return [];
+    const seasonKeys = Object.keys(seriesInfo.seasons).sort((a, b) => Number(a) - Number(b));
+    return seasonKeys.flatMap((season) => (seriesInfo.seasons[season] ?? []).map((episode) => ({ episode, season })));
+  }, [seriesInfo]);
+
+  const episodeEntries = useMemo<EpisodeEntry[]>(
+    () => flatEpisodes.map((flat) => ({
+      descriptor: episodeToDescriptor(flat.episode),
+      season: flat.season,
+      episodeNum: flat.episode.episodeNum,
+    })),
+    [flatEpisodes],
+  );
+
+  // Two independent paged views (hooks always run, regardless of which view is
+  // showing). Each resets automatically when its source list identity changes.
+  const seriesPaged = useAutoPagedItems(series, PAGE_SIZE);
+  const episodesPaged = useAutoPagedItems(flatEpisodes, PAGE_SIZE);
+
+  const selectEpisode = (index: number) => {
+    const entry = episodeEntries[index];
+    if (!entry) return;
+    void onSelect(entry.descriptor, {
+      seriesTitle: selectedSeries?.name ?? entry.descriptor.title,
+      episodes: episodeEntries,
+      index,
+    });
+  };
+
   if (error) {
     return (
       <FocusBoundary className="screen">
@@ -100,9 +145,6 @@ export function SeriesScreen({ settings, roomRole, onSelect, onBack, onSettings 
       </FocusBoundary>
     );
   }
-
-  const seasons = seriesInfo ? Object.keys(seriesInfo.seasons).sort((a, b) => Number(a) - Number(b)) : [];
-  const currentCategory = categories.find((category) => category.categoryId === categoryId)?.categoryName ?? 'All';
 
   return (
     <FocusBoundary className="screen screen--catalog">
@@ -133,35 +175,45 @@ export function SeriesScreen({ settings, roomRole, onSelect, onBack, onSettings 
       {!selectedSeries && (
         <div className="catalog-toolbar">
           <span className="catalog-meta"><strong>{currentCategory}</strong></span>
-          {!loading && <span className="catalog-meta">{series.length} {series.length === 1 ? 'series' : 'series'}</span>}
+          {!loading && seriesPaged.total > 0 && (
+            <span className="catalog-meta">Showing {seriesPaged.shownCount} of {seriesPaged.total} series</span>
+          )}
         </div>
       )}
 
       {loading ? (
         <SkeletonGrid count={10} />
       ) : selectedSeries && seriesInfo ? (
-        seasons.length === 0 ? (
+        flatEpisodes.length === 0 ? (
           <EmptyState icon={<Icon name="series" size={40} />} title="No episodes" hint="This series has no episodes available from the provider." />
         ) : (
-          <div className="season-stack">
-            {seasons.map((season) => (
-              <section key={season}>
-                <h2>Season {season}</h2>
-                <TvGrid compact>
-                  {seriesInfo.seasons[season].map((episode) => (
+          <>
+            <TvGrid compact>
+              {episodesPaged.visibleItems.map((item, index) => {
+                const previous = index > 0 ? episodesPaged.visibleItems[index - 1] : undefined;
+                const showHeader = !previous || previous.season !== item.season;
+                return (
+                  <Fragment key={`${item.season}-${item.episode.id}-${index}`}>
+                    {showHeader && <h2 className="season-heading">Season {item.season}</h2>}
                     <TvCard
-                      key={episode.id}
-                      title={episode.title}
-                      subtitle={`Episode ${episode.episodeNum}`}
-                      image={episode.coverBig || selectedSeries.cover}
-                      meta={episode.duration}
-                      onClick={() => void onSelect(episodeToDescriptor(episode))}
+                      title={item.episode.title}
+                      subtitle={`Episode ${item.episode.episodeNum}`}
+                      image={item.episode.coverBig || selectedSeries.cover}
+                      meta={item.episode.duration}
+                      onClick={() => selectEpisode(index)}
+                      onFocus={() => episodesPaged.onItemFocus(index)}
                     />
-                  ))}
-                </TvGrid>
-              </section>
-            ))}
-          </div>
+                  </Fragment>
+                );
+              })}
+            </TvGrid>
+            {episodesPaged.hasMore && (
+              <div ref={episodesPaged.sentinelRef} className="tv-loading-row" aria-hidden="true">
+                <span className="tv-loading-row__spinner" />
+                <span>Loading more episodes… {episodesPaged.shownCount} of {episodesPaged.total}</span>
+              </div>
+            )}
+          </>
         )
       ) : series.length === 0 ? (
         <EmptyState
@@ -170,18 +222,27 @@ export function SeriesScreen({ settings, roomRole, onSelect, onBack, onSettings 
           hint={`No series found in “${currentCategory}”. Try another category.`}
         />
       ) : (
-        <TvGrid>
-          {series.map((item) => (
-            <TvCard
-              key={item.seriesId}
-              title={item.name}
-              subtitle={item.genre || item.releaseDate || 'Series'}
-              image={item.cover}
-              meta={item.rating ? `★ ${item.rating}` : undefined}
-              onClick={() => void openSeries(item)}
-            />
-          ))}
-        </TvGrid>
+        <>
+          <TvGrid>
+            {seriesPaged.visibleItems.map((item, index) => (
+              <TvCard
+                key={item.seriesId}
+                title={item.name}
+                subtitle={item.genre || item.releaseDate || 'Series'}
+                image={item.cover}
+                meta={item.rating ? `★ ${item.rating}` : undefined}
+                onClick={() => void openSeries(item)}
+                onFocus={() => seriesPaged.onItemFocus(index)}
+              />
+            ))}
+          </TvGrid>
+          {seriesPaged.hasMore && (
+            <div ref={seriesPaged.sentinelRef} className="tv-loading-row" aria-hidden="true">
+              <span className="tv-loading-row__spinner" />
+              <span>Loading more… {seriesPaged.shownCount} of {seriesPaged.total}</span>
+            </div>
+          )}
+        </>
       )}
     </FocusBoundary>
   );

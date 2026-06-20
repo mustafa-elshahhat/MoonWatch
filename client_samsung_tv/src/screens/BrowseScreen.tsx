@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Badge, EmptyState, ErrorState, FocusBoundary, Icon, SkeletonGrid, TvButton, TvCard, TvGrid } from '../components';
+import { useAutoPagedItems } from '../hooks/useAutoPagedItems';
 import { IptvService } from '../iptv/iptvService';
 import type { CatalogContent, IptvCategory, LiveStream, VodStream } from '../iptv/types';
 import type { IptvContentDescriptor } from '../protocol/payloads';
 import type { TvSettings } from '../settings/settings';
 import { validateSettings } from '../settings/settings';
 import { userFacingError } from '../utils/format';
+
+/** TV-sized initial/page size — keeps the focusable DOM small on big categories. */
+const PAGE_SIZE = 48;
 
 interface BrowseScreenProps {
   kind: 'live' | 'movie';
@@ -70,6 +74,10 @@ export function BrowseScreen({ kind, settings, roomRole, onSelect, onBack, onSet
 
   const retry = () => setReloadToken((value) => value + 1);
   const currentCategory = categories.find((category) => category.categoryId === selectedCategory)?.categoryName ?? 'All';
+  // Render the (possibly huge) list one page at a time, appending more
+  // automatically as the remote nears the end. Page auto-resets when `items`
+  // changes — i.e. when the category changes or the list reloads.
+  const { visibleItems, total, shownCount, hasMore, onItemFocus, sentinelRef } = useAutoPagedItems(items, PAGE_SIZE);
 
   return (
     <FocusBoundary className="screen screen--catalog">
@@ -97,7 +105,9 @@ export function BrowseScreen({ kind, settings, roomRole, onSelect, onBack, onSet
 
       <div className="catalog-toolbar">
         <span className="catalog-meta"><strong>{currentCategory}</strong></span>
-        {!loading && !error && <span className="catalog-meta">{items.length} {items.length === 1 ? 'item' : 'items'}</span>}
+        {!loading && !error && total > 0 && (
+          <span className="catalog-meta">Showing {shownCount} of {total} {total === 1 ? 'item' : 'items'}</span>
+        )}
       </div>
 
       {error ? (
@@ -119,20 +129,29 @@ export function BrowseScreen({ kind, settings, roomRole, onSelect, onBack, onSet
           hint={`No ${title.toLowerCase()} found in “${currentCategory}”. Try another category.`}
         />
       ) : (
-        <TvGrid>
-          {items.map((item) => (
-            <TvCard
-              key={item.id}
-              variant={kind === 'live' ? 'live' : 'poster'}
-              title={item.title}
-              subtitle={item.subtitle}
-              image={item.image}
-              meta={item.description}
-              badges={kind === 'live' ? <Badge variant="live" dot>Live</Badge> : undefined}
-              onClick={() => void onSelect(item.descriptor)}
-            />
-          ))}
-        </TvGrid>
+        <>
+          <TvGrid>
+            {visibleItems.map((item, index) => (
+              <TvCard
+                key={item.id}
+                variant={kind === 'live' ? 'live' : 'poster'}
+                title={item.title}
+                subtitle={item.subtitle}
+                image={item.image}
+                meta={item.description}
+                badges={kind === 'live' ? <Badge variant="live" dot>Live</Badge> : undefined}
+                onClick={() => void onSelect(item.descriptor)}
+                onFocus={() => onItemFocus(index)}
+              />
+            ))}
+          </TvGrid>
+          {hasMore && (
+            <div ref={sentinelRef} className="tv-loading-row" aria-hidden="true">
+              <span className="tv-loading-row__spinner" />
+              <span>Loading more… {shownCount} of {total}</span>
+            </div>
+          )}
+        </>
       )}
     </FocusBoundary>
   );

@@ -92,7 +92,13 @@ export class HtmlVideoPlayer implements TvPlayer {
 
   async getDuration(): Promise<number> {
     const duration = this.video?.duration ?? 0;
-    return Number.isFinite(duration) ? Math.round(duration * 1000) : 0;
+    return Number.isFinite(duration) && duration > 0 ? Math.round(duration * 1000) : 0;
+  }
+
+  getState(): string | undefined {
+    if (!this.video) return 'NONE';
+    const READY = ['HAVE_NOTHING', 'HAVE_METADATA', 'HAVE_CURRENT_DATA', 'HAVE_FUTURE_DATA', 'HAVE_ENOUGH_DATA'];
+    return this.video.paused ? `PAUSED (${READY[this.video.readyState] ?? this.video.readyState})` : `PLAYING (${READY[this.video.readyState] ?? this.video.readyState})`;
   }
 
   destroy(): void {

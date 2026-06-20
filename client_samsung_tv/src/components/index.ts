@@ -6,6 +6,8 @@ export { Icon } from './Icon';
 export type { IconName } from './Icon';
 export { LoadingState } from './LoadingState';
 export { PlayerControls } from './PlayerControls';
+export { RoomCard } from './RoomCard';
+export type { ActiveRoom } from '../room/roomApi';
 export { SkeletonGrid } from './SkeletonGrid';
 export { TvButton } from './TvButton';
 export { TvCard } from './TvCard';

@@ -293,6 +293,19 @@ button {
   gap: 22px;
 }
 
+/* Season divider rendered inline in the episode grid (spans the full row). */
+.season-heading {
+  grid-column: 1 / -1;
+  margin: 18px 0 2px;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.season-heading:first-child {
+  margin-top: 0;
+}
+
 /* ---------------------------------------------------------------- cards */
 
 .tv-card {
@@ -402,6 +415,29 @@ button {
   font-size: 17px;
   font-weight: 600;
   letter-spacing: 0.04em;
+}
+
+/* Auto-pagination footer — a non-focusable loading row shown while the next
+   page lazy-loads. Doubles as the IntersectionObserver sentinel. */
+.tv-loading-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 18px 0 40px;
+  color: var(--soft);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.tv-loading-row__spinner {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 3px solid rgba(229, 163, 60, 0.25);
+  border-top-color: var(--accent);
+  animation: spin 0.9s linear infinite;
 }
 
 /* ------------------------------------------------------- category rail */
@@ -832,6 +868,166 @@ button {
   letter-spacing: 0.28em;
 }
 
+/* ------------------------------------------------------------ join room */
+
+.join-layout {
+  display: grid;
+  grid-template-columns: 1.25fr 0.85fr;
+  gap: 36px;
+  align-items: start;
+}
+
+.join-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 0 20px;
+}
+
+.join-rooms h2,
+.join-code h2 {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.join-rooms .state-view {
+  min-height: 360px;
+}
+
+.room-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.room-list-card {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  width: 100%;
+  text-align: left;
+  padding: 22px 26px;
+  border: 1.5px solid var(--line-subtle);
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, var(--surface-elevated), var(--surface));
+  color: var(--text);
+  box-shadow: var(--shadow-low);
+  transition: transform 160ms ease-out, border-color 160ms ease-out, box-shadow 160ms ease-out;
+}
+
+.room-list-card__icon {
+  flex: none;
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-md);
+  color: var(--accent);
+  background: rgba(229, 163, 60, 0.12);
+  border: 1px solid rgba(229, 163, 60, 0.28);
+}
+
+.room-list-card__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.room-list-card__top {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+}
+
+.room-list-card__code {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+}
+
+.room-list-card__age {
+  color: var(--soft);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.room-list-card__status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.room-list-card__status .status-dot {
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  box-shadow: 0 0 10px 0 currentColor;
+}
+
+.room-list-card__meta {
+  display: flex;
+  gap: 10px;
+  color: var(--soft);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.room-list-card__join {
+  flex: none;
+  padding: 12px 28px;
+  border-radius: var(--pill);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(229, 163, 60, 0.14);
+  border: 1px solid rgba(229, 163, 60, 0.32);
+}
+
+/* Status colour theming per room state. */
+.room-list-card--accent .room-list-card__status { color: var(--accent); }
+.room-list-card--accent .room-list-card__icon {
+  color: var(--accent);
+  background: rgba(229, 163, 60, 0.12);
+  border-color: rgba(229, 163, 60, 0.28);
+}
+.room-list-card--danger .room-list-card__status,
+.room-list-card--full .room-list-card__icon { color: var(--danger); }
+.room-list-card--full {
+  opacity: 0.6;
+}
+.room-list-card--full .room-list-card__icon {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.28);
+}
+.room-list-card--full .room-list-card__join {
+  color: var(--soft);
+  background: var(--surface-elevated);
+  border-color: var(--line);
+}
+
+.join-code__hint {
+  margin: 4px 0 22px;
+  color: var(--soft);
+  font-size: 19px;
+  line-height: 1.4;
+}
+
+.join-code__error {
+  margin: 18px 0 0;
+  color: var(--danger);
+  font-size: 19px;
+  font-weight: 600;
+}
+
 /* ------------------------------------------------------ state / skeleton */
 
 .state-view {
@@ -959,6 +1155,21 @@ button {
   height: 100%;
 }
 
+/* Samsung AVPlay decodes onto a native video plane *behind* the web layer.
+   While AVPlay is active we punch the whole document chain transparent so the
+   hardware picture shows through; the cinematic scrims/controls still composite
+   on top of it. The HTML5 fallback keeps the opaque #000 backdrop above because
+   its <video> element lives inside the web layer. The class is toggled on <html>
+   by AvPlayPlayer. */
+html.avplay-active,
+html.avplay-active body,
+html.avplay-active #root,
+html.avplay-active .app-shell,
+html.avplay-active .player-screen,
+html.avplay-active .player-surface {
+  background: transparent !important;
+}
+
 .html-video-player {
   display: block;
   object-fit: contain;
@@ -1081,6 +1292,28 @@ button {
   box-shadow: 0 10px 30px rgba(229, 163, 60, 0.34);
 }
 
+/* "Next episode" — a wider pill so its label reads at 10 feet. */
+.player-btn--next {
+  width: auto;
+  height: 72px;
+  border-radius: var(--pill);
+  gap: 12px;
+  padding: 0 28px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.player-btn__label {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.player-subtitle--upnext {
+  color: var(--accent-hover);
+  font-weight: 600;
+}
+
 .player-controls {
   position: absolute;
   left: 64px;
@@ -1172,6 +1405,45 @@ button {
   min-height: 72px;
   border: none;
   background: transparent;
+}
+
+/* Opt-in developer diagnostics panel (PLAYER_DIAGNOSTICS). Compact, top-right,
+   never covers the central video, no credentials. */
+.player-diag {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 4;
+  display: grid;
+  gap: 4px;
+  max-width: 360px;
+  padding: 14px 18px;
+  border: 1px solid rgba(229, 163, 60, 0.4);
+  border-radius: var(--r-md);
+  background: rgba(8, 7, 6, 0.78);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.player-diag__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.player-diag__key {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.player-diag__val {
+  color: var(--muted);
+  text-align: right;
+  word-break: break-word;
 }
 
 /* ------------------------------------------------------------ episodes */
@@ -1309,6 +1581,10 @@ button {
   .settings-layout,
   .waiting-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .join-layout {
+    grid-template-columns: 1fr;
   }
 
   .screen__header h1,

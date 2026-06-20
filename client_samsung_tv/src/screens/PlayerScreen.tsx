@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Icon, PlayerControls, TvButton } from '../components';
 import { IptvService } from '../iptv/iptvService';
+import type { EpisodeContext } from '../iptv/episodeContext';
+import { episodeLabel, nextEpisode } from '../iptv/episodeContext';
 import type { IptvContentDescriptor, RoomRole } from '../protocol/payloads';
 import { contentKeyOf } from '../protocol/payloads';
 import { createTvPlayer, destroyActivePlayer, hasAvPlay } from '../player/createPlayer';
+import { describeUrl, PLAYER_DIAGNOSTICS } from '../player/diagnostics';
 import type { TvPlayer } from '../player/TvPlayer';
 import type { PlaybackCommand } from '../room/playbackCommand';
 import type { LatencySnapshot, RoomClient, RoomConnectionState } from '../room/roomClient';
@@ -21,6 +24,7 @@ export interface PlayerRemoteHandle {
 
 interface PlayerScreenProps {
   descriptor: IptvContentDescriptor;
+  episodeContext?: EpisodeContext;
   settings: TvSettings;
   mode: 'solo' | 'room';
   role?: RoomRole;
@@ -31,6 +35,7 @@ interface PlayerScreenProps {
   latency: LatencySnapshot;
   onExit: () => void;
   onLocalReady?: (contentKey: string) => void;
+  onPlayNext?: (descriptor: IptvContentDescriptor, episodeContext: EpisodeContext) => void;
   registerRemoteHandle: (handle: PlayerRemoteHandle | undefined) => void;
 }
 
@@ -42,6 +47,7 @@ const CONTROLS_HIDE_MS = 4500;
 
 export function PlayerScreen({
   descriptor,
+  episodeContext,
   settings,
   mode,
   role,
@@ -52,6 +58,7 @@ export function PlayerScreen({
   latency,
   onExit,
   onLocalReady,
+  onPlayNext,
   registerRemoteHandle,
 }: PlayerScreenProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -70,6 +77,8 @@ export function PlayerScreen({
   const [controlsVisible, setControlsVisible] = useState(true);
   const [reloadToken, setReloadToken] = useState(0);
   const [playerLabel] = useState(() => (hasAvPlay() ? 'AVPlay' : 'HTML5'));
+  const [engineState, setEngineState] = useState('—');
+  const [streamKind, setStreamKind] = useState('—');
   const statusRef = useRef<PlayerStatus>('loading');
   const positionRef = useRef(0);
 
@@ -77,6 +86,14 @@ export function PlayerScreen({
   const contentKey = useMemo(() => contentKeyOf(descriptor), [descriptor]);
   const canControl = mode === 'solo' || role === 'host';
   const isLive = isLiveDuration(durationMs);
+
+  // Next Episode is series-only and host/solo-only (guests carry no context).
+  const nextEp = useMemo(() => (episodeContext ? nextEpisode(episodeContext) : undefined), [episodeContext]);
+  const showNext = descriptor.contentType === 'episode' && canControl && !!episodeContext;
+  const upNextLabel = nextEp ? `Up next: ${episodeLabel(nextEp.entry)} — ${nextEp.entry.descriptor.title}` : undefined;
+  const playNext = useCallback(() => {
+    if (nextEp && onPlayNext) onPlayNext(nextEp.entry.descriptor, nextEp.context);
+  }, [nextEp, onPlayNext]);
 
   useEffect(() => {
     controlsVisibleRef.current = controlsVisible;
@@ -124,6 +141,7 @@ export function PlayerScreen({
     const [position, duration] = await Promise.all([player.getPosition(), player.getDuration()]);
     setPositionMs(position);
     setDurationMs(duration);
+    if (PLAYER_DIAGNOSTICS) setEngineState(player.getState?.() ?? '—');
   }, [safePlayer]);
 
   const invokePlay = useCallback(async () => {
@@ -221,6 +239,7 @@ export function PlayerScreen({
       setError('');
       try {
         const url = iptv.resolvePlaybackUrl(descriptor);
+        if (PLAYER_DIAGNOSTICS) setStreamKind(describeUrl(url));
         const player = createTvPlayer(containerRef.current, {
           onReady: () => {
             if (cancelled) return;
@@ -400,6 +419,18 @@ export function PlayerScreen({
     <div className="player-screen" onMouseMove={showControls}>
       <div ref={containerRef} className="player-surface" />
 
+      {PLAYER_DIAGNOSTICS && (
+        <div className="player-diag" role="status" aria-hidden="true">
+          <div className="player-diag__row"><span className="player-diag__key">Engine</span><span className="player-diag__val">{playerLabel}</span></div>
+          <div className="player-diag__row"><span className="player-diag__key">Stream</span><span className="player-diag__val">{streamKind}</span></div>
+          <div className="player-diag__row"><span className="player-diag__key">State</span><span className="player-diag__val">{engineState}</span></div>
+          <div className="player-diag__row"><span className="player-diag__key">Status</span><span className="player-diag__val">{status}</span></div>
+          <div className="player-diag__row"><span className="player-diag__key">Live</span><span className="player-diag__val">{isLive ? 'yes' : 'no'}</span></div>
+          <div className="player-diag__row"><span className="player-diag__key">Pos</span><span className="player-diag__val">{formatClock(positionMs)}</span></div>
+          <div className="player-diag__row"><span className="player-diag__key">Dur</span><span className="player-diag__val">{isLive ? 'LIVE' : formatClock(durationMs)}</span></div>
+        </div>
+      )}
+
       {controlsVisible && status !== 'error' && (
         <div className="player-chrome">
           <div className="player-scrim player-scrim--top" />
@@ -417,9 +448,13 @@ export function PlayerScreen({
             positionMs={positionMs}
             durationMs={durationMs}
             canControl={canControl && status !== 'loading'}
+            showNext={showNext}
+            canNext={!!nextEp && status !== 'loading'}
+            upNextLabel={upNextLabel}
             onPlayPause={invokeToggle}
             onSeekBack={() => void invokeSeekBy(-SEEK_STEP_MS)}
             onSeekForward={() => void invokeSeekBy(SEEK_STEP_MS)}
+            onNext={playNext}
             onBack={onExit}
           />
         </div>
@@ -453,6 +488,9 @@ export function PlayerScreen({
           <div className="state-view__mark"><Icon name="alert" size={48} /></div>
           <h2>Playback failed</h2>
           <p>{error}</p>
+          {playerLabel === 'AVPlay' && (
+            <p>Tip: the TV emulator's codec support differs from a real Samsung TV — a stream that fails here may still play on hardware.</p>
+          )}
           <div className="screen__actions screen__actions--center">
             <TvButton onClick={onExit}>Back</TvButton>
             <TvButton variant="primary" onClick={retry}>Try again</TvButton>

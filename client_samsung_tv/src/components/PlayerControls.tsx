@@ -17,9 +17,13 @@ interface PlayerControlsProps {
   positionMs: number;
   durationMs: number;
   canControl: boolean;
+  showNext?: boolean;
+  canNext?: boolean;
+  upNextLabel?: string;
   onPlayPause: () => void;
   onSeekBack: () => void;
   onSeekForward: () => void;
+  onNext?: () => void;
   onBack: () => void;
 }
 
@@ -49,9 +53,13 @@ export function PlayerControls({
   positionMs,
   durationMs,
   canControl,
+  showNext,
+  canNext,
+  upNextLabel,
   onPlayPause,
   onSeekBack,
   onSeekForward,
+  onNext,
   onBack,
 }: PlayerControlsProps) {
   const progress = isLive || durationMs <= 0 ? 0 : Math.min(100, (positionMs / durationMs) * 100);
@@ -79,6 +87,9 @@ export function PlayerControls({
             <h1 className="player-title">{title}</h1>
             {mode === 'room' && role === 'guest' && (
               <p className="player-subtitle">Playback follows the host.</p>
+            )}
+            {showNext && upNextLabel && (
+              <p className="player-subtitle player-subtitle--upnext">{upNextLabel}</p>
             )}
           </div>
         </div>
@@ -128,6 +139,18 @@ export function PlayerControls({
           >
             <Icon name="forward" size={30} />
           </button>
+          {showNext && (
+            <button
+              className="player-btn player-btn--next"
+              data-tv-focusable="true"
+              disabled={!canNext}
+              onClick={onNext}
+              aria-label="Next episode"
+            >
+              <Icon name="next" size={28} />
+              <span className="player-btn__label">Next</span>
+            </button>
+          )}
         </div>
       </div>
     </>

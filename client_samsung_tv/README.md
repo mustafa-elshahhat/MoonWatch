@@ -52,6 +52,48 @@ Open **Settings** from the Home screen. Fields are stored in this TV's LocalStor
 
 ---
 
+## Features & navigation
+
+Everything is driven by the TV remote — arrows to move focus, **OK** to select, **Back**
+to go up a level, and **Play / Pause / FF / Rewind** in the player. The focused element
+always shows the golden focus ring; there is no mouse/hover dependency.
+
+**Automatic (infinite) loading — no "Load More".**
+Live TV, Movies, Series, and long episode lists render one TV-sized page (~48 items) at a
+time and append the next page automatically:
+- as the remote focuses near the **end of the current rows**, and
+- as the bottom **sentinel** scrolls into view (mouse-wheel / page-down).
+
+Focus stays on the item you were on (the list never jumps to the top), a subtle
+`Loading more… X of Y` row shows while the next page resolves, and the toolbar shows
+`Showing X of Y`. The virtual **All** category is rendered incrementally the same way, so
+the focusable DOM stays small even on huge catalogs. Paging resets when you change category.
+Implemented in [`src/hooks/useAutoPagedItems.ts`](src/hooks/useAutoPagedItems.ts).
+
+**Join Room — available rooms list.**
+The Join screen shows a large **room-code entry** *and* a live list of **active rooms** from
+the server, so a guest can join with one click without typing a code. Each room card shows
+the code, a coloured status (`Waiting for guest` / `Playing: Live·Movie·Series` / `Room is
+full`), age, participant count, and host ping. The list polls every ~12s silently, supports
+**manual Refresh**, and stops polling when you leave the screen. It consumes the existing
+read-only **`GET /api/v1/rooms`** endpoint (the same one the Flutter client uses) — no
+backend change, and it exposes only safe summary data (never IPTV credentials or playback
+URLs). See [`src/room/roomApi.ts`](src/room/roomApi.ts) and
+[`src/components/RoomCard.tsx`](src/components/RoomCard.tsx).
+
+**Next Episode (series).**
+In the player, series episodes show a **Next Episode** control plus an `Up next: SxxExx —
+title` hint. It is hidden for Live and Movies, and disabled on the last episode. The next
+episode is resolved locally from the series' episode list (rolling into the next season when
+a season ends) — only the plain content descriptor crosses SignalR, never a playback URL.
+- **Solo:** plays the next episode immediately.
+- **Watch-party host:** sets the next episode as room content and syncs it to guests via the
+  existing `SetContent` flow.
+- **Guests:** the control is hidden (guests don't control room content); they receive the new
+  episode automatically.
+
+---
+
 ## Requirements
 
 - **Node.js 20+** and **npm 10+**

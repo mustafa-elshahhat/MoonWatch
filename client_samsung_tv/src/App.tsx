@@ -13,6 +13,7 @@ import { SettingsScreen } from './screens/SettingsScreen';
 import { TvModal } from './components';
 import type { IptvContentDescriptor, PlayerReadyPayload, RoomJoinedPayload, RoomRole } from './protocol/payloads';
 import { contentKeyOf } from './protocol/payloads';
+import type { EpisodeContext } from './iptv/episodeContext';
 import type { PlaybackCommand } from './room/playbackCommand';
 import { RoomClient, type LatencySnapshot, type RoomConnectionState } from './room/roomClient';
 import { useRemoteNavigation } from './navigation/remote';
@@ -37,6 +38,8 @@ interface PlayerIntent {
   descriptor: IptvContentDescriptor;
   mode: 'solo' | 'room';
   previousScreen: Screen;
+  /** Client-only series navigation (solo/host); never sent over SignalR. */
+  episodeContext?: EpisodeContext;
 }
 
 interface ErrorView {
@@ -186,7 +189,7 @@ export default function App() {
     setScreen(target);
   }, [validateOrRoute]);
 
-  const handleSelectContent = useCallback(async (descriptor: IptvContentDescriptor) => {
+  const handleSelectContent = useCallback(async (descriptor: IptvContentDescriptor, episodeContext?: EpisodeContext) => {
     if (!validateOrRoute('playback')) return;
     if (room?.role === 'guest') {
       setErrorView({ title: 'Host controls content', message: 'Guests cannot change room content. Wait for the host to choose what to watch.' });
@@ -199,14 +202,25 @@ export default function App() {
       if (!client) throw new Error('Room connection is not ready.');
       await client.setContent(descriptor);
       setRoom((current) => current ? { ...current, contentDescriptor: descriptor, localReady: false, peerReady: false } : current);
-      setPlayerIntent({ descriptor, mode: 'room', previousScreen: screenRef.current });
+      setPlayerIntent({ descriptor, mode: 'room', previousScreen: screenRef.current, episodeContext });
       setScreen('player');
       return;
     }
 
-    setPlayerIntent({ descriptor, mode: 'solo', previousScreen: screenRef.current });
+    setPlayerIntent({ descriptor, mode: 'solo', previousScreen: screenRef.current, episodeContext });
     setScreen('player');
   }, [room, validateOrRoute]);
+
+  // Advance to the next episode from inside the player (solo & host). The host
+  // re-uses the existing SetContent sync so guests follow via room:content_set;
+  // only the plain descriptor crosses the wire — the episode context is local.
+  const advanceEpisode = useCallback(async (descriptor: IptvContentDescriptor, episodeContext: EpisodeContext) => {
+    if (room?.role === 'host') {
+      await roomClientRef.current?.setContent(descriptor);
+      setRoom((current) => current ? { ...current, contentDescriptor: descriptor, localReady: false, peerReady: false } : current);
+    }
+    setPlayerIntent((current) => current ? { ...current, descriptor, episodeContext } : current);
+  }, [room]);
 
   const createRoom = useCallback(async () => {
     if (!validateOrRoute('server')) return;
@@ -295,7 +309,7 @@ export default function App() {
       if (screen === 'vod') return <BrowseScreen kind="movie" settings={settings} roomRole={room?.role} onSelect={handleSelectContent} onBack={goHome} onSettings={goSettings} />;
       if (screen === 'series') return <SeriesScreen settings={settings} roomRole={room?.role} onSelect={handleSelectContent} onBack={goHome} onSettings={goSettings} />;
       if (screen === 'create-room') return <CreateRoomScreen onCreate={createRoom} onBack={goHome} />;
-      if (screen === 'join-room') return <JoinRoomScreen onJoin={joinRoom} onBack={goHome} />;
+      if (screen === 'join-room') return <JoinRoomScreen settings={settings} onJoin={joinRoom} onBack={goHome} />;
       if (screen === 'waiting' && room) {
         return (
           <RoomWaitingScreen
@@ -314,6 +328,7 @@ export default function App() {
         return (
           <PlayerScreen
             descriptor={playerIntent.descriptor}
+            episodeContext={playerIntent.episodeContext}
             settings={settings}
             mode={playerIntent.mode}
             role={room?.role}
@@ -324,6 +339,7 @@ export default function App() {
             latency={latency}
             onExit={exitPlayer}
             onLocalReady={markLocalReady}
+            onPlayNext={advanceEpisode}
             registerRemoteHandle={registerRemoteHandle}
           />
         );

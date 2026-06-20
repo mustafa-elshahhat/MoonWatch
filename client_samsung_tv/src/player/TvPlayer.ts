@@ -5,6 +5,8 @@ export interface TvPlayer {
   seek(ms: number): Promise<void> | void;
   getPosition(): Promise<number>;
   getDuration(): Promise<number>;
+  /** Optional engine-specific state label, used for diagnostics only. */
+  getState?(): string | undefined;
   destroy(): void;
 }
 
